@@ -1,0 +1,14 @@
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: boilery
+    environment:
+      MARIADB_ROOT_PASSWORD: password
+      MARIADB_DATABASE: app
+    ports:
+      - "33021:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+volumes:
+  mariadb_data:
