@@ -23,6 +23,16 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
+    --prussian-blue: #0a122aff;
+    --sage-green: #698f3fff;
+    --bright-snow: #fbfaf8ff;
+    --bone: #e7decdff;
+    --clay-soil: #804e49ff;
+
+    --color-text-primary-100: #e5e5e5;
+    --color-primary-bg: var(--prussian-blue);
+
+
     --color-accent: var(--color-neutral-800);
     --color-accent-content: var(--color-neutral-800);
     --color-accent-foreground: var(--color-white);
