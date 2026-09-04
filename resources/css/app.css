@@ -30,7 +30,11 @@
     --clay-soil: #804e49ff;
 
     --color-text-primary-100: #e5e5e5;
-    --color-primary-bg: var(--prussian-blue);
+
+    --color-primary-bg: var(--bright-snow);
+    --color-primary-dark-bg: var(--prussian-blue);
+
+    --color-primary-dark-text: var(--bone);
 
 
     --color-accent: var(--color-neutral-800);
