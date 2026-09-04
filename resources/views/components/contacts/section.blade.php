@@ -32,44 +32,6 @@
                 </dl>
             </div>
         </div>
-        <form action="#" method="POST" class="px-6 pt-20 pb-24 sm:pb-32 lg:px-8 lg:py-48">
-            <div class="mx-auto max-w-xl lg:mr-0 lg:max-w-lg">
-                <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-                    <div>
-                        <label for="first-name" class="block text-sm/6 font-semibold text-gray-900 dark:text-white">First name</label>
-                        <div class="mt-2.5">
-                            <input id="first-name" type="text" name="first-name" autocomplete="given-name" class="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500" />
-                        </div>
-                    </div>
-                    <div>
-                        <label for="last-name" class="block text-sm/6 font-semibold text-gray-900 dark:text-white">Last name</label>
-                        <div class="mt-2.5">
-                            <input id="last-name" type="text" name="last-name" autocomplete="family-name" class="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500" />
-                        </div>
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label for="email" class="block text-sm/6 font-semibold text-gray-900 dark:text-white">Email</label>
-                        <div class="mt-2.5">
-                            <input id="email" type="email" name="email" autocomplete="email" class="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500" />
-                        </div>
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label for="phone-number" class="block text-sm/6 font-semibold text-gray-900 dark:text-white">Phone number</label>
-                        <div class="mt-2.5">
-                            <input id="phone-number" type="tel" name="phone-number" autocomplete="tel" class="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500" />
-                        </div>
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label for="message" class="block text-sm/6 font-semibold text-gray-900 dark:text-white">Message</label>
-                        <div class="mt-2.5">
-                            <textarea id="message" name="message" rows="4" class="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-8 flex justify-end">
-                    <button type="submit" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500">Send message</button>
-                </div>
-            </div>
-        </form>
+        @livewire('contact-form')
     </div>
 </div>
