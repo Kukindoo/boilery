@@ -35,14 +35,16 @@ class QuoteSubmittedAdmin extends Notification
     {
         $mail = (new MailMessage)
             ->subject('Nová poptávka')
-            ->line("Jméno: {$this->quote->first_name} {$this->quote->last_name}")
-            ->line("Email: {$this->quote->email}")
-            ->line("Telefon: {$this->quote->phone}")
-            ->line("Adresa: {$this->quote->address}")
-            ->line("Výrobce kotle: {$this->quote->boiler_manufacturer}")
-            ->line("Výrobní číslo: {$this->quote->boiler_serial_number}")
-            ->line("Typ kotle: {$this->quote->boiler_type}")
-            ->line("Zpráva: {$this->quote->message}");
+            ->line('Jméno: ' . $this->quote->first_name . ' ' . $this->quote->last_name)
+            ->line('Email: ' . $this->quote->email)
+            ->line('Telefon: ' . $this->quote->phone)
+            ->line('Adresa: ' . ($this->quote->address ?? 'Neuvedeno'))
+            ->line('Výrobce kotle: ' . ($this->quote->boiler_manufacturer ?? 'Neuvedeno'))
+            ->line('Výrobní číslo: ' . ($this->quote->boiler_serial_number ?? 'Neuvedeno'))
+            ->line('Typ kotle: ' . ($this->quote->boiler_type ?? 'Neuvedeno'))
+            ->line('Záruka: ' . ($this->quote->under_warranty ? 'Ano' : 'Ne'))
+            ->line('Zpráva:')
+            ->line($this->quote->message);
 
         if ($this->quote->label_file_path) {
             $mail->attachFromStorage($this->quote->label_file_path);
