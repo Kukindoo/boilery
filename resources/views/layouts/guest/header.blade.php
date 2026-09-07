@@ -12,11 +12,8 @@
     </a>
 
     <flux:navbar class="-mb-px max-lg:hidden">
-        <flux:navbar.item icon="home" :href="route('login')" :current="request()->routeIs('login')" wire:navigate>
+        <flux:navbar.item icon="key" :href="route('login')" :current="request()->routeIs('login')" wire:navigate>
             {{ __('Login') }}
-        </flux:navbar.item>
-        <flux:navbar.item icon="user-group" :href="route('register')" :current="request()->routeIs('register')" wire:navigate>
-            {{ __('Register') }}
         </flux:navbar.item>
     </flux:navbar>
 
@@ -32,11 +29,8 @@
 
     <flux:navlist>
         <flux:navlist.group>
-            <flux:navbar.item icon="home" :href="route('login')" :current="request()->routeIs('login')" wire:navigate>
+            <flux:navbar.item icon="key" :href="route('login')" :current="request()->routeIs('login')" wire:navigate>
                 {{ __('Login') }}
-            </flux:navbar.item>
-            <flux:navbar.item icon="user-group" :href="route('register')" :current="request()->routeIs('register')" wire:navigate>
-                {{ __('Register') }}
             </flux:navbar.item>
         </flux:navlist.group>
     </flux:navlist>
