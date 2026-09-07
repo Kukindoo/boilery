@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Spatie\Activitylog\Facades\Activity;
+use Spatie\Activitylog\Contracts\Activity as ActivityContract;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +24,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Activity::beforeLogging(function (ActivityContract $activity) {
+            if (! app()->runningInConsole()) {
+                $activity->properties = $activity->properties->merge([
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'url' => request()->fullUrl(),
+                    'method' => request()->method(),
+                ]);
+            }
+        });
     }
 }
