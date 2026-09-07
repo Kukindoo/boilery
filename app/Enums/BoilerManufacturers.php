@@ -4,6 +4,8 @@ namespace App\Enums;
 
 enum BoilerManufacturers: string
 {
+    case UNKNOWN = 'unknown';
+
     case ARISTON = 'ariston';
 
     case DRAZICE = 'drazice';
@@ -20,6 +22,7 @@ enum BoilerManufacturers: string
     public function label(): string
     {
         return match ($this) {
+            self::UNKNOWN => 'Neznámý',
             self::ARISTON => 'Ariston',
             self::DRAZICE => 'Dražice',
             self::STIEBLE => 'Stiebl Eltron',
