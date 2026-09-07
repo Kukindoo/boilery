@@ -6,7 +6,7 @@
                     Kontaktujte nás
                 </h2>
                 <p class="mt-6 text-lg/8 text-gray-600 dark:text-gray-400">
-                    Pokud víte který bojler je třeba opravit, prosím, vyplňte formulář vpravo. Pro vice informací nás můžete zastihnout na telefonu nebo emailu dole.
+                    Pokud víte který bojler je třeba opravit, prosím, vyplňte formulář. Pro vice informací nás můžete zastihnout na telefonu nebo emailu.
                 </p>
                 <dl class="mt-10 space-y-4 text-base/7 text-gray-600 dark:text-gray-300">
                     <div class="flex gap-x-4">
