@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\RequestedQuotes;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -17,8 +16,7 @@ class QuoteSubmittedAdmin extends Notification
      */
     public function __construct(
         public RequestedQuotes $quote,
-    )
-    {}
+    ) {}
 
     /**
      * Get the notification's delivery channels.
@@ -35,7 +33,7 @@ class QuoteSubmittedAdmin extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        $mail = (new MailMessage)
             ->subject('Nová poptávka')
             ->line("Jméno: {$this->quote->first_name} {$this->quote->last_name}")
             ->line("Email: {$this->quote->email}")
@@ -45,6 +43,20 @@ class QuoteSubmittedAdmin extends Notification
             ->line("Výrobní číslo: {$this->quote->boiler_serial_number}")
             ->line("Typ kotle: {$this->quote->boiler_type}")
             ->line("Zpráva: {$this->quote->message}");
+
+        if ($this->quote->label_file_path) {
+            $mail->attachFromStorage($this->quote->label_file_path);
+        }
+
+        if ($this->quote->warranty_file_path) {
+            $mail->attachFromStorage($this->quote->warranty_file_path);
+        }
+
+        if ($this->quote->receipt_file_path) {
+            $mail->attachFromStorage($this->quote->receipt_file_path);
+        }
+
+        return $mail;
     }
 
     /**
