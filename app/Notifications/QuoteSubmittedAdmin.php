@@ -47,15 +47,37 @@ class QuoteSubmittedAdmin extends Notification
             ->line($this->quote->message);
 
         if ($this->quote->label_file_path) {
-            $mail->attachFromStorage($this->quote->label_file_path);
+            $extension = pathinfo(
+                $this->quote->label_file_path,
+                PATHINFO_EXTENSION
+            );
+
+            $mail->attachFromStorage(
+                $this->quote->label_file_path,
+                "Stitek-kotle.{$extension}"
+            );
         }
 
         if ($this->quote->warranty_file_path) {
-            $mail->attachFromStorage($this->quote->warranty_file_path);
+            $extension = pathinfo(
+                $this->quote->warranty_file_path,
+                PATHINFO_EXTENSION
+            );
+            $mail->attachFromStorage(
+                $this->quote->warranty_file_path,
+                "Zarucni-list-kotle.{$extension}"
+            );
         }
 
         if ($this->quote->receipt_file_path) {
-            $mail->attachFromStorage($this->quote->receipt_file_path);
+            $extension = pathinfo(
+                $this->quote->receipt_file_path,
+                PATHINFO_EXTENSION
+            );
+            $mail->attachFromStorage(
+                $this->quote->receipt_file_path,
+                "Kupni-dokument-kotle.{$extension}"
+            );
         }
 
         return $mail;
