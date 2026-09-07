@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\RequestedQuotes;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -17,8 +16,7 @@ class QuoteSubmittedCustomer extends Notification
      */
     public function __construct(
         public RequestedQuotes $quote,
-    )
-    {}
+    ) {}
 
     /**
      * Get the notification's delivery channels.
