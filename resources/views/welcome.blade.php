@@ -9,14 +9,13 @@
                     Opravujeme a instalujeme bojlery značek Dražice, Ariston and Stiebl&nbsp;Eltron. Nové i záruky.
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-x-6">
-                    <a href="#" class="text-sm/6 font-semibold text-gray-900 dark:text-primary-dark-text">
+                    <a href="#contact-quote-form" class="text-sm/6 font-semibold text-gray-900 dark:text-primary-dark-text">
                         Kontaktujte nás <span aria-hidden="true">→</span>
                     </a>
                 </div>
             </div>
         </div>
     </div>
-
 
     <x-contacts.section />
 </x-layouts::guest>
