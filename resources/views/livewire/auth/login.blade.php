@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+    <x-auth-header title="Příhlášení k účtu" description=""/>
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
@@ -8,7 +8,7 @@
         <!-- Email Address -->
         <flux:input
             wire:model="email"
-            :label="__('Email address')"
+            label="E-mail"
             type="email"
             required
             autofocus
@@ -20,27 +20,27 @@
         <div class="relative">
             <flux:input
                 wire:model="password"
-                :label="__('Password')"
+                label="Heslo"
                 type="password"
                 required
                 autocomplete="current-password"
-                :placeholder="__('Password')"
+                placeholder="Heslo"
                 viewable
             />
 
             @if (Route::has('password.request'))
                 <flux:link class="absolute top-0 text-sm end-0" :href="route('password.request')" wire:navigate>
-                    {{ __('Forgot your password?') }}
+                    {{ __('Zapomenuté heslo?') }}
                 </flux:link>
             @endif
         </div>
 
         <!-- Remember Me -->
-        <flux:checkbox wire:model="remember" :label="__('Remember me')" />
+        <flux:checkbox wire:model="remember" label="Zapamatuj si mě" />
 
         <div class="flex items-center justify-end">
             <flux:button variant="primary" type="submit" class="w-full" data-test="login-button">
-                {{ __('Log in') }}
+                Přihlásit
             </flux:button>
         </div>
     </form>
