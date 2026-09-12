@@ -1,4 +1,4 @@
-<x-layouts::guest :title="__('Welcome')">
+<x-layouts::guest :title="config('app.name'). ' - ' . __('Welcome')">
     <div class="relative isolate px-6 pt-6 lg:px-8">
         <div class="mx-auto max-w-2xl py-16 sm:py-24 lg:py-28">
             <div class="text-center">
