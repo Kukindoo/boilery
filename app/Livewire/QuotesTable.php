@@ -41,6 +41,13 @@ class QuotesTable extends Component
         ]);
     }
 
+    public function contactedQuote(RequestedQuotes $quote): void
+    {
+        $quote->update([
+            'status' => RequestedQuoteStatus::CONTACTED,
+        ]);
+    }
+
     public function rejectQuote(RequestedQuotes $quote): void
     {
         $quote->update([

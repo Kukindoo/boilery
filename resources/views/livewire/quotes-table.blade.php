@@ -56,11 +56,14 @@
                                 </flux:menu.item>
                                 <flux:menu.separator/>
                                 <flux:menu.submenu heading="Status">
-                                    <flux:menu.item icon="x-circle" wire:click="rejectQuote({{ $quote }})">
-                                        Odmítnout
-                                    </flux:menu.item>
                                     <flux:menu.item icon="check" wire:click="resolveQuote({{ $quote }})">
                                         Vyřešit
+                                    </flux:menu.item>
+                                    <flux:menu.item icon="phone-arrow-up-right" wire:click="contactedQuote({{ $quote }})">
+                                        Contacted
+                                    </flux:menu.item>
+                                    <flux:menu.item icon="x-circle" wire:click="rejectQuote({{ $quote }})">
+                                        Odmítnout
                                     </flux:menu.item>
                                 </flux:menu.submenu>
                                 <flux:menu.separator/>
