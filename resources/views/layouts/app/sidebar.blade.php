@@ -17,7 +17,7 @@
                         Přehled
                     </flux:navlist.item>
                     <flux:navlist.item icon="clipboard-document-list" :href="route('quotes.index')" :current="request()->routeIs('quotes.index')" wire:navigate>
-                        Požadavky
+                        Poptávky
                     </flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
