@@ -8,9 +8,8 @@
     <flux:table bleed :paginate="$this->quotes">
         <flux:table.columns>
             <flux:table.column>Požadavek</flux:table.column>
-            <flux:table.column sortable :sorted="$sortBy === 'date'" :direction="$sortDirection"
-                               wire:click="sort('date')">
-                Datum
+            <flux:table.column>
+                Jméno a Příjmení
             </flux:table.column>
             <flux:table.column sortable :sorted="$sortBy === 'status'" :direction="$sortDirection"
                                wire:click="sort('status')">
@@ -30,7 +29,9 @@
                         {{ $quote->id }}
                     </flux:table.cell>
 
-                    <flux:table.cell class="whitespace-nowrap">{{ $quote->created_at }}</flux:table.cell>
+                    <flux:table.cell class="whitespace-nowrap">
+                        {{ $quote->first_name }} {{ $quote->last_name }}
+                    </flux:table.cell>
 
                     <flux:table.cell class="py-0">
                         @php
