@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -23,7 +24,8 @@ use Spatie\Activitylog\Support\LogOptions;
  */
 class RequestedQuotes extends Model
 {
-    use LogsActivity;
+    use HasFactory, LogsActivity;
+
     protected $fillable = [
         'first_name',
         'last_name',
@@ -40,16 +42,16 @@ class RequestedQuotes extends Model
         'receipt_file_path',
     ];
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnlyDirty();
+    }
+
     protected function casts(): array
     {
         return [
             'under_warranty' => 'boolean',
         ];
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnlyDirty();
     }
 }
