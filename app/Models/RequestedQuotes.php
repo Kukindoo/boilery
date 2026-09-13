@@ -8,6 +8,7 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
+ * @property string $status
  * @property string $first_name
  * @property string $last_name
  * @property string $email
@@ -27,6 +28,7 @@ class RequestedQuotes extends Model
     use HasFactory, LogsActivity;
 
     protected $fillable = [
+        'status',
         'first_name',
         'last_name',
         'email',
