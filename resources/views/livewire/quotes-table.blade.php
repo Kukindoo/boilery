@@ -42,10 +42,33 @@
                         </flux:badge>
                     </flux:table.cell>
 
-                    <flux:table.cell variant="strong">{{ $quote->boiler_type ?? 'Neznámý' }}</flux:table.cell>
+                    <flux:table.cell variant="strong">
+                        {{ $quote->boiler_type ?? 'Neznámý' }}
+                    </flux:table.cell>
 
                     <flux:table.cell class="py-0">
-                        <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal"></flux:button>
+                        <flux:dropdown>
+                            <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal">
+                            </flux:button>
+                            <flux:menu>
+                                <flux:menu.item icon="eye">
+                                    Otevřít
+                                </flux:menu.item>
+                                <flux:menu.separator/>
+                                <flux:menu.submenu heading="Status">
+                                    <flux:menu.item icon="x-circle">
+                                        Odmítnout
+                                    </flux:menu.item>
+                                    <flux:menu.item icon="check">
+                                        Vyřešit
+                                    </flux:menu.item>
+                                </flux:menu.submenu>
+                                <flux:menu.separator/>
+                                <flux:menu.item variant="danger" icon="trash">
+                                    Delete
+                                </flux:menu.item>
+                            </flux:menu>
+                        </flux:dropdown>
                     </flux:table.cell>
                 </flux:table.row>
             @endforeach
