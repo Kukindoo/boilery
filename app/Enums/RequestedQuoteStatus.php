@@ -4,17 +4,15 @@ namespace App\Enums;
 
 enum RequestedQuoteStatus: string
 {
-    case UNKNOWN = 'unknown';
-
     case NEW = 'new';
 
     case CONTACTED = 'contacted';
 
-    case SCHEDULED = 'scheduled';
-
     case PROCESSING = 'processing';
 
     case DONE = 'done';
+
+    case REJECTED = 'rejected';
 
     public static function getOptions(): array
     {
@@ -26,24 +24,22 @@ enum RequestedQuoteStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::UNKNOWN => 'Neznámý',
             self::NEW => 'Nový',
             self::CONTACTED => 'Kontaktovaný',
-            self::SCHEDULED => 'Domluvený',
             self::PROCESSING => 'Probíhá',
-            self::DONE => 'Hotovo',
+            self::DONE => 'Vyřešený',
+            self::REJECTED => 'Odmítnutý',
         };
     }
 
     public function colour(): string
     {
         return match ($this) {
-            self::UNKNOWN => 'slate-400',
             self::NEW => 'orange-300',
             self::CONTACTED => 'yellow-300',
-            self::SCHEDULED => 'lime-600',
             self::PROCESSING => 'lime-600',
             self::DONE => 'green-600',
+            self::REJECTED => 'red-400',
         };
     }
 }
