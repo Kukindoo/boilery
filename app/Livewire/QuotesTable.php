@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Enums\RequestedQuoteStatus;
 use App\Models\RequestedQuotes;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -15,7 +16,7 @@ class QuotesTable extends Component
 
     public $sortDirection = 'desc';
 
-    public function sort($column)
+    public function sort($column): void
     {
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -31,5 +32,19 @@ class QuotesTable extends Component
         return RequestedQuotes::query()
             ->tap(fn ($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate(15);
+    }
+
+    public function resolveQuote(RequestedQuotes $quote): void
+    {
+        $quote->update([
+            'status' => RequestedQuoteStatus::DONE,
+        ]);
+    }
+
+    public function rejectQuote(RequestedQuotes $quote): void
+    {
+        $quote->update([
+            'status' => RequestedQuoteStatus::REJECTED,
+        ]);
     }
 }
