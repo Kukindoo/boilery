@@ -36,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::controller(QuoteController::class)->group(function () {
         Route::get('quotes', 'index')->name('quotes.index');
+        Route::get('quotes/{quote}', 'show')->name('quotes.show');
     });
 });
 
