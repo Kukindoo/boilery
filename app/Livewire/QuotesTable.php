@@ -34,24 +34,15 @@ class QuotesTable extends Component
             ->paginate(15);
     }
 
-    public function resolveQuote(RequestedQuotes $quote): void
+    public function changeQuoteStatus(RequestedQuotes $quote, RequestedQuoteStatus $status): void
     {
         $quote->update([
-            'status' => RequestedQuoteStatus::DONE,
+            'status' => $status,
         ]);
     }
 
-    public function contactedQuote(RequestedQuotes $quote): void
+    public function openQuote(RequestedQuotes $quote): void
     {
-        $quote->update([
-            'status' => RequestedQuoteStatus::CONTACTED,
-        ]);
-    }
-
-    public function rejectQuote(RequestedQuotes $quote): void
-    {
-        $quote->update([
-            'status' => RequestedQuoteStatus::REJECTED,
-        ]);
+        $this->redirect(route('quotes.show', $quote));
     }
 }
