@@ -35,11 +35,11 @@ enum RequestedQuoteStatus: string
     public function colour(): string
     {
         return match ($this) {
-            self::NEW => 'orange-300',
-            self::CONTACTED => 'yellow-300',
-            self::PROCESSING => 'lime-600',
-            self::DONE => 'green-600',
-            self::REJECTED => 'red-400',
+            self::NEW => 'orange',
+            self::CONTACTED => 'blue',
+            self::PROCESSING => 'lime',
+            self::DONE => 'green',
+            self::REJECTED => 'red',
         };
     }
 }
