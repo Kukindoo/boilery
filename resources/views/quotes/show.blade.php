@@ -111,7 +111,7 @@
                                 />
 
                                 <livewire:quotes.quote-download-card
-                                        label="okument záručního listu"
+                                        label="Dokument záručního listu"
                                         :quote="$quote"
                                 />
                             </ul>
