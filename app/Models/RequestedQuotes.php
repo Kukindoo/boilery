@@ -47,6 +47,7 @@ class RequestedQuotes extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
+            ->logAll()
             ->logOnlyDirty();
     }
 
