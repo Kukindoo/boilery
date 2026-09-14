@@ -16,6 +16,11 @@ class QuotesTable extends Component
 
     public $sortDirection = 'desc';
 
+    public $selectedStatuses = [
+        RequestedQuoteStatus::NEW,
+        RequestedQuoteStatus::CONTACTED,
+    ];
+
     public function sort($column): void
     {
         if ($this->sortBy === $column) {
@@ -31,6 +36,8 @@ class QuotesTable extends Component
     {
         return RequestedQuotes::query()
             ->tap(fn ($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
+//            ->tap(fn ($query) => $query->whereNot('status', RequestedQuoteStatus::DONE))
+            ->tap(fn ($query) => $query->whereIn('status', $this->selectedStatuses))
             ->paginate(15);
     }
 

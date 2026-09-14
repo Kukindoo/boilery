@@ -5,6 +5,13 @@
         </div>
         <flux:button size="sm" icon="plus" disabled>Přidat poptávku</flux:button>
     </div>
+    <div class="flex items-center justify-between gap-4 mt-4">
+        <flux:pillbox wire:model.live="selectedStatuses" multiple placeholder="Choose tags...">
+            @foreach(\App\Enums\RequestedQuoteStatus::cases() as $status)
+                <flux:pillbox.option value="{{ $status->value }}">{{ $status->label() }}</flux:pillbox.option>
+            @endforeach
+        </flux:pillbox>
+    </div>
     <flux:table bleed :paginate="$this->quotes">
         <flux:table.columns>
             <flux:table.column>Požadavek</flux:table.column>
