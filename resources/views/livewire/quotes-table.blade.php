@@ -51,7 +51,7 @@
                             <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal">
                             </flux:button>
                             <flux:menu>
-                                <flux:menu.item icon="eye">
+                                <flux:menu.item icon="eye" wire:click="openQuote({{ $quote }})">
                                     Otevřít
                                 </flux:menu.item>
                                 <flux:menu.separator/>
