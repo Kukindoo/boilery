@@ -35,6 +35,7 @@ class QuoteDownloadCard extends Component
         $fileNameDirty = implode('_', [
             $this->quote->first_name,
             $this->quote->last_name,
+            $this->quote->id,
             Str::snake($this->label)]);
 
         $fileName = Str::ascii($fileNameDirty) . '.' . $extension;
