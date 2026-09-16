@@ -16,6 +16,7 @@
             Neposkytnuto
         @else
             <a wire:click="downloadFile()"
+               style="cursor:pointer"
                class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
                 Stáhnout
             </a>
