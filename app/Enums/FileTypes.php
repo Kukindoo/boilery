@@ -25,4 +25,13 @@ enum FileTypes: string
             self::WARRANTY => 'Záruka',
         };
     }
+
+    public function snake(): string
+    {
+        return match ($this) {
+            self::SERIAL_NUMBER => 'stitek',
+            self::RECEIPT => 'kupni_smlouva',
+            self::WARRANTY => 'zaruka',
+        };
+    }
 }
