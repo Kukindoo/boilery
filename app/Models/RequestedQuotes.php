@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -56,5 +57,10 @@ class RequestedQuotes extends Model
         return [
             'under_warranty' => 'boolean',
         ];
+    }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(File::class, 'quote_id');
     }
 }
