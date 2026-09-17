@@ -71,7 +71,7 @@
                             Výrobce
                         </dt>
                         <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0 dark:text-gray-300">
-                            {{ \App\Enums\BoilerManufacturers::tryFrom($quote->boiler_manufacturer)->label() }}
+                            {{ $manufacturer->label() }}
                         </dd>
 
                         <dt class="text-sm font-medium text-gray-900 dark:text-gray-100">
