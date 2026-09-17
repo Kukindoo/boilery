@@ -46,6 +46,9 @@ class RequestedQuotes extends Model
             ->logOnlyDirty();
     }
 
+    /**
+     * @return HasMany<File, $this>
+     */
     public function files(): HasMany
     {
         return $this->hasMany(File::class, 'quote_id');
