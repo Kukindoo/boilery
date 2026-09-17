@@ -77,4 +77,6 @@ return [
         public_path('storage') => storage_path('app/public'),
     ],
 
+    'disk_name' => env('DISK_NAME', 'public'),
+
 ];

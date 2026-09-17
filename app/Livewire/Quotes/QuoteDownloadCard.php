@@ -31,7 +31,7 @@ class QuoteDownloadCard extends Component
 
     public function downloadFile(): StreamedResponse
     {
-        return Storage::disk('local')->download(
+        return Storage::disk(config('filesystems.disk_name'))->download(
             $this->file->path,
             $this->file->label,
         );
