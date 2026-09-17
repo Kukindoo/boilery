@@ -32,6 +32,7 @@ class UploadFile
             'original_name' => $file->getClientOriginalName(),
             'extension' => $extension,
             'mime_type' => $file->getMimeType(),
+            'file_type' => $fileType->value,
             'size' => $file->getSize(),
             'label' => $fileName,
         ]);
