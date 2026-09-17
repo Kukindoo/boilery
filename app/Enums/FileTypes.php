@@ -4,7 +4,7 @@ namespace App\Enums;
 
 enum FileTypes: string
 {
-    case SERIAL_NUMBER = 'serial_number';
+    case BOILER_LABEL = 'boiler-label';
 
     case RECEIPT = 'receipt';
 
@@ -20,7 +20,7 @@ enum FileTypes: string
     public function label(): string
     {
         return match ($this) {
-            self::SERIAL_NUMBER => 'Štítek',
+            self::BOILER_LABEL => 'Štítek',
             self::RECEIPT => 'Kupní smlouva',
             self::WARRANTY => 'Záruka',
         };
@@ -29,7 +29,7 @@ enum FileTypes: string
     public function snake(): string
     {
         return match ($this) {
-            self::SERIAL_NUMBER => 'stitek',
+            self::BOILER_LABEL => 'stitek',
             self::RECEIPT => 'kupni_smlouva',
             self::WARRANTY => 'zaruka',
         };
