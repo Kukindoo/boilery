@@ -43,7 +43,7 @@ class ContactsForm extends Form
             'phone' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'max:255'],
             'message' => ['required', 'string', 'max:500'],
-            'boilerManufacturer' => ['nullable', 'string', Rule::enum(BoilerManufacturers::class)],
+            'boilerManufacturer' => ['nullable', Rule::enum(BoilerManufacturers::class)],
             'boilerType' => ['nullable', 'string', 'max:255'],
             'boilerSerialNumber' => ['nullable', 'string', 'max:255'],
             'boilerUnderWarranty' => ['in:yes,no'],
