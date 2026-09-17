@@ -40,9 +40,6 @@ class RequestedQuotes extends Model
         'boiler_manufacturer',
         'boiler_serial_number',
         'boiler_type',
-        'label_file_path',
-        'warranty_file_path',
-        'receipt_file_path',
     ];
 
     public function getActivitylogOptions(): LogOptions
