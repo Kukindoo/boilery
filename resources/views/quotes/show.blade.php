@@ -93,30 +93,29 @@
                             {{ $quote->address ?? 'Neznámá' }}
                         </dd>
                     </div>
+                    @if($quote->files()->count() === 0)
+                        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                            <dt class="text-sm/6 font-medium text-gray-900 dark:text-gray-100">
+                                Bez Přílohy
+                            </dt>
+                    @else
                     <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm/6 font-medium text-gray-900 dark:text-gray-100">
                             Přílohy
                         </dt>
                         <dd class="mt-2 text-sm text-gray-900 sm:col-span-2 sm:mt-0 dark:text-gray-100">
                             <ul role="list"
-                                class="divide-y divide-gray-100 rounded-md border border-gray-200 dark:divide-white/5 dark:border-white/10">
-                                <livewire:quotes.quote-download-card
-                                        label="Dokument štítku"
-                                        :quote="$quote"
-                                />
-
-                                <livewire:quotes.quote-download-card
-                                        label="Dokument kupní smlouvy"
-                                        :quote="$quote"
-                                />
-
-                                <livewire:quotes.quote-download-card
-                                        label="Dokument záručního listu"
-                                        :quote="$quote"
-                                />
+                                    class="divide-y space-y-4 divide-gray-100 rounded-md border border-gray-200 dark:divide-white/5 dark:border-white/10">
+                                @foreach($quote->files as $file)
+                                    <livewire:quotes.quote-download-card
+                                                :quote="$quote"
+                                                :file="$file"
+                                        />
+                                    @endforeach
                             </ul>
                         </dd>
                     </div>
+                    @endif
                 </dl>
             </div>
         </div>
