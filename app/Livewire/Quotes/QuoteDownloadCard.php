@@ -32,22 +32,9 @@ class QuoteDownloadCard extends Component
 
     public function downloadFile(): StreamedResponse
     {
-        $extension = pathinfo(
-            $this->quote->{$this->column},
-            PATHINFO_EXTENSION
-        );
-
-        $fileNameDirty = implode('_', [
-            $this->quote->first_name,
-            $this->quote->last_name,
-            $this->quote->id,
-            Str::snake($this->label)]);
-
-        $fileName = Str::ascii($fileNameDirty) . '.' . $extension;
-
         return Storage::disk('local')->download(
-            $this->quote->{$this->column},
-            $fileName,
+            $this->file->path,
+            $this->file->label,
         );
     }
 }
