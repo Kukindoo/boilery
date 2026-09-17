@@ -39,7 +39,7 @@ class QuoteSubmittedAdmin extends Notification
             ->line('Email: ' . $this->quote->email)
             ->line('Telefon: ' . $this->quote->phone)
             ->line('Adresa: ' . ($this->quote->address ?? 'Neuvedeno'))
-            ->line('Výrobce kotle: ' . ($this->quote->boiler_manufacturer ?? 'Neuvedeno'))
+            ->line('Výrobce kotle: ' . ($this->quote->boiler_manufacturer->value ?? 'Neuvedeno'))
             ->line('Výrobní číslo: ' . ($this->quote->boiler_serial_number ?? 'Neuvedeno'))
             ->line('Typ kotle: ' . ($this->quote->boiler_type ?? 'Neuvedeno'))
             ->line('Záruka: ' . ($this->quote->under_warranty ? 'Ano' : 'Ne'))
