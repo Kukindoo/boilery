@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Quotes;
 
+use App\Enums\FileTypes;
+use App\Models\File;
 use App\Models\RequestedQuotes;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -12,12 +14,15 @@ class QuoteDownloadCard extends Component
 {
     public RequestedQuotes $quote;
 
-    public string $label;
+    public File $file;
 
-    public function mount(RequestedQuotes $quote, string $label): void
+    public FileTypes $file_type;
+
+    public function mount(RequestedQuotes $quote, File $file): void
     {
         $this->quote = $quote;
-        $this->label = $label;
+        $this->file = $file;
+        $this->file_type = FileTypes::from($this->file->file_type);
     }
 
     public function render()
@@ -28,7 +33,7 @@ class QuoteDownloadCard extends Component
     public function downloadFile(): StreamedResponse
     {
         $extension = pathinfo(
-            $this->quote->label_file_path,
+            $this->quote->{$this->column},
             PATHINFO_EXTENSION
         );
 
@@ -41,7 +46,7 @@ class QuoteDownloadCard extends Component
         $fileName = Str::ascii($fileNameDirty) . '.' . $extension;
 
         return Storage::disk('local')->download(
-            $this->quote->label_file_path,
+            $this->quote->{$this->column},
             $fileName,
         );
     }
