@@ -53,15 +53,15 @@
             </div>
 
             <div class="sm:col-span-2">
-                <flux:file-upload wire:model="form.fileLabel" label="Štítek z boileru">
-                    @if (is_null($form->fileLabel))
-                        <flux:file-upload.dropzone
-                                heading="Zde nahrejte štítek z boileru"
-                                text="JPEG, PNG, PDF do 10MB"
-                                with-progress
-                        />
-                    @endif
-                </flux:file-upload>
+                @if (is_null($form->fileLabel))
+                    <flux:file-upload wire:model.live="form.fileLabel" label="Štítek z boileru">
+                            <flux:file-upload.dropzone
+                                    heading="Zde nahrejte štítek z boileru"
+                                    text="JPEG, PNG, PDF do 10MB"
+                                    with-progress
+                            />
+                    </flux:file-upload>
+                @endif
 
                 @if ($form->fileLabel)
                     <div class="mt-4 flex flex-col gap-2">
@@ -80,15 +80,15 @@
             </div>
 
             <div class="sm:col-span-2">
-                <flux:file-upload wire:model="form.fileReceipt" label="Dokrad o nákupu">
-                    @if (is_null($form->fileReceipt))
-                        <flux:file-upload.dropzone
-                                heading="Zde nahrejte doklad o nákupu"
-                                text="JPEG, PNG, PDF do 10MB"
-                                with-progress
-                        />
-                    @endif
-                </flux:file-upload>
+                @if (is_null($form->fileReceipt))
+                    <flux:file-upload wire:model.live="form.fileReceipt" label="Dokrad o nákupu">
+                            <flux:file-upload.dropzone
+                                    heading="Zde nahrejte doklad o nákupu"
+                                    text="JPEG, PNG, PDF do 10MB"
+                                    with-progress
+                            />
+                    </flux:file-upload>
+                @endif
 
                 @if ($form->fileReceipt)
                     <div class="mt-4 flex flex-col gap-2">
@@ -119,15 +119,15 @@
 
             @if($form->boilerUnderWarranty == 'yes')
                 <div class="sm:col-span-2">
-                        <flux:file-upload wire:model="form.fileWarrantyDocument" label="Záruční list">
-                            @if (is_null($form->fileWarrantyDocument))
+                    @if (is_null($form->fileWarrantyDocument))
+                        <flux:file-upload wire:model.live="form.fileWarrantyDocument" label="Záruční list">
                             <flux:file-upload.dropzone
                                     heading="Zde nahrejte záruční list"
                                     text="JPEG, PNG, PDF do 10MB"
                                     with-progress
                             />
-                            @endif
                         </flux:file-upload>
+                    @endif
 
                     @if ($form->fileWarrantyDocument)
                         <div class="mt-4 flex flex-col gap-2">
