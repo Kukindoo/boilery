@@ -57,7 +57,7 @@
                     @if (is_null($form->fileLabel))
                         <flux:file-upload.dropzone
                                 heading="Zde nahrejte štítek z boileru"
-                                text="JPEG, PNG, PDF up to 10MB"
+                                text="JPEG, PNG, PDF do 10MB"
                                 with-progress
                         />
                     @endif
@@ -84,7 +84,7 @@
                     @if (is_null($form->fileReceipt))
                         <flux:file-upload.dropzone
                                 heading="Zde nahrejte doklad o nákupu"
-                                text="JPEG, PNG, PDF up to 10MB"
+                                text="JPEG, PNG, PDF do 10MB"
                                 with-progress
                         />
                     @endif
@@ -123,7 +123,7 @@
                             @if (is_null($form->fileWarrantyDocument))
                             <flux:file-upload.dropzone
                                     heading="Zde nahrejte záruční list"
-                                    text="JPEG, PNG, PDF up to 10MB"
+                                    text="JPEG, PNG, PDF do 10MB"
                                     with-progress
                             />
                             @endif
