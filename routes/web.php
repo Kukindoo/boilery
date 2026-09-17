@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\QuoteController;
+use App\Livewire\Quotes\RequestedQuoteFilePreviewController;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -37,6 +38,11 @@ Route::middleware(['auth'])->group(function () {
     Route::controller(QuoteController::class)->group(function () {
         Route::get('quotes', 'index')->name('quotes.index');
         Route::get('quotes/{quote}', 'show')->name('quotes.show');
+
+        Route::get(
+            '/quotes/{quote}/files/{file}/preview',
+            RequestedQuoteFilePreviewController::class
+        )->name('quotes.files.preview');
     });
 });
 
