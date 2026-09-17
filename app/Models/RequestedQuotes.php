@@ -49,15 +49,15 @@ class RequestedQuotes extends Model
             ->logOnlyDirty();
     }
 
+    public function files(): HasMany
+    {
+        return $this->hasMany(File::class, 'quote_id');
+    }
+
     protected function casts(): array
     {
         return [
             'under_warranty' => 'boolean',
         ];
-    }
-
-    public function files(): HasMany
-    {
-        return $this->hasMany(File::class, 'quote_id');
     }
 }
