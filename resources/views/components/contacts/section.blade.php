@@ -32,6 +32,7 @@
                 </dl>
             </div>
         </div>
-        @livewire('contact-form')
+
+        <livewire:quote-request-form />
     </div>
 </div>
