@@ -21,7 +21,7 @@ class QuoteDownloadCard extends Component
     {
         $this->quote = $quote;
         $this->file = $file;
-        $this->file_type = FileTypes::tryFrom($this->file->file_type);
+        $this->file_type = FileTypes::tryFrom($this->file->file_type) ?? FileTypes::UNKNOWN;
     }
 
     public function render()
