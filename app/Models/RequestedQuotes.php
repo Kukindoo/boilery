@@ -20,9 +20,6 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property ?string $boiler_manufacturer
  * @property ?string $boiler_serial_number
  * @property ?string $boiler_type
- * @property ?string $label_file_path
- * @property ?string $warranty_file_path
- * @property ?string $receipt_file_path
  */
 class RequestedQuotes extends Model
 {
