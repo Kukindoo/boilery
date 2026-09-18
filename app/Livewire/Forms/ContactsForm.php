@@ -49,7 +49,7 @@ class ContactsForm extends Form
             'boilerUnderWarranty' => ['in:yes,no'],
             'fileLabel' => ['nullable', 'file', 'mimes:pdf,png,jpeg', 'max:10240'],
             'fileReceipt' => ['nullable', 'file', 'mimes:pdf,png,jpeg', 'max:10240'],
-            'fileWarrantyDocument' => ['nullable', 'file', 'mimes:pdf,png,jpeg', 'max:10240'],
+            'fileWarrantyDocument' => ['nullable', 'file', 'mimes:png,jpeg', 'max:10240'],
         ];
     }
 }

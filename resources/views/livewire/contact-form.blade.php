@@ -57,7 +57,7 @@
                     <flux:file-upload wire:model.live="form.fileLabel" label="Štítek z boileru">
                             <flux:file-upload.dropzone
                                     heading="Zde nahrejte štítek z boileru"
-                                    text="JPEG, PNG, PDF do 10MB"
+                                    text="JPEG, PNG do 10MB"
                                     with-progress
                             />
                     </flux:file-upload>
@@ -84,7 +84,7 @@
                     <flux:file-upload wire:model.live="form.fileReceipt" label="Doklad o nákupu">
                             <flux:file-upload.dropzone
                                     heading="Zde nahrejte doklad o nákupu"
-                                    text="JPEG, PNG, PDF do 10MB"
+                                    text="JPEG, PNG do 10MB"
                                     with-progress
                             />
                     </flux:file-upload>
@@ -123,7 +123,7 @@
                         <flux:file-upload wire:model.live="form.fileWarrantyDocument" label="Záruční list">
                             <flux:file-upload.dropzone
                                     heading="Zde nahrejte záruční list"
-                                    text="JPEG, PNG, PDF do 10MB"
+                                    text="JPEG, PNG do 10MB"
                                     with-progress
                             />
                         </flux:file-upload>
