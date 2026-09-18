@@ -21,7 +21,7 @@
                 </div>
 
                 <p class="mt-8 text-lg font-medium text-pretty text-gray-500 sm:text-xl/8 dark:text-primary-dark-text">
-                    Opravujeme a instalujeme bojlery značek Dražice, Ariston and Stiebl&nbsp;Eltron. Nové i záruky.
+                    Opravujeme a instalujeme bojlery značek Dražice, Ariston and Stiebel&nbsp;Eltron. Nové i záruky.
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-x-6">
                     <a href="#contact-quote-form" class="text-sm/6 font-semibold text-gray-900 dark:text-primary-dark-text">

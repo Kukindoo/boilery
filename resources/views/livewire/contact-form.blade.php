@@ -81,7 +81,7 @@
 
             <div class="sm:col-span-2">
                 @if (is_null($form->fileReceipt))
-                    <flux:file-upload wire:model.live="form.fileReceipt" label="Dokrad o nákupu">
+                    <flux:file-upload wire:model.live="form.fileReceipt" label="Doklad o nákupu">
                             <flux:file-upload.dropzone
                                     heading="Zde nahrejte doklad o nákupu"
                                     text="JPEG, PNG, PDF do 10MB"
@@ -112,8 +112,8 @@
                         label="Bojler v záruce?"
                         variant="segmented"
                 >
-                    <flux:radio value="yes" label="Yes" />
-                    <flux:radio value="no" label="No" />
+                    <flux:radio value="yes" label="Ano" />
+                    <flux:radio value="no" label="Ne" />
                 </flux:radio.group>
             </div>
 

@@ -10,7 +10,7 @@ enum BoilerManufacturers: string
 
     case DRAZICE = 'drazice';
 
-    case STIEBLE = 'stieble-eltron';
+    case STIEBEL = 'stiebel-eltron';
 
     public static function getOptions(): array
     {
@@ -25,7 +25,7 @@ enum BoilerManufacturers: string
             self::UNKNOWN => 'Neznámý',
             self::ARISTON => 'Ariston',
             self::DRAZICE => 'Dražice',
-            self::STIEBLE => 'Stiebl Eltron',
+            self::STIEBEL => 'Stiebel Eltron',
         };
     }
 }

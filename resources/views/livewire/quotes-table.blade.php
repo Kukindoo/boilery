@@ -69,15 +69,15 @@
                                         Vyřešit
                                     </flux:menu.item>
                                     <flux:menu.item icon="phone-arrow-up-right" wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\RequestedQuoteStatus::CONTACTED }}')">
-                                        Contacted
+                                        Kontaktovaný
                                     </flux:menu.item>
                                     <flux:menu.item icon="x-circle" wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\RequestedQuoteStatus::REJECTED }}')">
                                         Odmítnout
                                     </flux:menu.item>
                                 </flux:menu.submenu>
                                 <flux:menu.separator/>
-                                <flux:menu.item variant="danger" icon="trash">
-                                    Delete
+                                <flux:menu.item variant="danger" icon="trash" disabled>
+                                    Smazat
                                 </flux:menu.item>
                             </flux:menu>
                         </flux:dropdown>
