@@ -87,7 +87,7 @@ class QuoteRequestForm extends Component
         Notification::route('mail', $quote->email)
             ->notify(new QuoteSubmittedCustomer($quote));
 
-        Notification::route('mail', config('contacts.email'))
+        Notification::route('mail', config('contacts.admin_email'))
             ->notify(new QuoteSubmittedAdmin($quote));
 
         $this->submitted = true;
