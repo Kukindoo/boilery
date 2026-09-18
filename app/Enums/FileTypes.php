@@ -12,6 +12,8 @@ enum FileTypes: string
 
     case WARRANTY = 'warranty';
 
+    case QUOTE_SUMMARY = 'quote-summary';
+
     public static function getOptions(): array
     {
         return collect(self::cases())
@@ -26,6 +28,7 @@ enum FileTypes: string
             self::BOILER_LABEL => 'Štítek',
             self::RECEIPT => 'Kupní smlouva',
             self::WARRANTY => 'Záruka',
+            self::QUOTE_SUMMARY => 'Shrnutí poptávky',
         };
     }
 
@@ -36,6 +39,7 @@ enum FileTypes: string
             self::BOILER_LABEL => 'stitek',
             self::RECEIPT => 'kupni_smlouva',
             self::WARRANTY => 'zaruka',
+            self::QUOTE_SUMMARY => 'shrnuti_poptavky'
         };
     }
 }
