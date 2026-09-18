@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\QuoteController;
+use App\Http\Controllers\QuotePrintController;
 use App\Livewire\Quotes\RequestedQuoteFilePreviewController;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
@@ -43,6 +44,10 @@ Route::middleware(['auth'])->group(function () {
             '/quotes/{quote}/files/{file}/preview',
             RequestedQuoteFilePreviewController::class
         )->name('quotes.files.preview');
+    });
+
+    Route::controller(QuotePrintController::class)->group(function () {
+        Route::get('quotes/{quote}/print', 'show')->name('quotes.print');
     });
 });
 

@@ -5,7 +5,9 @@
                 Poptávka {{ $quote->id }}
                 <flux:text>{{ $quote->first_name }} {{ $quote->last_name }}</flux:text>
             </flux:heading>
-            <livewire:quotes.quote-summary-button :quote="$quote" />
+            <flux:button size="sm" icon="printer" :href="route('quotes.print', $quote)" target="_blank">
+                Vytisknout poptávku
+            </flux:button>
         </div>
 
         <x-quotes.quote-person-info :quote="$quote" />
