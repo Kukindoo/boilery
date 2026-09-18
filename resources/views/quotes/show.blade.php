@@ -5,9 +5,7 @@
                 Poptávka {{ $quote->id }}
                 <flux:text>{{ $quote->first_name }} {{ $quote->last_name }}</flux:text>
             </flux:heading>
-            <flux:button size="sm" icon="printer" wire:click="downloadPdf({{ $quote }})">
-                Stáhnout poptávku
-            </flux:button>
+            <livewire:quotes.quote-summary-button :quote="$quote" />
         </div>
 
         <x-quotes.quote-person-info :quote="$quote" />
