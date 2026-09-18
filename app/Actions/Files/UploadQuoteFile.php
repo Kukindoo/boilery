@@ -13,7 +13,9 @@ class UploadQuoteFile
         RequestedQuotes $quote,
         FileTypes $fileType)
     {
-        $path = $file->store('files');
+        $store_path = "files/quotes/{$quote->id}";
+
+        $path = $file->store($store_path);
 
         $extension = $file->getClientOriginalExtension();
 
