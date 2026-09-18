@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Actions\Files\UploadFile;
+use App\Actions\Files\UploadQuoteFile;
 use App\Enums\FileTypes;
 use App\Livewire\Forms\ContactsForm;
 use App\Models\RequestedQuotes;
@@ -53,7 +53,7 @@ class QuoteRequestForm extends Component
             if ($this->form->fileLabel) {
                 $file = $this->form->fileLabel;
 
-                app(UploadFile::class)->handle(
+                app(UploadQuoteFile::class)->handle(
                     $file,
                     $quote,
                     FileTypes::BOILER_LABEL);
@@ -62,7 +62,7 @@ class QuoteRequestForm extends Component
             if ($this->form->fileReceipt) {
                 $file = $this->form->fileReceipt;
 
-                app(UploadFile::class)->handle(
+                app(UploadQuoteFile::class)->handle(
                     $file,
                     $quote,
                     FileTypes::RECEIPT);
@@ -71,7 +71,7 @@ class QuoteRequestForm extends Component
             if ($this->form->fileWarrantyDocument) {
                 $file = $this->form->fileWarrantyDocument;
 
-                app(UploadFile::class)->handle(
+                app(UploadQuoteFile::class)->handle(
                     $file,
                     $quote,
                     FileTypes::WARRANTY);

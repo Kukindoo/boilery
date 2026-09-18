@@ -7,7 +7,7 @@ use App\Models\File;
 use App\Models\RequestedQuotes;
 use Illuminate\Support\Str;
 
-class UploadFile
+class UploadQuoteFile
 {
     public function handle($file,
         RequestedQuotes $quote,
