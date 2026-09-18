@@ -14,15 +14,9 @@ class QuoteController extends Controller
 
     public function show(RequestedQuotes $quote)
     {
-        $manufacturer = BoilerManufacturers::tryFrom($quote->boiler_manufacturer);
-
-        if (is_null($manufacturer)) {
-            $manufacturer = BoilerManufacturers::UNKNOWN;
-        }
 
         return view('quotes.show', [
-            'quote' => $quote,
-            'manufacturer' => $manufacturer,
+            'quote' => $quote
         ]);
     }
 }
