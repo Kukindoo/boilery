@@ -16,11 +16,11 @@ class RequestedQuoteFilePreviewController extends Controller
         abort_unless($file->quote_id === $quote->id, 404);
 
         abort_unless(
-            Storage::disk('local')->exists($file->path),
+            Storage::disk(config('filesystems.default'))->exists($file->path),
             404
         );
 
-        return Storage::disk('local')->response(
+        return Storage::disk(config('filesystems.default'))->response(
             $file->path,
             $file->label,
             [
