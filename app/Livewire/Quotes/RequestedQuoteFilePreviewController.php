@@ -26,6 +26,7 @@ class RequestedQuoteFilePreviewController extends Controller
             [
                 'Content-Type' => $file->mime_type,
                 'Content-Disposition' => 'inline',
+                'X-Frame-Options' => 'SAMEORIGIN',
             ]
         );
     }
