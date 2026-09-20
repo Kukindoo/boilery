@@ -15,5 +15,8 @@
     <x-quotes.quote-boiler-info :quote="$quote" />
     <x-quotes.quote-attached-images :quote="$quote" />
 </div>
+<script>
+    window.print();
+</script>
 </body>
 </html>
