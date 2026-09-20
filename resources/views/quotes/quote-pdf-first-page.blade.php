@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 <head>
+    @php
+        $fileNameDirty = implode('_', [
+            $quote->first_name,
+            $quote->last_name,
+            $quote->id,
+            \App\Enums\FileTypes::QUOTE_SUMMARY->snake(),
+        ]);
+
+        $fileName = Str::ascii($fileNameDirty)
+    @endphp
+    <title>{{ $fileName ?? config('app.name') }}</title>
+
     @include('partials.head')
 </head>
 <body class="min-h-screen bg-white dark:bg-zinc-800">
