@@ -133,6 +133,6 @@ return [
     */
 
     'files' => [
-        'quote_save_directory' => 'files/quotes/{quote->id}'
-    ]
+        'quote_save_directory' => 'files/quotes/{quote->id}',
+    ],
 ];
