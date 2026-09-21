@@ -7,14 +7,23 @@
 <flux:header container class="border-b border-zinc-200 bg-primary-bg dark:border-zinc-700 dark:bg-primary-dark-bg">
     <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
-    <a href="{{ route('dashboard') }}" class="ms-2 me-5 flex items-center space-x-2 rtl:space-x-reverse lg:ms-0" wire:navigate>
+    <a href="{{ route('home') }}" class="ms-2 me-5 flex items-center space-x-2 rtl:space-x-reverse lg:ms-0" wire:navigate>
         <x-app-logo />
     </a>
 
     <flux:navbar class="-mb-px max-lg:hidden">
-        <flux:navbar.item icon="key" :href="route('login')" :current="request()->routeIs('login')" wire:navigate>
-            {{ __('Login') }}
-        </flux:navbar.item>
+        @auth
+            <form method="POST" action="{{ route('logout') }}" class="w-full">
+                @csrf
+                <flux:navbar.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
+                    {{ __('Log Out') }}
+                </flux:navbar.item>
+            </form>
+        @else
+            <flux:navbar.item icon="key" :href="route('login')" :current="request()->routeIs('login')" wire:navigate>
+                {{ __('Login') }}
+            </flux:navbar.item>
+        @endauth
     </flux:navbar>
 
 </flux:header>
