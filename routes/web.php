@@ -36,19 +36,22 @@ Route::middleware(['auth'])->group(function () {
         )
         ->name('two-factor.show');
 
-    Route::controller(QuoteController::class)->group(function () {
-        Route::get('quotes', 'index')->name('quotes.index');
-        Route::get('quotes/{quote}', 'show')->name('quotes.show');
+    Route::name('quotes.')->prefix('quotes')->group(function () {
+        Route::controller(QuoteController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{quote}', 'show')->name('show');
+        });
 
         Route::get(
-            '/quotes/{quote}/files/{file}/preview',
+            '/{quote}/files/{file}/preview',
             RequestedQuoteFilePreviewController::class
-        )->name('quotes.files.preview');
+        )->name('files.preview');
+
+        Route::controller(QuotePrintController::class)->group(function () {
+            Route::get('/{quote}/print', 'show')->name('print');
+        });
     });
 
-    Route::controller(QuotePrintController::class)->group(function () {
-        Route::get('quotes/{quote}/print', 'show')->name('quotes.print');
-    });
 });
 
 require __DIR__ . '/auth.php';
