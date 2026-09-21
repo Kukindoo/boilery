@@ -6,11 +6,11 @@ use App\Enums\FileTypes;
 use App\Models\RequestedQuotes;
 use Illuminate\Support\Str;
 
-class CreateFileLabel
+class GenerateFileLabel
 {
     public function handle(RequestedQuotes $quote,
         FileTypes $fileType,
-        string $extension
+        ?string $extension = null
     ): string {
 
         $fileLabelDirty = implode('_', [
@@ -20,6 +20,12 @@ class CreateFileLabel
             $fileType->snake(),
         ]);
 
-        return Str::ascii($fileLabelDirty) . '.' . $extension;
+        $fileLabel = Str::ascii($fileLabelDirty);
+
+        if (is_null($extension)) {
+            return $fileLabel;
+        }
+
+        return $fileLabel . '.' . $extension;
     }
 }

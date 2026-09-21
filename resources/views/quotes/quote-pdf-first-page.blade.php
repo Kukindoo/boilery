@@ -1,17 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 <head>
-    @php
-        $fileNameDirty = implode('_', [
-            $quote->first_name,
-            $quote->last_name,
-            $quote->id,
-            \App\Enums\FileTypes::QUOTE_SUMMARY->snake(),
-        ]);
-
-        $fileName = Str::ascii($fileNameDirty)
-    @endphp
-    <title>{{ $fileName ?? config('app.name') }}</title>
+    <title>{{ $fileLabel ?? config('app.name') }}</title>
 
     @include('partials.head')
 </head>
@@ -23,9 +13,9 @@
             <flux:text>{{ $quote->first_name }} {{ $quote->last_name }}</flux:text>
         </flux:heading>
     </div>
-    <x-quotes.quote-person-info :quote="$quote" />
-    <x-quotes.quote-boiler-info :quote="$quote" />
-    <x-quotes.quote-attached-images :quote="$quote" />
+    <x-quotes.quote-person-info :quote="$quote"/>
+    <x-quotes.quote-boiler-info :quote="$quote"/>
+    <x-quotes.quote-attached-images :quote="$quote"/>
 </div>
 <script>
     window.print();
