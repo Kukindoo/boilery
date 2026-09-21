@@ -51,7 +51,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{quote}/print', 'show')->name('print');
         });
     });
-
 });
 
 require __DIR__ . '/auth.php';
