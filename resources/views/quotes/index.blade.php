@@ -1,4 +1,4 @@
-<x-layouts::app :title="__('Dashboard')">
+<x-layouts::app title="Poptávky">
     <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
         <flux:heading>
             Poptávky

@@ -13,6 +13,9 @@
 
     <flux:navbar class="-mb-px max-lg:hidden">
         @auth
+            <flux:navbar.item icon="home" :href="route('dashboard')" wire:navigate>
+                Přehled
+            </flux:navbar.item>
             <form method="POST" action="{{ route('logout') }}" class="w-full">
                 @csrf
                 <flux:navbar.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
