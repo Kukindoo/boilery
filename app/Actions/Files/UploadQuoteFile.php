@@ -5,28 +5,32 @@ namespace App\Actions\Files;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\RequestedQuotes;
-use Illuminate\Support\Str;
+use Exception;
 
 class UploadQuoteFile
 {
+    /**
+     * @throws Exception
+     */
     public function handle($file,
         RequestedQuotes $quote,
         FileTypes $fileType)
     {
-        $store_path = "files/quotes/{$quote->id}";
+        $directory = str_replace(
+            '{quote_id}',
+            $quote->id,
+            config('app.files.quote_save_directory')
+        );
 
-        $path = $file->store($store_path);
+        $path = $file->store($directory);
 
         $extension = $file->getClientOriginalExtension();
 
-        $fileNameDirty = implode('_', [
-            $quote->first_name,
-            $quote->last_name,
-            $quote->id,
-            $fileType->snake(),
-        ]);
-
-        $fileName = Str::ascii($fileNameDirty) . '.' . $extension;
+        $fileLabel = app(CreateFileLabel::class)->handle(
+            $quote,
+            $fileType,
+            $extension,
+        );
 
         return File::create([
             'path' => $path,
@@ -36,7 +40,7 @@ class UploadQuoteFile
             'mime_type' => $file->getMimeType(),
             'file_type' => $fileType->value,
             'size' => $file->getSize(),
-            'label' => $fileName,
+            'label' => $fileLabel,
         ]);
     }
 }

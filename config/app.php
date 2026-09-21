@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Files directories
+    |--------------------------------------------------------------------------
+    |
+    | These configuration options determine the directory where to save certain files
+    |
+    */
+
+    'files' => [
+        'quote_save_directory' => 'files/quotes/{quote->id}'
+    ]
+
 ];
