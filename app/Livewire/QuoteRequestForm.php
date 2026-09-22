@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Actions\Files\UploadQuoteFile;
+use App\Actions\Quotes\CreateCustomer;
+use App\Actions\Quotes\CreateQuote;
 use App\Enums\FileTypes;
 use App\Livewire\Forms\ContactsForm;
 use App\Models\RequestedQuotes;
@@ -32,53 +34,13 @@ class QuoteRequestForm extends Component
      * @throws Exception
      * @throws Throwable
      */
-    public function submit()
+    public function submit(): void
     {
         $this->form->validate();
 
-        $quote = DB::transaction(function () {
-            $quote = RequestedQuotes::create([
-                'first_name' => $this->form->firstName,
-                'last_name' => $this->form->lastName,
-                'email' => $this->form->email,
-                'phone' => $this->form->phone,
-                'message' => $this->form->message,
-                'address' => $this->form->address ?? null,
-                'under_warranty' => $this->form->boilerUnderWarranty === 'yes',
-                'boiler_manufacturer' => $this->form->boilerManufacturer,
-                'boiler_serial_number' => $this->form->boilerSerialNumber ?? null,
-                'boiler_type' => $this->form->boilerType ?? null,
-            ]);
+        $user = app(CreateCustomer::class)->handle($this->form->email);
 
-            if ($this->form->fileLabel) {
-                $file = $this->form->fileLabel;
-
-                app(UploadQuoteFile::class)->handle(
-                    $file,
-                    $quote,
-                    FileTypes::BOILER_LABEL);
-            }
-
-            if ($this->form->fileReceipt) {
-                $file = $this->form->fileReceipt;
-
-                app(UploadQuoteFile::class)->handle(
-                    $file,
-                    $quote,
-                    FileTypes::RECEIPT);
-            }
-
-            if ($this->form->fileWarrantyDocument) {
-                $file = $this->form->fileWarrantyDocument;
-
-                app(UploadQuoteFile::class)->handle(
-                    $file,
-                    $quote,
-                    FileTypes::WARRANTY);
-            }
-
-            return $quote;
-        });
+        $quote = app(CreateQuote::class)->handle($this->form, $user);
 
         activity('quotes')
             ->performedOn($quote)

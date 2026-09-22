@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -12,6 +13,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string $status
  * @property string $first_name
  * @property string $last_name
+ * @property int $user_id
  * @property string $email
  * @property string $phone
  * @property ?string $address
@@ -29,6 +31,7 @@ class RequestedQuotes extends Model
         'status',
         'first_name',
         'last_name',
+        'user_id',
         'email',
         'phone',
         'address',
@@ -59,5 +62,10 @@ class RequestedQuotes extends Model
         return [
             'under_warranty' => 'boolean',
         ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
