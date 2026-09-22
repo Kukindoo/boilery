@@ -3,12 +3,18 @@
 namespace App\Http\Requests\Quotes;
 
 use App\Enums\Permissions;
+use App\Models\RequestedQuotes;
 use Illuminate\Foundation\Http\FormRequest;
 
 class QuoteShowRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->hasPermissionTo(Permissions::QUOTE_VIEW_ALL);
+        /** @var RequestedQuotes $quote */
+        $quote = $this->route('quote');
+
+        return $this->user()->hasPermissionTo(Permissions::QUOTE_VIEW_ALL) or
+            ($this->user()->hasPermissionTo(Permissions::QUOTE_VIEW_OWN)
+                and $quote->user_id === $this->user()->id);
     }
 }
