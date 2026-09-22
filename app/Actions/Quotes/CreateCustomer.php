@@ -2,7 +2,6 @@
 
 namespace App\Actions\Quotes;
 
-use App\Models\RequestedQuotes;
 use App\Models\User;
 use Illuminate\Support\Str;
 
