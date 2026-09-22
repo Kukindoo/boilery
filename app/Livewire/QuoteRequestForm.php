@@ -2,15 +2,11 @@
 
 namespace App\Livewire;
 
-use App\Actions\Files\UploadQuoteFile;
 use App\Actions\Quotes\CreateCustomer;
 use App\Actions\Quotes\CreateQuote;
-use App\Enums\FileTypes;
 use App\Livewire\Forms\ContactsForm;
-use App\Models\RequestedQuotes;
 use App\Notifications\QuoteSubmittedAdmin;
 use App\Notifications\QuoteSubmittedCustomer;
-use DB;
 use Exception;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Component;
