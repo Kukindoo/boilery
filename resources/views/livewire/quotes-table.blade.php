@@ -65,13 +65,16 @@
                                 </flux:menu.item>
                                 <flux:menu.separator/>
                                 <flux:menu.submenu heading="Status">
-                                    <flux:menu.item icon="check" wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\RequestedQuoteStatus::DONE }}')">
+                                    <flux:menu.item icon="check"
+                                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\RequestedQuoteStatus::ACCEPTED }}')">
                                         Vyřešit
                                     </flux:menu.item>
-                                    <flux:menu.item icon="phone-arrow-up-right" wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\RequestedQuoteStatus::CONTACTED }}')">
+                                    <flux:menu.item icon="phone-arrow-up-right"
+                                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\RequestedQuoteStatus::CONTACTED }}')">
                                         Kontaktovaný
                                     </flux:menu.item>
-                                    <flux:menu.item icon="x-circle" wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\RequestedQuoteStatus::REJECTED }}')">
+                                    <flux:menu.item icon="x-circle"
+                                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\RequestedQuoteStatus::REJECTED }}')">
                                         Odmítnout
                                     </flux:menu.item>
                                 </flux:menu.submenu>

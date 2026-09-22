@@ -10,7 +10,7 @@ enum RequestedQuoteStatus: string
 
     case PROCESSING = 'processing';
 
-    case DONE = 'done';
+    case ACCEPTED = 'accepted';
 
     case REJECTED = 'rejected';
 
@@ -27,7 +27,7 @@ enum RequestedQuoteStatus: string
             self::NEW => 'Nový',
             self::CONTACTED => 'Kontaktovaný',
             self::PROCESSING => 'Probíhá',
-            self::DONE => 'Vyřešený',
+            self::ACCEPTED => 'Přijato',
             self::REJECTED => 'Odmítnutý',
         };
     }
@@ -38,7 +38,7 @@ enum RequestedQuoteStatus: string
             self::NEW => 'orange',
             self::CONTACTED => 'blue',
             self::PROCESSING => 'lime',
-            self::DONE => 'green',
+            self::ACCEPTED => 'green',
             self::REJECTED => 'red',
         };
     }
