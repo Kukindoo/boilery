@@ -34,7 +34,7 @@ class QuoteRequestForm extends Component
     {
         $this->form->validate();
 
-        $user = app(CreateCustomer::class)->handle($this->form->email);
+        $user = app(CreateCustomer::class)->handle($this->form);
 
         $quote = app(CreateQuote::class)->handle($this->form, $user);
 

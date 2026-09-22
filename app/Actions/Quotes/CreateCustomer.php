@@ -8,14 +8,14 @@ use Illuminate\Support\Str;
 
 class CreateCustomer
 {
-    public function handle(RequestedQuotes $quote): User
+    public function handle($form): User
     {
         return User::firstOrCreate(
             [
-                'email' => $quote->email,
+                'email' => $form->email,
             ],
             [
-                'name' => $quote->first_name . ' ' . $quote->last_name,
+                'name' => $form->firstName . ' ' . $form->lastName,
                 'password' => bcrypt(Str::password()),
             ]);
     }
