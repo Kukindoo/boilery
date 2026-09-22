@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('requested_quotes', function (Blueprint $table) {
-            $table->foreignId('user_id')->nullable()->constrained('users');
+            $table->foreignId('user_id')->nullable()->after('last_name')->constrained('users');
         });
     }
 };
