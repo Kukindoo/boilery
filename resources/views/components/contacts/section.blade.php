@@ -32,7 +32,8 @@
                 </dl>
             </div>
         </div>
-
-        <livewire:quotes.quote-request-form />
+        <div class="px-6 pt-20 pb-24 sm:pb-32 lg:px-8 lg:py-48">
+            <livewire:quotes.quote-request-form />
+        </div>
     </div>
 </div>
