@@ -33,6 +33,6 @@
             </div>
         </div>
 
-        <livewire:quote-request-form />
+        <livewire:quotes.quote-request-form />
     </div>
 </div>

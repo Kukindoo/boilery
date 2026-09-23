@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Quotes;
 
 use App\Enums\RequestedQuoteStatus;
 use App\Models\RequestedQuotes;
