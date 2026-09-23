@@ -3,6 +3,6 @@
         <flux:heading>
             Poptávky
         </flux:heading>
-        <livewire:quotes-table />
+        <livewire:quotes.quotes-table />
     </div>
 </x-layouts::app>
