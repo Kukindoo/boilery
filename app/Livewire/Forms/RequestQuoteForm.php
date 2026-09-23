@@ -2,11 +2,15 @@
 
 namespace App\Livewire\Forms;
 
+use App\Actions\Quotes\CreateCustomer;
+use App\Actions\Quotes\CreateQuote;
 use App\Enums\BoilerManufacturers;
+use App\Models\RequestedQuotes;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
+use Throwable;
 
-class ContactsForm extends Form
+class RequestQuoteForm extends Form
 {
     public ?string $firstName;
 
@@ -51,5 +55,21 @@ class ContactsForm extends Form
             'fileReceipt' => ['nullable', 'file', 'mimes:pdf,png,jpeg', 'max:10240'],
             'fileWarrantyDocument' => ['nullable', 'file', 'mimes:png,jpeg', 'max:10240'],
         ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function submit(): RequestedQuotes
+    {
+        $this->validate();
+
+        $user = app(CreateCustomer::class)->handle($this);
+
+        $quote = app(CreateQuote::class)->handle($this, $user);
+
+        $this->reset();
+
+        return $quote;
     }
 }
