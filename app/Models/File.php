@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\FileTypes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -28,6 +29,13 @@ class File extends Model
         'quote_id',
         'size',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'file_type' => FileTypes::class,
+        ];
+    }
 
     public function quote(): BelongsTo
     {
