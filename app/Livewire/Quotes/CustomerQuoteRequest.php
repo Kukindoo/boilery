@@ -20,7 +20,7 @@ class CustomerQuoteRequest extends Component
 
     public function render()
     {
-        return view('livewire.customer-quote-request');
+        return view('livewire.forms.customer-quote-request');
     }
 
     /**
