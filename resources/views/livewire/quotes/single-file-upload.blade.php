@@ -1,6 +1,6 @@
 <div class="px-6">
     <form id="single-file-upload-form" wire:submit="submit">
-        <div class="mx-auto max-w-xl lg:mr-0 lg:max-w-lg">
+        <div class="mx-auto max-w-xl lg:mr-0 lg:max-w-lg space-y-5">
             <div class="sm:col-span-2">
                 <label for="file-type" class="block text-sm/6 font-semibold text-gray-900 dark:text-white">
                     Typ souborů
