@@ -13,11 +13,27 @@
             </div>
         </div>
         <div class="ml-4 shrink-0">
-            <a wire:click="downloadFile()"
-               style="cursor:pointer"
-               class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
-                Stáhnout
-            </a>
+            <flux:dropdown>
+                <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal">
+                </flux:button>
+                <flux:menu>
+                    <flux:menu.item icon="arrow-down-tray" wire:click="downloadFile()">
+                        Stáhnout
+                    </flux:menu.item>
+                    <flux:menu.separator/>
+                    <flux:menu.submenu heading="Změnit typ">
+                        @foreach(App\Enums\FileTypes::cases() as $_fileType)
+                            <flux:menu.item wire:click="changeFileType('{{ $_fileType }}')">
+                                {{ $_fileType->label() }}
+                            </flux:menu.item>
+                        @endforeach
+                    </flux:menu.submenu>
+                    <flux:menu.separator/>
+                    <flux:menu.item variant="danger" icon="trash" disabled>
+                        Smazat
+                    </flux:menu.item>
+                </flux:menu>
+            </flux:dropdown>
         </div>
     </div>
     <div class="mt-6">

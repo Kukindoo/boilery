@@ -29,6 +29,21 @@ class QuoteDownloadCard extends Component
         return view('livewire.quote-download-card');
     }
 
+    public function changeFileType(FileTypes $file_type): void
+    {
+        auth()->user()->can('update', $this->quote);
+
+        if (! in_array($file_type->value, array_column(FileTypes::cases(), 'value'))) {
+            abort(405);
+        }
+
+        $this->file->update([
+            'file_type' => $file_type,
+        ]);
+
+        $this->file_type = $file_type;
+    }
+
     public function downloadFile(): StreamedResponse
     {
         return Storage::disk(config('filesystems.default'))->download(
