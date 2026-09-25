@@ -51,7 +51,7 @@ class User extends Authenticatable
 
     public function quotes(): HasMany
     {
-        return $this->hasMany(RequestedQuotes::class, 'user_id', 'id');
+        return $this->hasMany(Quote::class, 'user_id', 'id');
     }
 
     /**

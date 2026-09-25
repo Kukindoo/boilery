@@ -6,7 +6,7 @@ use App\Actions\Quotes\CreateCustomer;
 use App\Actions\Quotes\CreateQuote;
 use App\Enums\BoilerManufacturers;
 use App\Enums\FileTypes;
-use App\Models\RequestedQuotes;
+use App\Models\Quote;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 use Throwable;
@@ -39,7 +39,7 @@ class RequestQuoteForm extends Form
 
     public $fileWarrantyDocument = null;
 
-    public ?RequestedQuotes $quote = null;
+    public ?Quote $quote = null;
 
     public function rules(): array
     {
@@ -63,7 +63,7 @@ class RequestQuoteForm extends Form
     /**
      * @throws Throwable
      */
-    public function submit(): RequestedQuotes
+    public function submit(): Quote
     {
         $this->validate();
 
@@ -76,7 +76,7 @@ class RequestQuoteForm extends Form
         return $quote;
     }
 
-    public function update(): RequestedQuotes
+    public function update(): Quote
     {
         $this->validate();
 
@@ -96,7 +96,7 @@ class RequestQuoteForm extends Form
         return $this->quote;
     }
 
-    public function initForm(RequestedQuotes $quote)
+    public function initForm(Quote $quote)
     {
         $this->quote = $quote;
 

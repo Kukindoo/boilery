@@ -2,18 +2,20 @@
 
 namespace App\Livewire\Quotes;
 
+use App\Enums\Permissions;
+use App\Enums\RequestedQuoteStatus;
 use App\Livewire\Forms\RequestQuoteForm;
-use App\Models\RequestedQuotes;
+use App\Models\Quote;
 use Flux\Flux;
 use Livewire\Component;
 
 class QuoteEdit extends Component
 {
-    public RequestedQuotes $quote;
+    public Quote $quote;
 
     public RequestQuoteForm $form;
 
-    public function mount(RequestedQuotes $quote): void
+    public function mount(Quote $quote): void
     {
         $this->quote = $quote;
         $this->form->initForm($this->quote);

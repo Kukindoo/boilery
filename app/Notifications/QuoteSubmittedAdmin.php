@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\Models\RequestedQuotes;
+use App\Models\Quote;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -15,7 +15,7 @@ class QuoteSubmittedAdmin extends Notification
      * Create a new notification instance.
      */
     public function __construct(
-        public RequestedQuotes $quote,
+        public Quote $quote,
     ) {}
 
     /**

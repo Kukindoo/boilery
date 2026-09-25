@@ -3,14 +3,14 @@
 namespace App\Actions\Files;
 
 use App\Enums\FileTypes;
-use App\Models\RequestedQuotes;
+use App\Models\Quote;
 use Illuminate\Support\Str;
 
 class GenerateFileLabel
 {
-    public function handle(RequestedQuotes $quote,
-        FileTypes $fileType,
-        ?string $extension = null
+    public function handle(Quote     $quote,
+                           FileTypes $fileType,
+                           ?string   $extension = null
     ): string {
 
         $fileLabelDirty = implode('_', [

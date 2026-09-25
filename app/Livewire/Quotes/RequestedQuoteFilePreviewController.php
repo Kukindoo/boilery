@@ -4,14 +4,14 @@ namespace App\Livewire\Quotes;
 
 use App\Http\Controllers\Controller;
 use App\Models\File;
-use App\Models\RequestedQuotes;
+use App\Models\Quote;
 use Illuminate\Support\Facades\Storage;
 
 class RequestedQuoteFilePreviewController extends Controller
 {
     public function __invoke(
-        RequestedQuotes $quote,
-        File $file,
+        Quote $quote,
+        File  $file,
     ) {
         abort_unless($file->quote_id === $quote->id, 404);
 

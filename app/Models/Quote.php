@@ -23,7 +23,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property ?string $boiler_serial_number
  * @property ?string $boiler_type
  */
-class RequestedQuotes extends Model
+class Quote extends Model
 {
     use HasFactory, LogsActivity;
 

@@ -2,13 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Models\RequestedQuotes;
+use App\Models\Quote;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
 class RequestedQuotesFactory extends Factory
 {
-    protected $model = RequestedQuotes::class;
+    protected $model = Quote::class;
 
     public function definition(): array
     {

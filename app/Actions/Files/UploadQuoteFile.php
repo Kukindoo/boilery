@@ -4,7 +4,7 @@ namespace App\Actions\Files;
 
 use App\Enums\FileTypes;
 use App\Models\File;
-use App\Models\RequestedQuotes;
+use App\Models\Quote;
 use Exception;
 
 class UploadQuoteFile
@@ -13,8 +13,8 @@ class UploadQuoteFile
      * @throws Exception
      */
     public function handle($file,
-        RequestedQuotes $quote,
-        FileTypes $fileType)
+                           Quote $quote,
+                           FileTypes $fileType)
     {
         $directory = str_replace(
             '{quote_id}',

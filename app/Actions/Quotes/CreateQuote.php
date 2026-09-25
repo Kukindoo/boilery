@@ -4,7 +4,7 @@ namespace App\Actions\Quotes;
 
 use App\Actions\Files\UploadQuoteFile;
 use App\Enums\FileTypes;
-use App\Models\RequestedQuotes;
+use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -14,10 +14,10 @@ class CreateQuote
     /**
      * @throws Throwable
      */
-    public function handle($form, User $user): RequestedQuotes
+    public function handle($form, User $user): Quote
     {
         return DB::transaction(function () use ($form, $user) {
-            $quote = RequestedQuotes::create([
+            $quote = Quote::create([
                 'first_name' => $form->firstName,
                 'last_name' => $form->lastName,
                 'user_id' => $user->id,

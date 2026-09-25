@@ -39,6 +39,6 @@ class File extends Model
 
     public function quote(): BelongsTo
     {
-        return $this->belongsTo(RequestedQuotes::class, 'quote_id', 'id');
+        return $this->belongsTo(Quote::class, 'quote_id', 'id');
     }
 }
