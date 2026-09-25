@@ -26,6 +26,13 @@ class QuoteEdit extends Component
 
     public function submit()
     {
+        $user = auth()->user();
+        abort_unless($user->hasPermissionTo(Permissions::QUOTE_EDIT_ALL) or
+            ($user->hasPermissionTo(Permissions::QUOTE_VIEW_OWN)
+                and $this->quote->user_id === $user->id
+                and ($this->quote->status !== RequestedQuoteStatus::ACCEPTED
+                    or $this->quote->status !== RequestedQuoteStatus::REJECTED)), 403);
+
         $this->form->update();
         Flux::modal('edit-personal-info')->close();
         $this->redirect(route('quotes.show', $this->quote));
