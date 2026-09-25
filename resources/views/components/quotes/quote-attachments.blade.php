@@ -1,10 +1,17 @@
 @props(['quote'])
 
 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800/50 dark:shadow-none dark:inset-ring dark:inset-ring-white/10">
-    <div class="px-4 py-6 sm:px-6">
+    <div class="px-4 py-6 sm:px-6 flex items-center justify-between">
         <h3 class="text-base/7 font-semibold text-gray-900 dark:text-white">
             Přílohy
         </h3>
+        <div class="ml-4 shrink-0 print:hidden">
+            <flux:modal.trigger name="upload-file">
+                <flux:button icon="arrow-up-tray">
+                    Nahrát
+                </flux:button>
+            </flux:modal.trigger>
+        </div>
     </div>
     <div class="border-t border-gray-100 dark:border-white/5">
         <dl class="divide-y divide-gray-100 dark:divide-white/5">
@@ -28,3 +35,11 @@
         </dl>
     </div>
 </div>
+
+<flux:modal name="upload-file" class="w-full max-w-5xl">
+    <div class="space-y-6">
+        <flux:heading size="lg">Nahrát soubor</flux:heading>
+
+        <livewire:quotes.single-file-upload :quote="$quote"/>
+    </div>
+</flux:modal>
