@@ -10,7 +10,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Throwable;
 
-class CustomerQuoteRequest extends Component
+class CustomerQuoteRequestPage extends Component
 {
     use WithFileUploads;
 
@@ -20,7 +20,7 @@ class CustomerQuoteRequest extends Component
 
     public function render()
     {
-        return view('livewire.forms.customer-quote-request');
+        return view('livewire.forms.customer-quote-request-page');
     }
 
     /**

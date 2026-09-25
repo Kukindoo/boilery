@@ -5,7 +5,7 @@
                 Poptávka {{ $quote->id }}
                 <flux:text>{{ $quote->first_name }} {{ $quote->last_name }}</flux:text>
             </flux:heading>
-            @if( auth()->user()->hasPermissionTo(App\Enums\Permissions::QUOTE_PRINT_ALL) )
+            @if( auth()->user()->can('update', $quote) )
                 <flux:button size="sm" icon="printer" :href="route('quotes.print', $quote)" target="_blank">
                     Vytisknout poptávku
                 </flux:button>
