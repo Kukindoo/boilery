@@ -35,5 +35,6 @@ class SingleFileUpload extends Component
         $this->form->submit($this->quote);
         Flux::modal('upload-file')->close();
         $this->form->reset();
+        $this->redirect(route('quotes.show', $this->quote));
     }
 }
