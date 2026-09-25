@@ -5,6 +5,7 @@ namespace App\Livewire\Quotes;
 use App\Livewire\Forms\SingleFileUploadForm;
 use App\Models\Quote;
 use Exception;
+use Flux\Flux;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -32,5 +33,7 @@ class SingleFileUpload extends Component
     public function submit()
     {
         $this->form->submit($this->quote);
+        Flux::modal('upload-file')->close();
+        $this->form->reset();
     }
 }
