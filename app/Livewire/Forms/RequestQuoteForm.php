@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use App\Actions\Quotes\CreateCustomer;
 use App\Actions\Quotes\CreateQuote;
 use App\Enums\BoilerManufacturers;
+use App\Enums\FileTypes;
 use App\Models\RequestedQuotes;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
@@ -12,11 +13,11 @@ use Throwable;
 
 class RequestQuoteForm extends Form
 {
-    public ?string $firstName;
+    public string $firstName = '';
 
-    public ?string $lastName;
+    public string $lastName = '';
 
-    public ?string $address;
+    public ?string $address = null;
 
     public string $phone = '';
 
@@ -26,17 +27,19 @@ class RequestQuoteForm extends Form
 
     public ?BoilerManufacturers $boilerManufacturer = null;
 
-    public ?string $boilerType;
+    public ?string $boilerType = null;
 
-    public ?string $boilerSerialNumber;
+    public ?string $boilerSerialNumber = null;
 
     public string $boilerUnderWarranty = 'no';
 
-    public $fileLabel;
+    public $fileLabel = null;
 
-    public $fileReceipt;
+    public $fileReceipt = null;
 
-    public $fileWarrantyDocument;
+    public $fileWarrantyDocument = null;
+
+    public ?RequestedQuotes $quote = null;
 
     public function rules(): array
     {
@@ -71,5 +74,41 @@ class RequestQuoteForm extends Form
         $this->reset();
 
         return $quote;
+    }
+
+    public function update(): RequestedQuotes
+    {
+        $this->validate();
+
+        $this->quote->update([
+            'first_name' => $this->firstName,
+            'last_name' => $this->lastName,
+            'address' => $this?->address,
+            'phone' => $this->phone,
+            'email' => $this->email,
+            'message' => $this->message,
+            'boiler_manufacturer' => $this->boilerManufacturer,
+            'boiler_type' => $this->boilerType,
+            'boiler_serial_number' => $this->boilerSerialNumber,
+            'under_warranty' => $this->boilerUnderWarranty === 'yes',
+        ]);
+
+        return $this->quote;
+    }
+
+    public function initForm(RequestedQuotes $quote)
+    {
+        $this->quote = $quote;
+
+        $this->firstName = $quote->first_name;
+        $this->lastName = $quote->last_name;
+        $this->address = $quote->address;
+        $this->phone = $quote->phone;
+        $this->email = $quote->email;
+        $this->message = $quote->message;
+        $this->boilerManufacturer = $quote->boiler_manufacturer;
+        $this->boilerType = $quote->boiler_type;
+        $this->boilerSerialNumber = $quote->boiler_serial_number;
+        $this->boilerUnderWarranty = $quote->under_warranty ? 'yes' : 'no';
     }
 }
