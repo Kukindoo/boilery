@@ -58,3 +58,11 @@
         </dl>
     </div>
 </div>
+
+<flux:modal name="edit-personal-info" class="w-full max-w-5xl">
+    <div class="space-y-6">
+        <flux:heading size="lg">Upravit informace o poptávce</flux:heading>
+
+        <livewire:quotes.quote-edit :quote="$quote"/>
+    </div>
+</flux:modal>
