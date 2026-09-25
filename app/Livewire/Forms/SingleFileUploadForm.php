@@ -33,6 +33,6 @@ class SingleFileUploadForm extends Form
         app(UploadQuoteFile::class)->handle(
             $this->file,
             $quote,
-            FileTypes::BOILER_LABEL);
+            $this->fileType);
     }
 }
