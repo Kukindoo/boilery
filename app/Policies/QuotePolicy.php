@@ -34,8 +34,7 @@ class QuotePolicy
         return $user->hasPermissionTo(Permissions::QUOTE_EDIT_ALL) or
             ($user->hasPermissionTo(Permissions::QUOTE_EDIT_OWN)
                 and $quote->user_id === $user->id
-                and ($quote->status !== RequestedQuoteStatus::ACCEPTED
-                    or $quote->status !== RequestedQuoteStatus::REJECTED));
+                and ! $quote->isClosed());
     }
 
     public function delete(User $user, Quote $quote): bool
