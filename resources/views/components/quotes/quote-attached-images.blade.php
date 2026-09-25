@@ -18,7 +18,7 @@
                                 class="divide-y space-y-4 divide-gray-100 rounded-md border border-gray-200 dark:divide-white/5 dark:border-white/10">
                                 @foreach($quote->files as $file)
                                     @php
-                                        $file_type = FileTypes::tryFrom($file->file_type) ?? FileTypes::UNKNOWN;
+                                        $file_type = $file->file_type ?? FileTypes::UNKNOWN;
                                     @endphp
                                     @if ( str_starts_with($file->mime_type, 'image/') )
                                         <flux:heading class="p-6">
