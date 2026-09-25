@@ -5,7 +5,6 @@ namespace App\Livewire\Forms;
 use App\Actions\Quotes\CreateCustomer;
 use App\Actions\Quotes\CreateQuote;
 use App\Enums\BoilerManufacturers;
-use App\Enums\FileTypes;
 use App\Models\Quote;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
