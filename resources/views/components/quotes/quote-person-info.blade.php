@@ -5,6 +5,11 @@
         <h3 class="text-base/7 font-semibold text-gray-900 dark:text-white">
             Informace o poptávce
         </h3>
+        <div class="ml-4 shrink-0 print:hidden">
+            <flux:modal.trigger name="edit-personal-info">
+                <flux:button>Upravit</flux:button>
+            </flux:modal.trigger>
+        </div>
     </div>
     <div class="border-t border-gray-100 dark:border-white/5">
         <dl class="divide-y divide-gray-100 dark:divide-white/5">
