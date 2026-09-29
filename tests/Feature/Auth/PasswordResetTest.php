@@ -9,9 +9,9 @@ use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
-use Tests\TestCase;
+use Tests\Feature\FeatureTestCase;
 
-class PasswordResetTest extends TestCase
+class PasswordResetTest extends FeatureTestCase
 {
     use RefreshDatabase;
 

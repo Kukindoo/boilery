@@ -6,9 +6,9 @@ use App\Livewire\Settings\Profile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Tests\TestCase;
+use Tests\Feature\FeatureTestCase;
 
-class ProfileUpdateTest extends TestCase
+class ProfileUpdateTest extends FeatureTestCase
 {
     use RefreshDatabase;
 

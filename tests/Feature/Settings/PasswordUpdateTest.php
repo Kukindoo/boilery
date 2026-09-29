@@ -7,9 +7,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
-use Tests\TestCase;
+use Tests\Feature\FeatureTestCase;
 
-class PasswordUpdateTest extends TestCase
+class PasswordUpdateTest extends FeatureTestCase
 {
     use RefreshDatabase;
 

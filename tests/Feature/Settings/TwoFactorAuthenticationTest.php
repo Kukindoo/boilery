@@ -6,9 +6,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Fortify\Features;
 use Livewire\Livewire;
-use Tests\TestCase;
+use Tests\Feature\FeatureTestCase;
 
-class TwoFactorAuthenticationTest extends TestCase
+class TwoFactorAuthenticationTest extends FeatureTestCase
 {
     use RefreshDatabase;
 

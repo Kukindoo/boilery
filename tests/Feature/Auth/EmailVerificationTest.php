@@ -7,9 +7,9 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
-use Tests\TestCase;
+use Tests\Feature\FeatureTestCase;
 
-class EmailVerificationTest extends TestCase
+class EmailVerificationTest extends FeatureTestCase
 {
     use RefreshDatabase;
 
