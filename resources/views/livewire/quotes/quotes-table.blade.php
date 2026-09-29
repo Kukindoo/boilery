@@ -7,7 +7,7 @@
     </div>
     <div class="flex items-center justify-between gap-4 mt-4">
         <flux:pillbox wire:model.live="selectedStatuses" multiple placeholder="Choose tags...">
-            @foreach(\App\Enums\RequestedQuoteStatus::cases() as $status)
+            @foreach(\App\Enums\QuoteStatus::cases() as $status)
                 <flux:pillbox.option value="{{ $status->value }}">{{ $status->label() }}</flux:pillbox.option>
             @endforeach
         </flux:pillbox>
@@ -44,7 +44,7 @@
 
                     <flux:table.cell class="py-0">
                         @php
-                            $status = \App\Enums\RequestedQuoteStatus::from($quote->status);
+                            $status = \App\Enums\QuoteStatus::from($quote->status);
                         @endphp
                         <flux:badge size="sm" :color="$status->colour()">
                             {{ $status->label() }}
@@ -66,15 +66,15 @@
                                 <flux:menu.separator/>
                                 <flux:menu.submenu heading="Status">
                                     <flux:menu.item icon="check"
-                                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\RequestedQuoteStatus::ACCEPTED }}')">
+                                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::ACCEPTED }}')">
                                         Vyřešit
                                     </flux:menu.item>
                                     <flux:menu.item icon="phone-arrow-up-right"
-                                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\RequestedQuoteStatus::CONTACTED }}')">
+                                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::CONTACTED }}')">
                                         Kontaktovaný
                                     </flux:menu.item>
                                     <flux:menu.item icon="x-circle"
-                                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\RequestedQuoteStatus::REJECTED }}')">
+                                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::REJECTED }}')">
                                         Odmítnout
                                     </flux:menu.item>
                                 </flux:menu.submenu>

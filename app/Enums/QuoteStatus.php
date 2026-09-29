@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum RequestedQuoteStatus: string
+enum QuoteStatus: string
 {
     case NEW = 'new';
 

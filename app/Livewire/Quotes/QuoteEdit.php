@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Quotes;
 
-use App\Enums\Permissions;
-use App\Enums\RequestedQuoteStatus;
 use App\Livewire\Forms\RequestQuoteForm;
 use App\Models\Quote;
 use Flux\Flux;

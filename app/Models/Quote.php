@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\RequestedQuoteStatus;
+use App\Enums\QuoteStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -72,7 +72,7 @@ class Quote extends Model
 
     public function isClosed(): bool
     {
-        return $this->status === RequestedQuoteStatus::ACCEPTED
-            or $this->status === RequestedQuoteStatus::REJECTED;
+        return $this->status === QuoteStatus::ACCEPTED
+            or $this->status === QuoteStatus::REJECTED;
     }
 }

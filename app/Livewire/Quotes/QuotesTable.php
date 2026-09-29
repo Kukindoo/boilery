@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Quotes;
 
-use App\Enums\RequestedQuoteStatus;
+use App\Enums\QuoteStatus;
 use App\Models\Quote;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -17,8 +17,8 @@ class QuotesTable extends Component
     public $sortDirection = 'desc';
 
     public $selectedStatuses = [
-        RequestedQuoteStatus::NEW,
-        RequestedQuoteStatus::CONTACTED,
+        QuoteStatus::NEW,
+        QuoteStatus::CONTACTED,
     ];
 
     public function sort($column): void
@@ -41,7 +41,7 @@ class QuotesTable extends Component
             ->paginate(15);
     }
 
-    public function changeQuoteStatus(Quote $quote, RequestedQuoteStatus $status): void
+    public function changeQuoteStatus(Quote $quote, QuoteStatus $status): void
     {
         $quote->update([
             'status' => $status,

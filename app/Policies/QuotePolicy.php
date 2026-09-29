@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Enums\Permissions;
-use App\Enums\RequestedQuoteStatus;
 use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
