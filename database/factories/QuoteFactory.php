@@ -6,6 +6,7 @@ use App\Enums\QuoteStatus;
 use App\Models\Quote;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/** @extends Factory<Quote> */
 class QuoteFactory extends Factory
 {
     protected $model = Quote::class;
@@ -26,28 +27,25 @@ class QuoteFactory extends Factory
 
     public function contacted(): self
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => QuoteStatus::CONTACTED,
-            ];
-        });
+        return $this->state(fn (array $attributes) => [
+            'status' => QuoteStatus::CONTACTED,
+        ]
+        );
     }
 
     public function accepted(): self
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => QuoteStatus::ACCEPTED,
-            ];
-        });
+        return $this->state(fn (array $attributes) => [
+            'status' => QuoteStatus::ACCEPTED,
+        ]
+        );
     }
 
     public function rejected(): self
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'status' => QuoteStatus::REJECTED,
-            ];
-        });
+        return $this->state(fn (array $attributes) => [
+            'status' => QuoteStatus::REJECTED,
+        ]
+        );
     }
 }
