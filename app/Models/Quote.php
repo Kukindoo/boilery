@@ -58,13 +58,6 @@ class Quote extends Model
         return $this->hasMany(File::class, 'quote_id');
     }
 
-    protected function casts(): array
-    {
-        return [
-            'under_warranty' => 'boolean',
-        ];
-    }
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -74,5 +67,13 @@ class Quote extends Model
     {
         return $this->status === QuoteStatus::ACCEPTED
             or $this->status === QuoteStatus::REJECTED;
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'under_warranty' => 'boolean',
+            'status' => QuoteStatus::class,
+        ];
     }
 }
