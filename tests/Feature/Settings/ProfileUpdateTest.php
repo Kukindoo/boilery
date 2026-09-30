@@ -41,7 +41,7 @@ class ProfileUpdateTest extends FeatureTestCase
 
     public function test_email_verification_status_is_unchanged_when_email_address_is_unchanged(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->verified()->create();
 
         $this->actingAs($user);
 
