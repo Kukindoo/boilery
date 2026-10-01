@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\File;
 use App\Models\Quote;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RequestedQuoteFilePreviewController extends Controller
 {
     public function __invoke(
         Quote $quote,
-        File  $file,
-    ) {
+        File $file,
+    ): StreamedResponse {
         abort_unless($file->quote_id === $quote->id, 404);
 
         abort_unless(
