@@ -14,6 +14,10 @@ class RequestedQuoteFilePreviewController extends Controller
         Quote $quote,
         File $file,
     ): StreamedResponse {
+        if (! auth()->user()->can('view', $quote)) {
+            abort(403);
+        }
+
         abort_unless($file->quote_id === $quote->id, 404);
 
         abort_unless(
