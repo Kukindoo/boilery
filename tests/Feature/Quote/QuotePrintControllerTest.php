@@ -32,7 +32,7 @@ class QuotePrintControllerTest extends TestCase
     }
 
     #[DataProvider('previewPermissions')]
-    public function test_preview_checks_permissions_and_quote_ownership(?Permissions $permission, bool $ownsQuote, bool $allowed): void
+    public function test_print_checks_permissions_and_quote_ownership(?Permissions $permission, bool $ownsQuote, bool $allowed): void
     {
         $user = User::factory()->create();
         $quote = Quote::factory()->for($ownsQuote ? $user : User::factory()->create())->create();
