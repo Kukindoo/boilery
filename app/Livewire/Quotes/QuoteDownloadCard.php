@@ -31,7 +31,9 @@ class QuoteDownloadCard extends Component
 
     public function changeFileType(FileTypes $file_type): void
     {
-        auth()->user()->can('update', $this->quote);
+        if (! auth()->user()->can('update', $this->quote)) {
+            abort(403);
+        }
 
         if (! in_array($file_type->value, array_column(FileTypes::cases(), 'value'))) {
             abort(405);
