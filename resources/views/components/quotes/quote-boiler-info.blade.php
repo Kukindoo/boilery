@@ -3,7 +3,7 @@
 @php
     use App\Enums\BoilerManufacturers;
 
-    $manufacturer = BoilerManufacturers::tryFrom($quote->boiler_manufacturer);
+    $manufacturer = $quote->boiler_manufacturer;
 
         if (is_null($manufacturer)) {
             $manufacturer = BoilerManufacturers::UNKNOWN;

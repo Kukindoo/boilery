@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BoilerManufacturers;
 use App\Enums\QuoteStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -74,6 +75,7 @@ class Quote extends Model
         return [
             'under_warranty' => 'boolean',
             'status' => QuoteStatus::class,
+            'boiler_manufacturer' => BoilerManufacturers::class,
         ];
     }
 }

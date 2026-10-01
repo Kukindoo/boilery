@@ -44,7 +44,7 @@
 
                     <flux:table.cell class="py-0">
                         @php
-                            $status = \App\Enums\QuoteStatus::from($quote->status);
+                            $status = $quote->status;
                         @endphp
                         <flux:badge size="sm" :color="$status->colour()">
                             {{ $status->label() }}
