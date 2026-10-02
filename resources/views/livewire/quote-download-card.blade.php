@@ -23,7 +23,7 @@
                     <flux:menu.separator/>
                     <flux:menu.submenu heading="Změnit typ">
                         @foreach(App\Enums\FileTypes::cases() as $_fileType)
-                            <flux:menu.item wire:click="changeFileType('{{ $_fileType }}')">
+                            <flux:menu.item wire:click="changeFileType('{{ $_fileType->value }}')">
                                 {{ $_fileType->label() }}
                             </flux:menu.item>
                         @endforeach
