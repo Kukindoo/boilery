@@ -47,7 +47,7 @@ class RequestQuoteForm extends Form
             'lastName' => ['required', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:500'],
             'phone' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255'],
             'message' => ['required', 'string', 'max:500'],
             'boilerManufacturer' => ['nullable', Rule::enum(BoilerManufacturers::class)],
             'boilerType' => ['nullable', 'string', 'max:255'],
