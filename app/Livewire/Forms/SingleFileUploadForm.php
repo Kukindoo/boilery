@@ -18,7 +18,7 @@ class SingleFileUploadForm extends Form
     public function rules(): array
     {
         return [
-            'file' => ['required', 'file', 'mimes:jpg, png,jpeg', 'max:10240'],
+            'file' => ['required', 'file', 'mimes:jpg,png,jpeg', 'max:10240'],
             'fileType' => ['required', Rule::enum(FileTypes::class)],
         ];
     }
