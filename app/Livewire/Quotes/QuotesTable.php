@@ -43,6 +43,10 @@ class QuotesTable extends Component
 
     public function changeQuoteStatus(Quote $quote, QuoteStatus $status): void
     {
+        if (! auth()->user()->can('update', $quote)) {
+            abort(403);
+        }
+
         $quote->update([
             'status' => $status,
         ]);
