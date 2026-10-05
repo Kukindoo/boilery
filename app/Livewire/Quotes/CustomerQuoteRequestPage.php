@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Quotes;
 
+use App\Constants\RateLimiterNames;
 use App\Livewire\Forms\RequestQuoteForm;
 use App\Notifications\QuoteSubmittedAdmin;
 use App\Notifications\QuoteSubmittedCustomer;
+use App\Traits\PublicRateLimiter;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -12,7 +14,7 @@ use Throwable;
 
 class CustomerQuoteRequestPage extends Component
 {
-    use WithFileUploads;
+    use PublicRateLimiter, WithFileUploads;
 
     public RequestQuoteForm $form;
 
@@ -28,6 +30,8 @@ class CustomerQuoteRequestPage extends Component
      */
     public function submit()
     {
+        $this->rateLimiter(RateLimiterNames::PUBLIC_QUOTE_SUBMISSION);
+
         $quote = $this->form->submit();
 
         $this->submitted = true;
