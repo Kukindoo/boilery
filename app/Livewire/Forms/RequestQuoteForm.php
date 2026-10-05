@@ -53,9 +53,9 @@ class RequestQuoteForm extends Form
             'boilerType' => ['nullable', 'string', 'max:255'],
             'boilerSerialNumber' => ['nullable', 'string', 'max:255'],
             'boilerUnderWarranty' => ['in:yes,no'],
-            'fileLabel' => ['nullable', 'file', 'mimes:jpg, png,jpeg', 'max:10240'],
-            'fileReceipt' => ['nullable', 'file', 'mimes:jpg, png,jpeg', 'max:10240'],
-            'fileWarrantyDocument' => ['nullable', 'file', 'mimes:jpg, png,jpeg', 'max:10240'],
+            'fileLabel' => ['nullable', 'file', 'mimes:jpg,png,jpeg', 'max:10240'],
+            'fileReceipt' => ['nullable', 'file', 'mimes:jpg,png,jpeg', 'max:10240'],
+            'fileWarrantyDocument' => ['nullable', 'file', 'mimes:jpg,png,jpeg', 'max:10240'],
         ];
     }
 
