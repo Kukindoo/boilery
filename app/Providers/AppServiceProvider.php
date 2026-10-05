@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
+use App\Constants\RateLimiterNames;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use Spatie\Activitylog\Facades\Activity;
 use Spatie\Activitylog\Contracts\Activity as ActivityContract;
+use Spatie\Activitylog\Facades\Activity;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,6 +37,15 @@ class AppServiceProvider extends ServiceProvider
                     'method' => request()->method(),
                 ]);
             }
+        });
+
+        RateLimiter::for(RateLimiterNames::PUBLIC_QUOTE_SUBMISSION, function (Request $request, string $email): array {
+            return [
+                Limit::perHour(6)
+                    ->by('ip:' . hash('sha256', $request->ip() ?? '')),
+                Limit::perHour(3)
+                    ->by('email:' . hash('sha256', mb_strtolower(mb_trim($email)))),
+            ];
         });
     }
 }
