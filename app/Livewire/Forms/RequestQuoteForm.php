@@ -63,6 +63,24 @@ class RequestQuoteForm extends Form
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'firstName.required' => 'Prosím zadejte své jméno.',
+            'lastName.required' => 'Prosím zadejte své příjmení.',
+            'phone.required' => 'Prosím zadejte své telefonní číslo.',
+            'email.required' => 'Prosím zadejte svou e-mailovou adresu.',
+            'message.required' => 'Prosím zadejte zprávu.',
+            'email.email' => 'Prosím zdejte platnou e-mailovou adresu.',
+            'fileLabel.mimes' => 'Dokument musí být typu: ' . implode(', ', config('app.files.mimes')) . '.',
+            'fileLabel.max' => 'Dokument nesmí být větší jak ' . (config('app.files.max_size') / 1024) . ' MB.',
+            'fileReceipt.mimes' => 'Dokument musí být typu: ' . implode(', ', config('app.files.mimes')) . '.',
+            'fileReceipt.max' => 'Dokument nesmí být větší jak  ' . (config('app.files.max_size') / 1024) . ' MB.',
+            'fileWarrantyDocument.mimes' => 'Dokument musí být typu: ' . implode(', ', config('app.files.mimes')) . '.',
+            'fileWarrantyDocument.max' => 'Dokument nesmí být větší jak   ' . (config('app.files.max_size') / 1024) . ' MB.',
+        ];
+    }
+
     /**
      * @throws Throwable
      */
