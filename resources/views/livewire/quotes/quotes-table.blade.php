@@ -67,7 +67,7 @@
                                 <flux:menu.submenu heading="Status">
                                     <flux:menu.item icon="check"
                                                     wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::ACCEPTED }}')">
-                                        Vyřešit
+                                        Přijmout
                                     </flux:menu.item>
                                     <flux:menu.item icon="phone-arrow-up-right"
                                                     wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::CONTACTED }}')">
