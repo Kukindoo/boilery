@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Enums\Roles;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<User>
@@ -35,5 +35,19 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => now(),
         ]);
+    }
+
+    public function customer(): static
+    {
+        return $this->afterCreating(function (User $user): void {
+            $user->assignRole(Roles::CUSTOMER->value);
+        });
+    }
+
+    public function admin(): static
+    {
+        return $this->afterCreating(function (User $user): void {
+            $user->assignRole(Roles::ADMIN->value);
+        });
     }
 }
