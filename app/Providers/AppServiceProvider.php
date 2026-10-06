@@ -41,9 +41,9 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for(RateLimiterNames::PUBLIC_QUOTE_SUBMISSION, function (Request $request, string $email): array {
             return [
-                Limit::perHour(6)
+                Limit::perMinute(6)
                     ->by('ip:' . hash('sha256', $request->ip() ?? '')),
-                Limit::perHour(3)
+                Limit::perMinute(3)
                     ->by('email:' . hash('sha256', mb_strtolower(mb_trim($email)))),
             ];
         });
