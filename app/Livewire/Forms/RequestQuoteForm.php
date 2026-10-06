@@ -4,6 +4,7 @@ namespace App\Livewire\Forms;
 
 use App\Actions\Quotes\CreateCustomer;
 use App\Actions\Quotes\CreateQuote;
+use App\Dtos\NamePlate;
 use App\Enums\BoilerManufacturers;
 use App\Models\Quote;
 use Illuminate\Validation\Rule;
@@ -68,8 +69,9 @@ class RequestQuoteForm extends Form
     public function submit(): Quote
     {
         $this->validate();
+        $namePlate = new NamePlate($this->firstName, $this->lastName, $this->email);
 
-        $user = app(CreateCustomer::class)->handle($this);
+        $user = app(CreateCustomer::class)->handle($namePlate);
 
         $quote = app(CreateQuote::class)->handle($this, $user);
 
