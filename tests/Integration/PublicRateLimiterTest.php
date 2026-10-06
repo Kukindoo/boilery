@@ -48,7 +48,7 @@ class PublicRateLimiterTest extends IntegrationTestCase
         } catch (ValidationException $exception) {
             $this->assertSame([
                 'form.email' => [
-                    __('Please try again in :seconds seconds.', [
+                    __('Příliš mnoho pokusů. Zkuste to prosím znovu za :seconds sekund.', [
                         'seconds' => 60,
                     ]),
                 ],
