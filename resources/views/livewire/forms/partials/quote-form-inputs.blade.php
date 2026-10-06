@@ -1,7 +1,9 @@
 <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-    <flux:input wire:model="form.firstName" label="Jméno (Vyžadováno)" type="text" autocomplete="given-name"/>
+    @if(! auth()->check())
+        <flux:input wire:model="form.firstName" label="Jméno (Vyžadováno)" type="text" autocomplete="given-name"/>
 
-    <flux:input wire:model="form.lastName" label="Přijmení (Vyžadováno)" type="text" autocomplete="last-name"/>
+        <flux:input wire:model="form.lastName" label="Přijmení (Vyžadováno)" type="text" autocomplete="last-name"/>
+    @endif
 
     <div class="sm:col-span-2">
         <flux:input wire:model="form.email" label="E-mail (Vyžadováno)" type="email" autocomplete="email"/>

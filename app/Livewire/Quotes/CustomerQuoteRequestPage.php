@@ -9,6 +9,7 @@ use App\Notifications\QuoteSubmittedCustomer;
 use App\Traits\PublicRateLimiter;
 use DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Throwable;
@@ -21,7 +22,18 @@ class CustomerQuoteRequestPage extends Component
 
     public bool $submitted = false;
 
-    public function render()
+    public function mount(): void
+    {
+        if (auth()->check()) {
+            [$firstName, $lastName] = explode(' ', auth()->user()->name, 2);
+            $this->form->firstName = $firstName;
+            $this->form->lastName = $lastName;
+            $this->form->email = auth()->user()->email;
+            $this->form->phone = auth()->user()->quotes()->latest()->first()?->phone ?? '';
+        }
+    }
+
+    public function render(): View
     {
         return view('livewire.forms.customer-quote-request-page');
     }
@@ -29,7 +41,7 @@ class CustomerQuoteRequestPage extends Component
     /**
      * @throws Throwable
      */
-    public function submit()
+    public function submit(): void
     {
         $this->rateLimiter(RateLimiterNames::PUBLIC_QUOTE_SUBMISSION);
 
