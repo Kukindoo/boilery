@@ -1,6 +1,6 @@
 <?php
 
-namespace Integration;
+namespace Tests\Integration;
 
 use App\Traits\PublicRateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;

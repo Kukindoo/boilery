@@ -1,6 +1,6 @@
 <?php
 
-namespace Feature\Quote;
+namespace Tests\Feature\Quote;
 
 use App\Enums\Permissions;
 use App\Models\User;
