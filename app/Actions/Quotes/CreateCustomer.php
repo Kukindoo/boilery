@@ -2,6 +2,7 @@
 
 namespace App\Actions\Quotes;
 
+use App\Enums\Roles;
 use App\Models\User;
 use Illuminate\Support\Str;
 
@@ -9,7 +10,7 @@ class CreateCustomer
 {
     public function handle($form): User
     {
-        return User::firstOrCreate(
+        $user = User::firstOrCreate(
             [
                 'email' => $form->email,
             ],
@@ -17,5 +18,9 @@ class CreateCustomer
                 'name' => $form->firstName . ' ' . $form->lastName,
                 'password' => bcrypt(Str::password()),
             ]);
+
+        $user->roles()->attach(Roles::CUSTOMER);
+
+        return $user;
     }
 }
