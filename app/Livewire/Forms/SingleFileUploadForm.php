@@ -17,8 +17,11 @@ class SingleFileUploadForm extends Form
 
     public function rules(): array
     {
+        $mimes = implode(',', config('app.files.mimes'));
+        $maxSize = config('app.files.max_size');
+
         return [
-            'file' => ['required', 'file', 'mimes:jpg,png,jpeg', 'max:10240'],
+            'file' => ['required', 'file', "mimes:$mimes", "max:$maxSize"],
             'fileType' => ['required', Rule::enum(FileTypes::class)],
         ];
     }

@@ -42,6 +42,9 @@ class RequestQuoteForm extends Form
 
     public function rules(): array
     {
+        $mimes = implode(',', config('app.files.mimes'));
+        $maxSize = config('app.files.max_size');
+
         return [
             'firstName' => ['required', 'string', 'max:255'],
             'lastName' => ['required', 'string', 'max:255'],
@@ -53,9 +56,9 @@ class RequestQuoteForm extends Form
             'boilerType' => ['nullable', 'string', 'max:255'],
             'boilerSerialNumber' => ['nullable', 'string', 'max:255'],
             'boilerUnderWarranty' => ['in:yes,no'],
-            'fileLabel' => ['nullable', 'file', 'mimes:jpg,png,jpeg', 'max:10240'],
-            'fileReceipt' => ['nullable', 'file', 'mimes:jpg,png,jpeg', 'max:10240'],
-            'fileWarrantyDocument' => ['nullable', 'file', 'mimes:jpg,png,jpeg', 'max:10240'],
+            'fileLabel' => ['nullable', 'file', "mimes:$mimes", "max:$maxSize"],
+            'fileReceipt' => ['nullable', 'file', "mimes:$mimes", "max:$maxSize"],
+            'fileWarrantyDocument' => ['nullable', 'file', "mimes:$mimes", "max:$maxSize"],
         ];
     }
 
