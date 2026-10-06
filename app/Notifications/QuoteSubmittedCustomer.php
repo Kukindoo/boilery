@@ -40,7 +40,7 @@ class QuoteSubmittedCustomer extends Notification
             ->greeting("Dobrý den pane/paní {$lastName},")
             ->line('děkujeme za Vaši poptávku.')
             ->line('Vaši poptávku jsme přijali a budeme Vás co nejdříve kontaktovat.')
-            ->salutation('S pozdravem ' . config('main.from.name'));
+            ->salutation('S pozdravem ' . config('mail.from.name'));
     }
 
     /**
