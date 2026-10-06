@@ -19,7 +19,7 @@ class CreateCustomer
                 'password' => bcrypt(Str::password()),
             ]);
 
-        $user->roles()->attach(Roles::CUSTOMER);
+        $user->assignRole(Roles::CUSTOMER->value);
 
         return $user;
     }
