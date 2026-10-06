@@ -7,6 +7,7 @@ use App\Livewire\Forms\RequestQuoteForm;
 use App\Notifications\QuoteSubmittedAdmin;
 use App\Notifications\QuoteSubmittedCustomer;
 use App\Traits\PublicRateLimiter;
+use DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -32,18 +33,20 @@ class CustomerQuoteRequestPage extends Component
     {
         $this->rateLimiter(RateLimiterNames::PUBLIC_QUOTE_SUBMISSION);
 
-        $quote = $this->form->submit();
+        DB::transaction(function () {
+            $quote = $this->form->submit();
 
-        $this->submitted = true;
+            $this->submitted = true;
 
-        activity('quotes')
-            ->performedOn($quote)
-            ->log('Quote requested');
+            activity('quotes')
+                ->performedOn($quote)
+                ->log('Quote requested');
 
-        Notification::route('mail', $quote->email)
-            ->notify(new QuoteSubmittedCustomer($quote));
+            Notification::route('mail', $quote->email)
+                ->notify(new QuoteSubmittedCustomer($quote));
 
-        Notification::route('mail', config('contacts.admin_email'))
-            ->notify(new QuoteSubmittedAdmin($quote));
+            Notification::route('mail', config('contacts.admin_email'))
+                ->notify(new QuoteSubmittedAdmin($quote));
+        });
     }
 }
