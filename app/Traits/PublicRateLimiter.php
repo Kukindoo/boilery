@@ -18,7 +18,7 @@ trait PublicRateLimiter
             if (RateLimiter::tooManyAttempts($key, $limit->maxAttempts)) {
                 throw ValidationException::withMessages([
                     'form.email' => __(
-                        'Please try again in :seconds seconds.',
+                        'Příliš mnoho pokusů. Zkuste to prosím znovu za :seconds sekund.',
                         ['seconds' => RateLimiter::availableIn($key)],
                     ),
                 ]);
