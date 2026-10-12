@@ -101,14 +101,47 @@ class WorkTest extends FeatureTestCase
         );
     }
 
-    public function test_logs_deletion_of_a_work(): void
+    public function test_soft_deletes_and_logs_deletion_of_a_work(): void
     {
         $work = Work::factory()->create();
 
         $work->delete();
 
-        $this->assertModelMissing($work);
+        $this->assertSoftDeleted($work);
+        $this->assertNull(Work::find($work->id));
+        $this->assertTrue(Work::withTrashed()->findOrFail($work->id)->trashed());
         $activity = Activity::forSubject($work)->forEvent(ActivityEvent::Deleted)->sole();
         $this->assertSame($work->order_id, $activity->attribute_changes['old']['order_id']);
+    }
+
+    public function test_restores_a_soft_deleted_work_and_logs_restoration(): void
+    {
+        $work = Work::factory()->create();
+        $work->delete();
+
+        $work->restore();
+
+        $this->assertNotSoftDeleted($work);
+        $this->assertTrue(Work::findOrFail($work->id)->is($work));
+        $this->assertNull($work->fresh()->deleted_at);
+        $activity = Activity::forSubject($work)->forEvent(ActivityEvent::Restored)->sole();
+        $this->assertSame(ActivityEvent::Restored->value, $activity->event);
+    }
+
+    public function test_soft_deleting_a_linked_quote_preserves_its_work_and_foreign_key(): void
+    {
+        $user = User::factory()->create();
+        $quote = Quote::factory()->for($user)->create();
+        $work = Work::factory()->for($user)->for($quote)->create();
+
+        $quote->delete();
+
+        $this->assertNotSoftDeleted($work);
+        $this->assertSame($quote->id, $work->fresh()->quote_id);
+        $this->assertNull($work->fresh()->quote);
+
+        $quote->restore();
+
+        $this->assertTrue($work->fresh()->quote->is($quote));
     }
 }

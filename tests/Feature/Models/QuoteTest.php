@@ -118,14 +118,30 @@ class QuoteTest extends FeatureTestCase
         );
     }
 
-    public function test_logs_deletion_of_a_quote(): void
+    public function test_soft_deletes_and_logs_deletion_of_a_quote(): void
     {
         $quote = Quote::factory()->create(['message' => 'No heating']);
 
         $quote->delete();
 
-        $this->assertModelMissing($quote);
+        $this->assertSoftDeleted($quote);
+        $this->assertNull(Quote::find($quote->id));
+        $this->assertTrue(Quote::withTrashed()->findOrFail($quote->id)->trashed());
         $activity = Activity::forSubject($quote)->forEvent(ActivityEvent::Deleted)->sole();
         $this->assertSame('No heating', $activity->attribute_changes['old']['message']);
+    }
+
+    public function test_restores_a_soft_deleted_quote_and_logs_restoration(): void
+    {
+        $quote = Quote::factory()->create();
+        $quote->delete();
+
+        $quote->restore();
+
+        $this->assertNotSoftDeleted($quote);
+        $this->assertTrue(Quote::findOrFail($quote->id)->is($quote));
+        $this->assertNull($quote->fresh()->deleted_at);
+        $activity = Activity::forSubject($quote)->forEvent(ActivityEvent::Restored)->sole();
+        $this->assertSame(ActivityEvent::Restored->value, $activity->event);
     }
 }

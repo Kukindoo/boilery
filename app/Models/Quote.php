@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -27,11 +28,12 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property ?string $boiler_serial_number
  * @property ?string $boiler_type
  * @property ?Carbon $created_at
+ * @property ?Carbon $deleted_at
  * @property ?Carbon $updated_at
  */
 class Quote extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'status',

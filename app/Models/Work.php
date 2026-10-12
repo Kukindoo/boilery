@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -32,11 +33,12 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property ?string $note
  * @property ?string $mechanic_name
  * @property ?Carbon $created_at
+ * @property ?Carbon $deleted_at
  * @property ?Carbon $updated_at
  */
 class Work extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'user_id',
