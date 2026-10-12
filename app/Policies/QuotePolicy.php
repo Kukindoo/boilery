@@ -19,8 +19,8 @@ class QuotePolicy
     public function view(User $user, Quote $quote): bool
     {
         return $this->viewAny($user)
-            or ($user->hasPermissionTo(Permissions::QUOTE_VIEW_OWN)
-                and $quote->user_id === $user->id);
+            || ($user->hasPermissionTo(Permissions::QUOTE_VIEW_OWN)
+                && $quote->user_id === $user->id);
     }
 
     public function create(User $user): bool
@@ -30,10 +30,10 @@ class QuotePolicy
 
     public function update(User $user, Quote $quote): bool
     {
-        return $user->hasPermissionTo(Permissions::QUOTE_EDIT_ALL) or
-            ($user->hasPermissionTo(Permissions::QUOTE_EDIT_OWN)
-                and $quote->user_id === $user->id
-                and ! $quote->isClosed());
+        return $user->hasPermissionTo(Permissions::QUOTE_EDIT_ALL)
+            || ($user->hasPermissionTo(Permissions::QUOTE_EDIT_OWN)
+                && $quote->user_id === $user->id
+                && ! $quote->isClosed());
     }
 
     public function delete(User $user, Quote $quote): bool
