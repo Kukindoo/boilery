@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('type_number')->nullable();
             $table->string('serial_number')->nullable();
             $table->boolean('warranty_accepted')->default(false);
-            $table->string('repair_in_warranty');
+            $table->string('repair_in_warranty')->nullable();
             $table->date('day_of_purchase')->nullable();
             $table->string('building_type')->nullable();
 
