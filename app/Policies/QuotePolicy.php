@@ -13,13 +13,13 @@ class QuotePolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo(Permissions::QUOTE_VIEW_ALL);
+        return $user->can(Permissions::QUOTE_VIEW_ALL->label());
     }
 
     public function view(User $user, Quote $quote): bool
     {
         return $this->viewAny($user)
-            || ($user->hasPermissionTo(Permissions::QUOTE_VIEW_OWN)
+            || ($user->can(Permissions::QUOTE_VIEW_OWN->label())
                 && $quote->user_id === $user->id);
     }
 
@@ -30,8 +30,8 @@ class QuotePolicy
 
     public function update(User $user, Quote $quote): bool
     {
-        return $user->hasPermissionTo(Permissions::QUOTE_EDIT_ALL)
-            || ($user->hasPermissionTo(Permissions::QUOTE_EDIT_OWN)
+        return $user->can(Permissions::QUOTE_EDIT_ALL->label())
+            || ($user->can(Permissions::QUOTE_EDIT_OWN->label())
                 && $quote->user_id === $user->id
                 && ! $quote->isClosed());
     }
