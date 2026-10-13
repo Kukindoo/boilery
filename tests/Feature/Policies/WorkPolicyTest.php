@@ -41,7 +41,10 @@ class WorkPolicyTest extends FeatureTestCase
                 foreach (['own', 'another'] as $ownership) {
                     foreach ([false, true] as $trashed) {
                         foreach ([false, true] as $completed) {
-                            $allowed = $permission === $all || ($permission === $own && $ownership === 'own');
+                            $allowed = $permission === $all
+                                || (! in_array($ability, ['delete', 'forceDelete'], true)
+                                    && $permission === $own
+                                    && $ownership === 'own');
 
                             if ($ability === 'delete' && $trashed) {
                                 $allowed = false;

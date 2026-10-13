@@ -39,9 +39,7 @@ class WorkPolicy
     public function delete(User $user, Work $work): bool
     {
         return ! $work->trashed()
-            && ($user->can(Permissions::WORK_DELETE_ALL->label())
-                || ($user->can(Permissions::WORK_DELETE_OWN->label())
-                    && $work->user_id === $user->id));
+            && $user->can(Permissions::WORK_DELETE_ALL->label());
     }
 
     public function restore(User $user, Work $work): bool
@@ -55,8 +53,6 @@ class WorkPolicy
     public function forceDelete(User $user, Work $work): bool
     {
         return $work->trashed()
-            && ($user->can(Permissions::WORK_FORCE_DELETE_ALL->label())
-                || ($user->can(Permissions::WORK_FORCE_DELETE_OWN->label())
-                    && $work->user_id === $user->id));
+            && $user->can(Permissions::WORK_FORCE_DELETE_ALL->label());
     }
 }

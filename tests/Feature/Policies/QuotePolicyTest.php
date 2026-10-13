@@ -42,7 +42,10 @@ class QuotePolicyTest extends FeatureTestCase
                 foreach (['own', 'another', 'none'] as $ownership) {
                     foreach ([false, true] as $trashed) {
                         foreach ([QuoteStatus::NEW, QuoteStatus::ACCEPTED, QuoteStatus::REJECTED] as $status) {
-                            $allowed = $permission === $all || ($permission === $own && $ownership === 'own');
+                            $allowed = $permission === $all
+                                || (! in_array($ability, ['delete', 'forceDelete'], true)
+                                    && $permission === $own
+                                    && $ownership === 'own');
 
                             if ($ability === 'update' && $permission === $own && $status !== QuoteStatus::NEW) {
                                 $allowed = false;

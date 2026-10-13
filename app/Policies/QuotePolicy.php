@@ -40,9 +40,7 @@ class QuotePolicy
     public function delete(User $user, Quote $quote): bool
     {
         return ! $quote->trashed()
-            && ($user->can(Permissions::QUOTE_DELETE_ALL->label())
-                || ($user->can(Permissions::QUOTE_DELETE_OWN->label())
-                    && $quote->user_id === $user->id));
+            && $user->can(Permissions::QUOTE_DELETE_ALL->label());
     }
 
     public function restore(User $user, Quote $quote): bool
@@ -56,8 +54,6 @@ class QuotePolicy
     public function forceDelete(User $user, Quote $quote): bool
     {
         return $quote->trashed()
-            && ($user->can(Permissions::QUOTE_FORCE_DELETE_ALL->label())
-                || ($user->can(Permissions::QUOTE_FORCE_DELETE_OWN->label())
-                    && $quote->user_id === $user->id));
+            && $user->can(Permissions::QUOTE_FORCE_DELETE_ALL->label());
     }
 }
