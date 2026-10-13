@@ -20,6 +20,18 @@ enum Permissions: int
 
     case QUOTE_DELETE_OWN = 8;
 
+    case QUOTE_CREATE_ALL = 17;
+
+    case QUOTE_CREATE_OWN = 22;
+
+    case QUOTE_RESTORE_ALL = 18;
+
+    case QUOTE_RESTORE_OWN = 19;
+
+    case QUOTE_FORCE_DELETE_ALL = 20;
+
+    case QUOTE_FORCE_DELETE_OWN = 21;
+
     case WORK_VIEW_ALL = 9;
 
     case WORK_VIEW_OWN = 10;
@@ -55,6 +67,12 @@ enum Permissions: int
             self::WORK_EDIT_OWN => 'Edit own works',
             self::WORK_DELETE_ALL => 'Delete all works',
             self::WORK_DELETE_OWN => 'Delete own works',
+            self::QUOTE_CREATE_ALL => 'Create all quotes',
+            self::QUOTE_CREATE_OWN => 'Create own quotes',
+            self::QUOTE_RESTORE_ALL => 'Restore all quotes',
+            self::QUOTE_RESTORE_OWN => 'Restore own quotes',
+            self::QUOTE_FORCE_DELETE_ALL => 'Force delete all quotes',
+            self::QUOTE_FORCE_DELETE_OWN => 'Force delete own quotes',
         };
     }
 }
