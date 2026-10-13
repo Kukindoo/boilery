@@ -28,6 +28,22 @@ class QuotePrintControllerTest extends TestCase
             'edit all, another user quote' => [Permissions::QUOTE_EDIT_ALL, false, false],
             'edit own, own quote' => [Permissions::QUOTE_EDIT_OWN, true, false],
             'edit own, another user quote' => [Permissions::QUOTE_EDIT_OWN, false, false],
+            'quote_delete_all, own quote' => [Permissions::QUOTE_DELETE_ALL, true, false],
+            'quote_delete_all, another quote' => [Permissions::QUOTE_DELETE_ALL, false, false],
+            'quote_delete_own, own quote' => [Permissions::QUOTE_DELETE_OWN, true, false],
+            'quote_delete_own, another quote' => [Permissions::QUOTE_DELETE_OWN, false, false],
+            'quote_create_all, own quote' => [Permissions::QUOTE_CREATE_ALL, true, false],
+            'quote_create_own, own quote' => [Permissions::QUOTE_CREATE_OWN, true, false],
+            'quote_create_all, another quote' => [Permissions::QUOTE_CREATE_ALL, false, false],
+            'quote_create_own, another quote' => [Permissions::QUOTE_CREATE_OWN, false, false],
+            'quote_restore_all, own quote' => [Permissions::QUOTE_RESTORE_ALL, true, false],
+            'quote_restore_all, another quote' => [Permissions::QUOTE_RESTORE_ALL, false, false],
+            'quote_restore_own, own quote' => [Permissions::QUOTE_RESTORE_OWN, true, false],
+            'quote_restore_own, another quote' => [Permissions::QUOTE_RESTORE_OWN, false, false],
+            'quote_force_delete_all, own quote' => [Permissions::QUOTE_FORCE_DELETE_ALL, true, false],
+            'quote_force_delete_all, another quote' => [Permissions::QUOTE_FORCE_DELETE_ALL, false, false],
+            'quote_force_delete_own, own quote' => [Permissions::QUOTE_FORCE_DELETE_OWN, true, false],
+            'quote_force_delete_own, another quote' => [Permissions::QUOTE_FORCE_DELETE_OWN, false, false],
         ];
     }
 

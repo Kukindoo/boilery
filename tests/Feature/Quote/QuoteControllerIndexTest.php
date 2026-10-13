@@ -20,6 +20,14 @@ class QuoteControllerIndexTest extends FeatureTestCase
             'print all, own quote' => [Permissions::QUOTE_PRINT_ALL, false],
             'edit all, own quote' => [Permissions::QUOTE_EDIT_ALL, false],
             'edit own, own quote' => [Permissions::QUOTE_EDIT_OWN, false],
+            'quote_delete_all' => [Permissions::QUOTE_DELETE_ALL, false],
+            'quote_delete_own' => [Permissions::QUOTE_DELETE_OWN, false],
+            'quote_create_all' => [Permissions::QUOTE_CREATE_ALL, false],
+            'quote_create_own' => [Permissions::QUOTE_CREATE_OWN, false],
+            'quote_restore_all' => [Permissions::QUOTE_RESTORE_ALL, false],
+            'quote_restore_own' => [Permissions::QUOTE_RESTORE_OWN, false],
+            'quote_force_delete_all' => [Permissions::QUOTE_FORCE_DELETE_ALL, false],
+            'quote_force_delete_own' => [Permissions::QUOTE_FORCE_DELETE_OWN, false],
         ];
     }
 
