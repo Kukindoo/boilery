@@ -48,6 +48,18 @@ enum Permissions: int
 
     case WORK_DELETE_OWN = 16;
 
+    case WORK_CREATE_ALL = 23;
+
+    case WORK_CREATE_OWN = 24;
+
+    case WORK_RESTORE_ALL = 25;
+
+    case WORK_RESTORE_OWN = 26;
+
+    case WORK_FORCE_DELETE_ALL = 27;
+
+    case WORK_FORCE_DELETE_OWN = 28;
+
     public function label(): string
     {
         return match ($this) {
@@ -67,6 +79,12 @@ enum Permissions: int
             self::WORK_EDIT_OWN => 'Edit own works',
             self::WORK_DELETE_ALL => 'Delete all works',
             self::WORK_DELETE_OWN => 'Delete own works',
+            self::WORK_CREATE_ALL => 'Create all works',
+            self::WORK_CREATE_OWN => 'Create own works',
+            self::WORK_RESTORE_ALL => 'Restore all works',
+            self::WORK_RESTORE_OWN => 'Restore own works',
+            self::WORK_FORCE_DELETE_ALL => 'Force delete all works',
+            self::WORK_FORCE_DELETE_OWN => 'Force delete own works',
             self::QUOTE_CREATE_ALL => 'Create all quotes',
             self::QUOTE_CREATE_OWN => 'Create own quotes',
             self::QUOTE_RESTORE_ALL => 'Restore all quotes',
