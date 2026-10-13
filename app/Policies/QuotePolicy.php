@@ -25,7 +25,8 @@ class QuotePolicy
 
     public function create(User $user): bool
     {
-        return false;
+        return $user->can(Permissions::QUOTE_CREATE_ALL->label())
+            || $user->can(Permissions::QUOTE_CREATE_OWN->label());
     }
 
     public function update(User $user, Quote $quote): bool
@@ -38,16 +39,25 @@ class QuotePolicy
 
     public function delete(User $user, Quote $quote): bool
     {
-        return false;
+        return ! $quote->trashed()
+            && ($user->can(Permissions::QUOTE_DELETE_ALL->label())
+                || ($user->can(Permissions::QUOTE_DELETE_OWN->label())
+                    && $quote->user_id === $user->id));
     }
 
     public function restore(User $user, Quote $quote): bool
     {
-        return false;
+        return $quote->trashed()
+            && ($user->can(Permissions::QUOTE_RESTORE_ALL->label())
+                || ($user->can(Permissions::QUOTE_RESTORE_OWN->label())
+                    && $quote->user_id === $user->id));
     }
 
     public function forceDelete(User $user, Quote $quote): bool
     {
-        return false;
+        return $quote->trashed()
+            && ($user->can(Permissions::QUOTE_FORCE_DELETE_ALL->label())
+                || ($user->can(Permissions::QUOTE_FORCE_DELETE_OWN->label())
+                    && $quote->user_id === $user->id));
     }
 }
