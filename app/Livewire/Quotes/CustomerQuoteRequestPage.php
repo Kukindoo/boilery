@@ -3,7 +3,7 @@
 namespace App\Livewire\Quotes;
 
 use App\Constants\RateLimiterNames;
-use App\Livewire\Forms\RequestQuoteForm;
+use App\Livewire\Forms\QuoteForm;
 use App\Notifications\QuoteSubmittedAdmin;
 use App\Notifications\QuoteSubmittedCustomer;
 use App\Traits\PublicRateLimiter;
@@ -18,7 +18,7 @@ class CustomerQuoteRequestPage extends Component
 {
     use PublicRateLimiter, WithFileUploads;
 
-    public RequestQuoteForm $form;
+    public QuoteForm $form;
 
     public bool $submitted = false;
 

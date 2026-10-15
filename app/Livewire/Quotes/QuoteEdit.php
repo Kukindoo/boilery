@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Quotes;
 
-use App\Livewire\Forms\RequestQuoteForm;
+use App\Livewire\Forms\QuoteForm;
 use App\Models\Quote;
 use Flux\Flux;
 use Livewire\Component;
@@ -11,7 +11,7 @@ class QuoteEdit extends Component
 {
     public Quote $quote;
 
-    public RequestQuoteForm $form;
+    public QuoteForm $form;
 
     public function mount(Quote $quote): void
     {

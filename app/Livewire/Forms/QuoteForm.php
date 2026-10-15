@@ -11,7 +11,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Form;
 use Throwable;
 
-class RequestQuoteForm extends Form
+class QuoteForm extends Form
 {
     public string $firstName = '';
 
