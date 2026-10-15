@@ -29,7 +29,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property ?string $transport_from
  * @property ?string $transport_to
  * @property ?int $transport_rate_in_czk
- * @property ?string $transport_distance_in_km
+ * @property ?float $transport_distance_in_km
  * @property ?string $note
  * @property ?string $mechanic_name
  * @property ?Carbon $created_at
