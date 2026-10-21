@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\QuotePrintController;
+use App\Http\Controllers\WorksController;
 use App\Livewire\Quotes\RequestedQuoteFilePreviewController;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
@@ -51,6 +52,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{quote}/print', 'show')->name('print');
         });
     });
+
+    Route::resource('works', WorksController::class)
+        ->only(['index', 'create', 'show', 'edit']);
 });
 
 require __DIR__ . '/auth.php';
