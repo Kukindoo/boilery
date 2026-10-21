@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Works\WorkCreateRequest;
 use App\Http\Requests\Works\WorkIndexRequest;
 use Illuminate\Contracts\View\View;
 
@@ -17,7 +18,7 @@ class WorksController extends Controller
         return view('works.show', compact('work'));
     }
 
-    public function create()
+    public function create(WorkCreateRequest $request): View
     {
         return view('works.create');
     }
