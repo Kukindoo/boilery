@@ -63,25 +63,27 @@
                                 <flux:menu.item icon="eye" wire:click="openQuote({{ $quote }})">
                                     Otevřít
                                 </flux:menu.item>
-                                <flux:menu.separator/>
-                                <flux:menu.submenu heading="Status">
-                                    <flux:menu.item icon="check"
-                                                    wire:click="acceptQuote({{ $quote }})">
-                                        Přijmout
-                                    </flux:menu.item>
-                                    <flux:menu.item icon="phone-arrow-up-right"
-                                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::CONTACTED }}')">
-                                        Kontaktovaný
-                                    </flux:menu.item>
-                                    <flux:menu.item icon="x-circle"
-                                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::REJECTED }}')">
-                                        Odmítnout
-                                    </flux:menu.item>
-                                </flux:menu.submenu>
+                                @if($quote->status !== \App\Enums\QuoteStatus::ACCEPTED)
+                                    <flux:menu.separator/>
+                                    <flux:menu.submenu heading="Status">
+                                        <flux:menu.item icon="check"
+                                                        wire:click="acceptQuote({{ $quote }})">
+                                            Přijmout
+                                        </flux:menu.item>
+                                        <flux:menu.item icon="phone-arrow-up-right"
+                                                        wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::CONTACTED }}')">
+                                            Kontaktovaný
+                                        </flux:menu.item>
+                                        <flux:menu.item icon="x-circle"
+                                                        wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::REJECTED }}')">
+                                            Odmítnout
+                                        </flux:menu.item>
+                                    </flux:menu.submenu>
                                 <flux:menu.separator/>
                                 <flux:menu.item variant="danger" icon="trash" disabled>
                                     Smazat
                                 </flux:menu.item>
+                                @endif
                             </flux:menu>
                         </flux:dropdown>
                     </flux:table.cell>
