@@ -6,6 +6,7 @@ use App\Livewire\Forms\SingleFileUploadForm;
 use App\Models\Quote;
 use Exception;
 use Flux\Flux;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -32,6 +33,7 @@ class SingleFileUpload extends Component
      */
     public function submit()
     {
+        Gate::authorize('update', $this->quote);
         $this->form->submit($this->quote);
         Flux::modal('upload-file')->close();
         $this->form->reset();
