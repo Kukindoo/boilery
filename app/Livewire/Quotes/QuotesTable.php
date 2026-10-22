@@ -2,11 +2,13 @@
 
 namespace App\Livewire\Quotes;
 
+use App\Actions\Quotes\AcceptQuote;
 use App\Enums\QuoteStatus;
 use App\Models\Quote;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Throwable;
 
 class QuotesTable extends Component
 {
@@ -50,6 +52,26 @@ class QuotesTable extends Component
         $quote->update([
             'status' => $status,
         ]);
+
+        if ($quote->wasChanged('status')) {
+            activity('quotes')
+                ->performedOn($quote)
+                ->log('Quote accepted');
+        }
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function acceptQuote(Quote $quote): void
+    {
+        if (! auth()->user()->can('accept', $quote)) {
+            abort(403);
+        }
+
+        $quote = app(AcceptQuote::class)->handle($quote);
+
+        $this->redirect(route('works.show', $quote->work));
     }
 
     public function openQuote(Quote $quote): void
