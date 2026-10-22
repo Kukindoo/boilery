@@ -16,6 +16,11 @@ class QuotePolicy
         return $user->can(Permissions::QUOTE_VIEW_ALL->label());
     }
 
+    public function accept(User $user, Quote $quote): bool
+    {
+        return ! $quote->trashed() && $user->can(Permissions::QUOTE_EDIT_ALL->label());
+    }
+
     public function view(User $user, Quote $quote): bool
     {
         return $this->viewAny($user)
