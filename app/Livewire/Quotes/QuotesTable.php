@@ -5,6 +5,7 @@ namespace App\Livewire\Quotes;
 use App\Actions\Quotes\AcceptQuote;
 use App\Enums\QuoteStatus;
 use App\Models\Quote;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -36,6 +37,8 @@ class QuotesTable extends Component
     #[Computed]
     public function quotes()
     {
+        Gate::authorize('viewAny', Quote::class);
+
         return Quote::query()
             ->tap(fn ($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
 //            ->tap(fn ($query) => $query->whereNot('status', RequestedQuoteStatus::DONE))
