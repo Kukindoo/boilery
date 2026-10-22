@@ -19,6 +19,16 @@ enum BoilerManufacturers: string
             ->all();
     }
 
+    public function orderNumberPrefix(): string
+    {
+        return match ($this) {
+            self::UNKNOWN => 'N',
+            self::ARISTON => 'A',
+            self::DRAZICE => 'D',
+            self::STIEBEL => 'S',
+        };
+    }
+
     public function label(): string
     {
         return match ($this) {
