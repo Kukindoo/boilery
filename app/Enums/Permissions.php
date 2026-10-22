@@ -60,9 +60,40 @@ enum Permissions: int
 
     case WORK_FORCE_DELETE_OWN = 28;
 
+    case FILE_VIEW_ALL = 29;
+
+    case FILE_VIEW_OWN = 30;
+
+    case FILE_CREATE_ALL = 31;
+
+    case FILE_CREATE_OWN = 32;
+
+    case FILE_EDIT_ALL = 33;
+
+    case FILE_EDIT_OWN = 34;
+
+    case FILE_DELETE_ALL = 35;
+
+    case FILE_DELETE_OWN = 36;
+
+    case FILE_FORCE_DELETE_ALL = 37;
+
+    case FILE_FORCE_DELETE_OWN = 38;
+
     public function label(): string
     {
         return match ($this) {
+            self::FILE_VIEW_ALL => 'View all files',
+            self::FILE_VIEW_OWN => 'View own files',
+            self::FILE_CREATE_ALL => 'Create all files',
+            self::FILE_CREATE_OWN => 'Create own files',
+            self::FILE_EDIT_ALL => 'Edit all files',
+            self::FILE_EDIT_OWN => 'Edit own files',
+            self::FILE_DELETE_ALL => 'Delete all files',
+            self::FILE_DELETE_OWN => 'Delete own files',
+            self::FILE_FORCE_DELETE_ALL => 'Force delete all files',
+            self::FILE_FORCE_DELETE_OWN => 'Force delete own files',
+
             self::QUOTE_VIEW_ALL => 'View all quotes',
             self::QUOTE_VIEW_OWN => 'View own quotes',
             self::QUOTE_VIEW_INDEX => 'View index quotes',
@@ -71,6 +102,13 @@ enum Permissions: int
             self::QUOTE_EDIT_OWN => 'Edit own quotes',
             self::QUOTE_DELETE_ALL => 'Delete all quotes',
             self::QUOTE_DELETE_OWN => 'Delete own quotes',
+            self::QUOTE_CREATE_ALL => 'Create all quotes',
+            self::QUOTE_CREATE_OWN => 'Create own quotes',
+            self::QUOTE_RESTORE_ALL => 'Restore all quotes',
+            self::QUOTE_RESTORE_OWN => 'Restore own quotes',
+            self::QUOTE_FORCE_DELETE_ALL => 'Force delete all quotes',
+            self::QUOTE_FORCE_DELETE_OWN => 'Force delete own quotes',
+
             self::WORK_VIEW_ALL => 'View all works',
             self::WORK_VIEW_OWN => 'View own works',
             self::WORK_VIEW_INDEX => 'View index works',
@@ -85,12 +123,6 @@ enum Permissions: int
             self::WORK_RESTORE_OWN => 'Restore own works',
             self::WORK_FORCE_DELETE_ALL => 'Force delete all works',
             self::WORK_FORCE_DELETE_OWN => 'Force delete own works',
-            self::QUOTE_CREATE_ALL => 'Create all quotes',
-            self::QUOTE_CREATE_OWN => 'Create own quotes',
-            self::QUOTE_RESTORE_ALL => 'Restore all quotes',
-            self::QUOTE_RESTORE_OWN => 'Restore own quotes',
-            self::QUOTE_FORCE_DELETE_ALL => 'Force delete all quotes',
-            self::QUOTE_FORCE_DELETE_OWN => 'Force delete own quotes',
         };
     }
 }
