@@ -31,9 +31,9 @@ class AcceptQuote
                 ]);
             }
 
-            $quote->update(['status' => QuoteStatus::ACCEPTED]);
+            if ($quote->status !== QuoteStatus::ACCEPTED) {
+                $quote->update(['status' => QuoteStatus::ACCEPTED]);
 
-            if ($quote->wasChanged('status')) {
                 activity('quotes')
                     ->performedOn($quote)
                     ->log('Quote accepted');
