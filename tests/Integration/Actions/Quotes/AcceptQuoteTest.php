@@ -35,7 +35,14 @@ class AcceptQuoteTest extends IntegrationTestCase
         $action = app(AcceptQuote::class);
 
         $action->handle($quote);
-        $action->handle($quote);
+
+        try {
+            $action->handle($quote);
+            $this->fail('Repeated acceptance should be forbidden.');
+        } catch (AuthorizationException) {
+            $this->assertSame(QuoteStatus::ACCEPTED, $quote->fresh()->status);
+            $this->assertDatabaseCount('works', 1);
+        }
 
         $acceptance = Activity::inLog('quotes')->where('description', 'Quote accepted')->sole();
         $this->assertTrue($acceptance->subject->is($quote));
@@ -98,7 +105,7 @@ class AcceptQuoteTest extends IntegrationTestCase
         }
     }
 
-    public function test_repeated_acceptance_preserves_existing_work_even_when_archived(): void
+    public function test_repeated_acceptance_is_forbidden_and_preserves_archived_work(): void
     {
         $this->actingAs(User::factory()->admin()->create());
         $quote = Quote::factory()->for(User::factory()->customer())->create();
@@ -108,7 +115,12 @@ class AcceptQuoteTest extends IntegrationTestCase
         $work->update(['note' => 'Keep mechanic notes.']);
         $work->delete();
 
-        $action->handle($quote);
+        try {
+            $action->handle($quote);
+            $this->fail('Repeated acceptance should be forbidden.');
+        } catch (AuthorizationException) {
+            $this->assertSame(QuoteStatus::ACCEPTED, $quote->fresh()->status);
+        }
 
         $this->assertDatabaseCount('works', 1);
         $this->assertDatabaseHas('works', ['id' => $work->id, 'note' => 'Keep mechanic notes.']);

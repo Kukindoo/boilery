@@ -63,7 +63,7 @@
                                 <flux:menu.item icon="eye" wire:click="openQuote({{ $quote }})">
                                     Otevřít
                                 </flux:menu.item>
-                                @if($quote->status !== \App\Enums\QuoteStatus::ACCEPTED)
+                                @can('update', $quote)
                                     <flux:menu.separator/>
                                     <flux:menu.submenu heading="Status">
                                         <flux:menu.item icon="check"
@@ -79,11 +79,13 @@
                                             Odmítnout
                                         </flux:menu.item>
                                     </flux:menu.submenu>
-                                <flux:menu.separator/>
-                                <flux:menu.item variant="danger" icon="trash" disabled>
-                                    Smazat
-                                </flux:menu.item>
-                                @endif
+                                @endcan
+                                @can('delete', $quote)
+                                    <flux:menu.separator/>
+                                    <flux:menu.item variant="danger" icon="trash" disabled>
+                                        Smazat
+                                    </flux:menu.item>
+                                @endcan
                             </flux:menu>
                         </flux:dropdown>
                     </flux:table.cell>

@@ -30,6 +30,7 @@ class QuotePolicyTest extends FeatureTestCase
     {
         $cases = [];
         $abilities = [
+            'accept' => [Permissions::QUOTE_EDIT_ALL, Permissions::QUOTE_EDIT_OWN],
             'view' => [Permissions::QUOTE_VIEW_ALL, Permissions::QUOTE_VIEW_OWN],
             'update' => [Permissions::QUOTE_EDIT_ALL, Permissions::QUOTE_EDIT_OWN],
             'delete' => [Permissions::QUOTE_DELETE_ALL, Permissions::QUOTE_DELETE_OWN],
@@ -41,17 +42,18 @@ class QuotePolicyTest extends FeatureTestCase
             foreach (self::permissions() as $permissionName => [$permission]) {
                 foreach (['own', 'another', 'none'] as $ownership) {
                     foreach ([false, true] as $trashed) {
-                        foreach ([QuoteStatus::NEW, QuoteStatus::ACCEPTED, QuoteStatus::REJECTED] as $status) {
+                        foreach (QuoteStatus::cases() as $status) {
                             $allowed = $permission === $all
-                                || (! in_array($ability, ['delete', 'forceDelete'], true)
+                                || (! in_array($ability, ['accept', 'delete', 'forceDelete'], true)
                                     && $permission === $own
                                     && $ownership === 'own');
 
-                            if ($ability === 'update' && $permission === $own && $status !== QuoteStatus::NEW) {
+                            if (in_array($ability, ['accept', 'update', 'delete', 'forceDelete'], true)
+                                && in_array($status, [QuoteStatus::ACCEPTED, QuoteStatus::REJECTED], true)) {
                                 $allowed = false;
                             }
 
-                            if ($ability === 'delete' && $trashed) {
+                            if (in_array($ability, ['accept', 'delete'], true) && $trashed) {
                                 $allowed = false;
                             }
 
@@ -115,7 +117,7 @@ class QuotePolicyTest extends FeatureTestCase
             $this->assertFalse(Gate::allows($ability, Quote::class));
         }
 
-        foreach (['view', 'update', 'delete', 'restore', 'forceDelete'] as $ability) {
+        foreach (['accept', 'view', 'update', 'delete', 'restore', 'forceDelete'] as $ability) {
             $this->assertFalse(Gate::allows($ability, $quote));
         }
     }

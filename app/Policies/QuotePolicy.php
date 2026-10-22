@@ -18,7 +18,8 @@ class QuotePolicy
 
     public function accept(User $user, Quote $quote): bool
     {
-        return ! $quote->trashed() && $user->can(Permissions::QUOTE_EDIT_ALL->label());
+        return ! $quote->isClosed()
+            && (! $quote->trashed() && $user->can(Permissions::QUOTE_EDIT_ALL->label()));
     }
 
     public function view(User $user, Quote $quote): bool
@@ -36,15 +37,16 @@ class QuotePolicy
 
     public function update(User $user, Quote $quote): bool
     {
-        return $user->can(Permissions::QUOTE_EDIT_ALL->label())
-            || ($user->can(Permissions::QUOTE_EDIT_OWN->label())
-                && $quote->user_id === $user->id
-                && ! $quote->isClosed());
+        return ! $quote->isClosed()
+            && ($user->can(Permissions::QUOTE_EDIT_ALL->label())
+                || ($user->can(Permissions::QUOTE_EDIT_OWN->label())
+                    && $quote->user_id === $user->id));
     }
 
     public function delete(User $user, Quote $quote): bool
     {
         return ! $quote->trashed()
+            && ! $quote->isClosed()
             && $user->can(Permissions::QUOTE_DELETE_ALL->label());
     }
 
@@ -59,6 +61,7 @@ class QuotePolicy
     public function forceDelete(User $user, Quote $quote): bool
     {
         return $quote->trashed()
+            && ! $quote->isClosed()
             && $user->can(Permissions::QUOTE_FORCE_DELETE_ALL->label());
     }
 }
