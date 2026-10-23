@@ -43,6 +43,12 @@ class QuotePolicy
                     && $quote->user_id === $user->id));
     }
 
+    public function reassignment(User $user, Quote $quote): bool
+    {
+        return ! $quote->isClosed()
+            && $user->can(Permissions::QUOTE_EDIT_ALL->label());
+    }
+
     public function delete(User $user, Quote $quote): bool
     {
         return ! $quote->trashed()

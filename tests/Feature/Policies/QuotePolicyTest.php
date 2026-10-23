@@ -72,6 +72,28 @@ class QuotePolicyTest extends FeatureTestCase
         return $cases;
     }
 
+    /** @return array<string, array{QuoteStatus, string, bool, bool}> */
+    public static function reassignmentStates(): array
+    {
+        $cases = [];
+
+        foreach (QuoteStatus::cases() as $status) {
+            foreach (['own', 'another', 'none'] as $ownership) {
+                foreach ([false, true] as $trashed) {
+                    $key = implode(', ', [$status->value, $ownership, $trashed ? 'trashed' : 'active']);
+                    $cases[$key] = [
+                        $status,
+                        $ownership,
+                        $trashed,
+                        ! in_array($status, [QuoteStatus::ACCEPTED, QuoteStatus::REJECTED], true),
+                    ];
+                }
+            }
+        }
+
+        return $cases;
+    }
+
     #[DataProvider('permissions')]
     public function test_create_requires_its_own_permission(?Permissions $permission): void
     {
@@ -109,6 +131,37 @@ class QuotePolicyTest extends FeatureTestCase
         $this->assertSame($allowed, $user->can($ability, $quote));
     }
 
+    #[DataProvider('permissions')]
+    public function test_reassignment_requires_edit_all_permission(?Permissions $permission): void
+    {
+        $user = $this->userWithPermission($permission);
+        $quote = Quote::factory()->make(['user_id' => $user->id, 'status' => QuoteStatus::NEW]);
+
+        $this->assertSame($permission === Permissions::QUOTE_EDIT_ALL, $user->can('reassignment', $quote));
+    }
+
+    #[DataProvider('reassignmentStates')]
+    public function test_reassignment_requires_an_open_quote_regardless_of_ownership_and_deletion_state(
+        QuoteStatus $status,
+        string $ownership,
+        bool $trashed,
+        bool $allowed,
+    ): void {
+        $user = $this->userWithPermission(Permissions::QUOTE_EDIT_ALL);
+        $ownerId = match ($ownership) {
+            'own' => $user->id,
+            'another' => $user->id + 1,
+            'none' => null,
+        };
+        $quote = Quote::factory()->make([
+            'user_id' => $ownerId,
+            'status' => $status,
+            'deleted_at' => $trashed ? '2026-10-01 12:00:00' : null,
+        ]);
+
+        $this->assertSame($allowed, $user->can('reassignment', $quote));
+    }
+
     public function test_guests_cannot_use_quote_policy_abilities(): void
     {
         $quote = Quote::factory()->make();
@@ -117,7 +170,7 @@ class QuotePolicyTest extends FeatureTestCase
             $this->assertFalse(Gate::allows($ability, Quote::class));
         }
 
-        foreach (['accept', 'view', 'update', 'delete', 'restore', 'forceDelete'] as $ability) {
+        foreach (['accept', 'reassignment', 'view', 'update', 'delete', 'restore', 'forceDelete'] as $ability) {
             $this->assertFalse(Gate::allows($ability, $quote));
         }
     }
