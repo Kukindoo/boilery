@@ -16,6 +16,7 @@ class CreateQuote
      */
     public function handle($form, User $user): Quote
     {
+        // No Gate here as this is Guest facing Action
         return DB::transaction(function () use ($form, $user) {
             $quote = Quote::create([
                 'first_name' => $form->firstName,

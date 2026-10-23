@@ -17,6 +17,7 @@ readonly class CreateWork
      */
     public function handle(WorkDto $data): Work
     {
+
         return DB::transaction(function () use ($data): Work {
             $attributes = $data->toArray();
 
