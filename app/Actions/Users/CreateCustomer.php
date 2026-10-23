@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Quotes;
+namespace App\Actions\Users;
 
 use App\Dtos\NamePlate;
 use App\Enums\Roles;

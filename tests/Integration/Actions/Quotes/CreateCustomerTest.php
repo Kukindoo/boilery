@@ -2,7 +2,7 @@
 
 namespace Tests\Integration\Actions\Quotes;
 
-use App\Actions\Quotes\CreateCustomer;
+use App\Actions\Users\CreateCustomer;
 use App\Dtos\NamePlate;
 use App\Enums\Roles;
 use App\Models\User;

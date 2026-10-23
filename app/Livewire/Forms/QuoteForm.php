@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Forms;
 
-use App\Actions\Quotes\CreateCustomer;
 use App\Actions\Quotes\CreateQuote;
+use App\Actions\Users\CreateCustomer;
 use App\Dtos\NamePlate;
 use App\Enums\BoilerManufacturers;
 use App\Models\Quote;
