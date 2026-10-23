@@ -26,5 +26,6 @@ yarn-error.log
 /.codex
 /.agents
 /.ai
+/.archive
 AGENTS.md
 boost.json
