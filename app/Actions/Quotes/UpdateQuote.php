@@ -3,18 +3,29 @@
 namespace App\Actions\Quotes;
 
 use App\Dtos\Quotes\QuoteDto;
-use App\Enums\Permissions;
 use App\Models\Quote;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Throwable;
 
 class UpdateQuote
 {
+    /**
+     * @throws Throwable
+     */
     public function handle(Quote $quote, QuoteDto $data): Quote
     {
         Gate::authorize('update', $quote);
 
-        $quote->update($data->toArray());
+        return DB::transaction(function () use ($quote, $data): Quote {
+            $attributes = $data->toArray();
+            $reassignment = array_intersect_key($attributes, array_flip([
+                'first_name', 'last_name', 'email', 'user_id',
+            ]));
 
-        return $quote;
+            $quote->update(array_diff_key($attributes, $reassignment));
+
+            return $quote;
+        });
     }
 }
