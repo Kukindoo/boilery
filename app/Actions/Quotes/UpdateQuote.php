@@ -17,15 +17,13 @@ class UpdateQuote
     {
         Gate::authorize('update', $quote);
 
-        return DB::transaction(function () use ($quote, $data): Quote {
-            $attributes = $data->toArray();
-            $reassignment = array_intersect_key($attributes, array_flip([
-                'first_name', 'last_name', 'email', 'user_id',
-            ]));
+        $attributes = $data->toArray();
+        $reassignment = array_intersect_key($attributes, array_flip([
+            'user_id',
+        ]));
 
-            $quote->update(array_diff_key($attributes, $reassignment));
+        $quote->update(array_diff_key($attributes, $reassignment));
 
-            return $quote;
-        });
+        return $quote;
     }
 }
