@@ -25,11 +25,23 @@ class UpdateQuoteTest extends IntegrationTestCase
         ];
     }
 
+    public static function ignoredOwnershipChanges(): array
+    {
+        return [
+            'own editor changes owner' => [false, false],
+            'own editor removes owner' => [false, true],
+            'all editor changes owner' => [true, false],
+            'all editor removes owner' => [true, true],
+        ];
+    }
+
     public function test_updates_quote_attributes_and_returns_the_same_record(): void
     {
         $customer = User::factory()->customer()->create();
         $this->actingAs($customer);
-        $quote = Quote::factory()->for($customer)->create();
+        $quote = Quote::factory()->for($customer)->create([
+            'first_name' => 'Original', 'last_name' => 'Customer', 'email' => 'original@example.test',
+        ]);
         $data = $this->data($customer->id);
 
         $updated = app(UpdateQuote::class)->handle($quote, $data);
@@ -76,34 +88,29 @@ class UpdateQuoteTest extends IntegrationTestCase
         }
     }
 
-    public function test_own_editor_cannot_reassign_quote(): void
+    #[DataProvider('ignoredOwnershipChanges')]
+    public function test_ignores_owner_changes_while_saving_other_attributes(bool $allEditor, bool $removeOwner): void
     {
-        $customer = User::factory()->customer()->create();
-        $this->actingAs($customer);
-        $quote = Quote::factory()->for($customer)->create();
-        $quote->refresh();
-        $before = $quote->getRawOriginal();
+        $owner = User::factory()->customer()->create();
+        $this->actingAs($allEditor ? User::factory()->admin()->create() : $owner);
+        $quote = Quote::factory()->for($owner)->create();
+        $data = $this->data($removeOwner ? null : User::factory()->create()->id);
 
-        try {
-            app(UpdateQuote::class)->handle($quote, $this->data(User::factory()->create()->id));
-            $this->fail('Reassignment should be forbidden.');
-        } catch (AuthorizationException) {
-            $this->assertSame($before, $quote->fresh()->getRawOriginal());
-        }
+        $updated = app(UpdateQuote::class)->handle($quote, $data);
+
+        $this->assertSame($quote, $updated);
+        $this->assertSame($owner->id, $updated->user_id);
+        $this->assertDatabaseHas('quotes', [
+            'id' => $quote->id,
+            'user_id' => $owner->id,
+            'first_name' => 'Jan',
+            'last_name' => 'Novak',
+            'email' => 'jan@example.test',
+            'message' => 'Updated problem',
+        ]);
     }
 
-    public function test_all_editor_can_reassign_quote(): void
-    {
-        $this->actingAs(User::factory()->admin()->create());
-        $quote = Quote::factory()->for(User::factory()->create())->create();
-        $newOwner = User::factory()->create();
-
-        app(UpdateQuote::class)->handle($quote, $this->data($newOwner->id));
-
-        $this->assertSame($newOwner->id, $quote->fresh()->user_id);
-    }
-
-    private function data(int $userId): QuoteDto
+    private function data(?int $userId): QuoteDto
     {
         return new QuoteDto(
             firstName: 'Jan', lastName: 'Novak', email: 'jan@example.test',
