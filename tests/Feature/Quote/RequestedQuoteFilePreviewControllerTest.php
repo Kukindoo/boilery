@@ -13,45 +13,51 @@ use Tests\Feature\FeatureTestCase;
 
 class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
 {
-    /** @return array<string, array{?Permissions, bool, bool}> */
+    /** @return array<string, array{?Permissions, bool, bool, ?Permissions}> */
     public static function previewPermissions(): array
     {
         return [
-            'view all, own quote' => [Permissions::QUOTE_VIEW_ALL, true, true],
-            'view all, another user quote' => [Permissions::QUOTE_VIEW_ALL, false, true],
-            'view own, own quote' => [Permissions::QUOTE_VIEW_OWN, true, true],
-            'view own, another user quote' => [Permissions::QUOTE_VIEW_OWN, false, false],
-            'no permission, own quote' => [null, true, false],
-            'no permission, another user quote' => [null, false, false],
-            'view index, own quote' => [Permissions::QUOTE_VIEW_INDEX, true, false],
-            'view index, another user quote' => [Permissions::QUOTE_VIEW_INDEX, false, false],
-            'print all, own quote' => [Permissions::QUOTE_PRINT_ALL, true, false],
-            'print all, another user quote' => [Permissions::QUOTE_PRINT_ALL, false, false],
-            'edit all, own quote' => [Permissions::QUOTE_EDIT_ALL, true, false],
-            'edit all, another user quote' => [Permissions::QUOTE_EDIT_ALL, false, false],
-            'edit own, own quote' => [Permissions::QUOTE_EDIT_OWN, true, false],
-            'edit own, another user quote' => [Permissions::QUOTE_EDIT_OWN, false, false],
-            'quote_delete_all, own quote' => [Permissions::QUOTE_DELETE_ALL, true, false],
-            'quote_delete_all, another quote' => [Permissions::QUOTE_DELETE_ALL, false, false],
-            'quote_delete_own, own quote' => [Permissions::QUOTE_DELETE_OWN, true, false],
-            'quote_delete_own, another quote' => [Permissions::QUOTE_DELETE_OWN, false, false],
-            'quote_create_all, own quote' => [Permissions::QUOTE_CREATE_ALL, true, false],
-            'quote_create_own, own quote' => [Permissions::QUOTE_CREATE_OWN, true, false],
-            'quote_create_all, another quote' => [Permissions::QUOTE_CREATE_ALL, false, false],
-            'quote_create_own, another quote' => [Permissions::QUOTE_CREATE_OWN, false, false],
-            'quote_restore_all, own quote' => [Permissions::QUOTE_RESTORE_ALL, true, false],
-            'quote_restore_all, another quote' => [Permissions::QUOTE_RESTORE_ALL, false, false],
-            'quote_restore_own, own quote' => [Permissions::QUOTE_RESTORE_OWN, true, false],
-            'quote_restore_own, another quote' => [Permissions::QUOTE_RESTORE_OWN, false, false],
-            'quote_force_delete_all, own quote' => [Permissions::QUOTE_FORCE_DELETE_ALL, true, false],
-            'quote_force_delete_all, another quote' => [Permissions::QUOTE_FORCE_DELETE_ALL, false, false],
-            'quote_force_delete_own, own quote' => [Permissions::QUOTE_FORCE_DELETE_OWN, true, false],
-            'quote_force_delete_own, another quote' => [Permissions::QUOTE_FORCE_DELETE_OWN, false, false],
+            'view all, own quote' => [Permissions::QUOTE_VIEW_ALL, true, true, Permissions::FILE_VIEW_ALL],
+            'view all, another user quote' => [Permissions::QUOTE_VIEW_ALL, false, true, Permissions::FILE_VIEW_ALL],
+            'view own, own quote' => [Permissions::QUOTE_VIEW_OWN, true, true, Permissions::FILE_VIEW_OWN],
+            'view own, another user quote' => [Permissions::QUOTE_VIEW_OWN, false, false, Permissions::FILE_VIEW_ALL],
+            'view all quotes without file permission' => [Permissions::QUOTE_VIEW_ALL, true, false, null],
+            'view own quote without file permission' => [Permissions::QUOTE_VIEW_OWN, true, false, null],
+            'view all files without quote permission' => [null, true, false, Permissions::FILE_VIEW_ALL],
+            'view own files without quote permission' => [null, true, false, Permissions::FILE_VIEW_OWN],
+            'view all quotes and own files, own quote' => [Permissions::QUOTE_VIEW_ALL, true, true, Permissions::FILE_VIEW_OWN],
+            'view all quotes and own files, another user quote' => [Permissions::QUOTE_VIEW_ALL, false, false, Permissions::FILE_VIEW_OWN],
+            'no permission, own quote' => [null, true, false, null],
+            'no permission, another user quote' => [null, false, false, null],
+            'view index, own quote' => [Permissions::QUOTE_VIEW_INDEX, true, false, null],
+            'view index, another user quote' => [Permissions::QUOTE_VIEW_INDEX, false, false, null],
+            'print all, own quote' => [Permissions::QUOTE_PRINT_ALL, true, false, null],
+            'print all, another user quote' => [Permissions::QUOTE_PRINT_ALL, false, false, null],
+            'edit all, own quote' => [Permissions::QUOTE_EDIT_ALL, true, false, null],
+            'edit all, another user quote' => [Permissions::QUOTE_EDIT_ALL, false, false, null],
+            'edit own, own quote' => [Permissions::QUOTE_EDIT_OWN, true, false, null],
+            'edit own, another user quote' => [Permissions::QUOTE_EDIT_OWN, false, false, null],
+            'quote_delete_all, own quote' => [Permissions::QUOTE_DELETE_ALL, true, false, null],
+            'quote_delete_all, another quote' => [Permissions::QUOTE_DELETE_ALL, false, false, null],
+            'quote_delete_own, own quote' => [Permissions::QUOTE_DELETE_OWN, true, false, null],
+            'quote_delete_own, another quote' => [Permissions::QUOTE_DELETE_OWN, false, false, null],
+            'quote_create_all, own quote' => [Permissions::QUOTE_CREATE_ALL, true, false, null],
+            'quote_create_own, own quote' => [Permissions::QUOTE_CREATE_OWN, true, false, null],
+            'quote_create_all, another quote' => [Permissions::QUOTE_CREATE_ALL, false, false, null],
+            'quote_create_own, another quote' => [Permissions::QUOTE_CREATE_OWN, false, false, null],
+            'quote_restore_all, own quote' => [Permissions::QUOTE_RESTORE_ALL, true, false, null],
+            'quote_restore_all, another quote' => [Permissions::QUOTE_RESTORE_ALL, false, false, null],
+            'quote_restore_own, own quote' => [Permissions::QUOTE_RESTORE_OWN, true, false, null],
+            'quote_restore_own, another quote' => [Permissions::QUOTE_RESTORE_OWN, false, false, null],
+            'quote_force_delete_all, own quote' => [Permissions::QUOTE_FORCE_DELETE_ALL, true, false, null],
+            'quote_force_delete_all, another quote' => [Permissions::QUOTE_FORCE_DELETE_ALL, false, false, null],
+            'quote_force_delete_own, own quote' => [Permissions::QUOTE_FORCE_DELETE_OWN, true, false, null],
+            'quote_force_delete_own, another quote' => [Permissions::QUOTE_FORCE_DELETE_OWN, false, false, null],
         ];
     }
 
     #[DataProvider('previewPermissions')]
-    public function test_preview_checks_permissions_and_quote_ownership(?Permissions $permission, bool $ownsQuote, bool $allowed): void
+    public function test_preview_checks_permissions_and_quote_ownership(?Permissions $permission, bool $ownsQuote, bool $allowed, ?Permissions $filePermission): void
     {
         Storage::fake('local');
         config(['filesystems.default' => 'local']);
@@ -62,6 +68,10 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
 
         if ($permission !== null) {
             $user->givePermissionTo($permission);
+        }
+
+        if ($filePermission !== null) {
+            $user->givePermissionTo($filePermission);
         }
 
         $response = $this->actingAs($user)->get(route('quotes.files.preview', [$quote, $file]));
@@ -86,12 +96,12 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
             ->assertRedirect(route('login'));
     }
 
-    public function test_file_from_another_quote_returns_404_even_with_view_all_permission(): void
+    public function test_file_from_another_quote_returns_404_even_with_quote_and_file_view_all_permissions(): void
     {
         Storage::fake('local');
         config(['filesystems.default' => 'local']);
         $user = User::factory()->create();
-        $user->givePermissionTo(Permissions::QUOTE_VIEW_ALL);
+        $user->givePermissionTo([Permissions::QUOTE_VIEW_ALL, Permissions::FILE_VIEW_ALL]);
         $quote = Quote::factory()->for($user)->create();
         $otherQuote = Quote::factory()->for($user)->create();
         $file = $this->createFile($otherQuote);
@@ -106,7 +116,7 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
         Storage::fake('local');
         config(['filesystems.default' => 'local']);
         $user = User::factory()->create();
-        $user->givePermissionTo(Permissions::QUOTE_VIEW_OWN);
+        $user->givePermissionTo([Permissions::QUOTE_VIEW_OWN, Permissions::FILE_VIEW_OWN]);
         $quote = Quote::factory()->for($user)->create();
         $file = $this->createFile($quote);
 
@@ -117,7 +127,7 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
     public function test_missing_file_record_returns_404(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo(Permissions::QUOTE_VIEW_OWN);
+        $user->givePermissionTo([Permissions::QUOTE_VIEW_OWN, Permissions::FILE_VIEW_OWN]);
         $quote = Quote::factory()->for($user)->create();
 
         $this->actingAs($user)->get(route('quotes.files.preview', [$quote, 999999]))
@@ -127,7 +137,7 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
     public function test_missing_quote_returns_404(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo(Permissions::QUOTE_VIEW_ALL);
+        $user->givePermissionTo([Permissions::QUOTE_VIEW_ALL, Permissions::FILE_VIEW_ALL]);
         $quote = Quote::factory()->for($user)->create();
         $file = $this->createFile($quote);
 
