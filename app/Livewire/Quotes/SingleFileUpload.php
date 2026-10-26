@@ -33,7 +33,14 @@ class SingleFileUpload extends Component
      */
     public function submit()
     {
-        Gate::authorize('update', $this->quote);
+        if (! auth()->user()->can('update', $this->quote)) {
+            abort(403);
+        }
+
+        if (! auth()->user()->can('update', $this->file)) {
+            abort(403);
+        }
+
         $this->form->submit($this->quote);
         Flux::modal('upload-file')->close();
         $this->form->reset();

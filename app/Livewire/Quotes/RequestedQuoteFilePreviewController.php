@@ -18,6 +18,10 @@ class RequestedQuoteFilePreviewController extends Controller
             abort(403);
         }
 
+        if (! auth()->user()->can('view', $file)) {
+            abort(403);
+        }
+
         abort_unless($file->quote_id === $quote->id, 404);
 
         abort_unless(

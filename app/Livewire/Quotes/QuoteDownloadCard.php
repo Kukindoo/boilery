@@ -35,6 +35,10 @@ class QuoteDownloadCard extends Component
             abort(403);
         }
 
+        if (! auth()->user()->can('update', $this->file)) {
+            abort(403);
+        }
+
         if (! in_array($file_type->value, array_column(FileTypes::cases(), 'value'))) {
             abort(405);
         }
