@@ -1,20 +1,15 @@
-<flux:card>
-    <div class="flex items-center justify-between gap-4">
-        <div>
-            <flux:heading>Nedávné poptávky</flux:heading>
-        </div>
-        <flux:button size="sm" icon="plus" disabled>Přidat poptávku</flux:button>
-    </div>
-    <div class="flex items-center justify-between gap-4 mt-4">
-        <flux:pillbox wire:model.live="selectedStatuses" multiple placeholder="Choose tags...">
-            @foreach(\App\Enums\QuoteStatus::cases() as $status)
-                <flux:pillbox.option value="{{ $status->value }}">{{ $status->label() }}</flux:pillbox.option>
-            @endforeach
-        </flux:pillbox>
-    </div>
+<x-stellaris.livewire.table.wrapper heading="Nedávné poptávky">
+    <x-slot name="actions">
+        @include('livewire.quotes.partials.quotes-table-actions')
+    </x-slot>
+    <x-slot name="filters">
+        @include('livewire.quotes.partials.quotes-table-filters')
+    </x-slot>
     <flux:table bleed :paginate="$this->quotes">
         <flux:table.columns>
-            <flux:table.column>Požadavek</flux:table.column>
+            <flux:table.column>
+                Požadavek
+            </flux:table.column>
             <flux:table.column>
                 Jméno a Příjmení
             </flux:table.column>
@@ -56,41 +51,10 @@
                     </flux:table.cell>
 
                     <flux:table.cell class="py-0">
-                        <flux:dropdown>
-                            <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal">
-                            </flux:button>
-                            <flux:menu>
-                                <flux:menu.item icon="eye" wire:click="openQuote({{ $quote }})">
-                                    Otevřít
-                                </flux:menu.item>
-                                @can('update', $quote)
-                                    <flux:menu.separator/>
-                                    <flux:menu.submenu heading="Status">
-                                        <flux:menu.item icon="check"
-                                                        wire:click="acceptQuote({{ $quote }})">
-                                            Přijmout
-                                        </flux:menu.item>
-                                        <flux:menu.item icon="phone-arrow-up-right"
-                                                        wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::CONTACTED }}')">
-                                            Kontaktovaný
-                                        </flux:menu.item>
-                                        <flux:menu.item icon="x-circle"
-                                                        wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::REJECTED }}')">
-                                            Odmítnout
-                                        </flux:menu.item>
-                                    </flux:menu.submenu>
-                                @endcan
-                                @can('delete', $quote)
-                                    <flux:menu.separator/>
-                                    <flux:menu.item variant="danger" icon="trash" disabled>
-                                        Smazat
-                                    </flux:menu.item>
-                                @endcan
-                            </flux:menu>
-                        </flux:dropdown>
+                        @include('livewire.quotes.partials.quotes-table-dropdown-actions')
                     </flux:table.cell>
                 </flux:table.row>
             @endforeach
         </flux:table.rows>
     </flux:table>
-</flux:card>
+</x-stellaris.livewire.table.wrapper>
