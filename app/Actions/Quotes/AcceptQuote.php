@@ -16,10 +16,9 @@ class AcceptQuote
      */
     public function handle(Quote $quote): Quote
     {
-        Gate::authorize('accept', $quote);
-
         return DB::transaction(function () use ($quote): Quote {
             $quote->refreshForUpdate();
+            Gate::authorize('accept', $quote);
 
             if ($quote->user_id === null) {
                 activity('quotes')
