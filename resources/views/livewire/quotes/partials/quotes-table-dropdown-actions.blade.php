@@ -24,7 +24,7 @@
         @endcan
         @can('delete', $quote)
             <flux:menu.separator/>
-            <flux:menu.item variant="danger" icon="trash" disabled>
+            <flux:menu.item variant="danger" wire:click="confirmDelete({{ $quote->id }})">
                 Smazat
             </flux:menu.item>
         @endcan
