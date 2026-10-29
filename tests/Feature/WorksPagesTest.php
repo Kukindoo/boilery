@@ -34,7 +34,7 @@ class WorksPagesTest extends FeatureTestCase
             ->assertDontSee($quote->message, false)
             ->assertSee('Related boiler type')
             ->assertSee('Related serial number')
-            ->assertDontSeeLivewire(\App\Livewire\Quotes\QuoteEdit::class);
+            ->assertSeeLivewire(\App\Livewire\Quotes\QuoteEdit::class);
     }
 
     public function test_show_without_a_related_quote_still_displays_work_details(): void
