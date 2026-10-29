@@ -6,7 +6,6 @@ use App\Livewire\Forms\SingleFileUploadForm;
 use App\Models\Quote;
 use Exception;
 use Flux\Flux;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -31,13 +30,13 @@ class SingleFileUpload extends Component
     /**
      * @throws Exception
      */
-    public function submit()
+    public function submit(): void
     {
         if (! auth()->user()->can('update', $this->quote)) {
             abort(403);
         }
 
-        if (! auth()->user()->can('update', $this->file)) {
+        if (! auth()->user()->can('uploadFile', $this->quote)) {
             abort(403);
         }
 
