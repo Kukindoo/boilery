@@ -31,11 +31,11 @@ class SingleFileUploadForm extends Form
      */
     public function submit(Quote $quote): void
     {
-        if (! auth()->user()->can('update', $this->quote)) {
+        if (! auth()->user()->can('update', $quote)) {
             abort(403);
         }
 
-        if (! auth()->user()->can('uploadFile', $this->quote)) {
+        if (! auth()->user()->can('uploadFile', $quote)) {
             abort(403);
         }
 
