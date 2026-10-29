@@ -16,13 +16,6 @@ return new class extends Migration
         $permission = Permission::findOrCreate(Permissions::FILE_VIEW_ALL->label(), 'web');
 
         Role::findById(Roles::ADMIN->value)->givePermissionTo($permission);
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Role::findById(Roles::ADMIN->value)->revokePermissionTo(Permissions::FILE_VIEW_ALL->label());
+        Role::findById(Roles::STAKEHOLDER->value)->givePermissionTo($permission);
     }
 };
