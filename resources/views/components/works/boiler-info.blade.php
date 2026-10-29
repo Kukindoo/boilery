@@ -6,9 +6,11 @@
             Informace o bojleru
         </h3>
         <div class="ml-4 shrink-0 print:hidden">
-            <flux:modal.trigger name="edit-personal-info">
-                <flux:button>Upravit</flux:button>
-            </flux:modal.trigger>
+            @can('update', $work)
+                <flux:button size="sm" :href="route('works.edit', $work)">
+                    Upravit
+                </flux:button>
+            @endcan
         </div>
     </div>
     <div class="border-t border-gray-100 dark:border-white/5">
