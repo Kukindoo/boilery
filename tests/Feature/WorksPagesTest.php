@@ -6,12 +6,82 @@ use App\Enums\Permissions;
 use App\Enums\Roles;
 use App\Livewire\Works\WorkCreate;
 use App\Livewire\Works\WorkEdit;
+use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
 use Spatie\Permission\Models\Role;
 
 class WorksPagesTest extends FeatureTestCase
 {
+    public function test_show_displays_related_quote_details(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo([Permissions::WORK_VIEW_ALL, Permissions::QUOTE_VIEW_ALL]);
+        $quote = Quote::factory()->create([
+            'message' => '<script>alert("quote")</script>',
+            'boiler_type' => 'Related boiler type',
+            'boiler_serial_number' => 'Related serial number',
+        ]);
+        $work = Work::factory()->for($quote)->create();
+
+        $this->actingAs($user)->get(route('works.show', $work))
+            ->assertSee($quote->first_name)
+            ->assertSee($quote->last_name)
+            ->assertSee($quote->email)
+            ->assertSee($quote->phone)
+            ->assertSee($quote->address)
+            ->assertSee($quote->message)
+            ->assertDontSee($quote->message, false)
+            ->assertSee('Related boiler type')
+            ->assertSee('Related serial number')
+            ->assertDontSeeLivewire(\App\Livewire\Quotes\QuoteEdit::class);
+    }
+
+    public function test_show_without_a_related_quote_still_displays_work_details(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permissions::WORK_VIEW_ALL);
+        $work = Work::factory()->create();
+
+        $this->actingAs($user)->get(route('works.show', $work))
+            ->assertSee($work->order_id);
+    }
+
+    public function test_show_displays_related_quote_files(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo([Permissions::WORK_VIEW_ALL, Permissions::QUOTE_VIEW_ALL]);
+        $quote = Quote::factory()->create();
+        $file = $quote->files()->create([
+            'original_name' => 'receipt.pdf',
+            'file_type' => \App\Enums\FileTypes::RECEIPT,
+            'extension' => 'pdf',
+            'size' => 16,
+            'mime_type' => 'application/pdf',
+            'path' => 'quotes/receipt.pdf',
+            'label' => 'Receipt',
+        ]);
+        $work = Work::factory()->for($quote)->create();
+
+        $this->actingAs($user)->get(route('works.show', $work))
+            ->assertSeeLivewire(\App\Livewire\Quotes\QuoteDownloadCard::class)
+            ->assertSee(route('quotes.files.preview', [$quote, $file]))
+            ->assertDontSeeLivewire(\App\Livewire\Quotes\SingleFileUpload::class);
+    }
+
+    public function test_show_hides_quote_details_without_quote_view_permission(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permissions::WORK_VIEW_ALL);
+        $quote = Quote::factory()->create();
+        $work = Work::factory()->for($quote)->create();
+
+        $this->actingAs($user)->get(route('works.show', $work))
+            ->assertSee($work->order_id)
+            ->assertDontSee($quote->email)
+            ->assertDontSee($quote->message);
+    }
+
     public function test_pages_require_authentication_and_authorization(): void
     {
         $work = Work::factory()->create();
