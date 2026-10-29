@@ -1,20 +1,31 @@
-<x-layouts::app :title="__('Zakázky')">
-    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
-        <div class="flex items-center justify-between gap-4">
-            <flux:heading>
-                Zakázka {{ $work->order_id }}
-                <flux:text>{{ $work->user?->name ?? '—' }}</flux:text>
-            </flux:heading>
+    <x-layouts::app :title="__('Zakázky')">
+        <div class="space-y-3">
+            <x-stellaris.container.model-card
+                    :heading="__('Zakázka :order_id', ['order_id' => $work->order_id])"
+                    :subheading="$work->user?->name ?? '—'">
                 @can('update', $work)
-                    <flux:button size="sm" :href="route('works.edit', $work)">
-                        Upravit
-                    </flux:button>
+                    <x-slot name="actions">
+                        <flux:button size="sm" :href="route('works.edit', $work)">
+                            Upravit
+                        </flux:button>
+                    </x-slot>
                 @endcan
-        </div>
 
-        <x-works.work-info :work="$work" />
-        <x-works.boiler-info :work="$work" />
-        <x-works.repair-info :work="$work" />
-        <x-works.transport-info :work="$work" />
-    </div>
+                <x-works.work-info :work="$work"/>
+                <x-works.boiler-info :work="$work"/>
+                <x-works.repair-info :work="$work"/>
+                <x-works.transport-info :work="$work"/>
+
+            </x-stellaris.container.model-card>
+            @if ($work->quote)
+                @can('view', $work->quote)
+                    <x-stellaris.container.model-card
+                            :heading="__('Poptávka :quote_id', ['quote_id' => $work->quote->id])">
+                        <x-quotes.quote-person-info :quote="$work->quote"/>
+                        <x-quotes.quote-boiler-info :quote="$work->quote"/>
+                        <x-quotes.quote-attachments :quote="$work->quote"/>
+                    </x-stellaris.container.model-card>
+                @endcan
+            @endif
+        </div>
 </x-layouts::app>
