@@ -37,10 +37,12 @@ class QuotePolicy
 
     public function uploadFile(User $user, Quote $quote): bool
     {
-        return ! $quote->isClosed()
-            && $user->can(Permissions::FILE_CREATE_ALL->label())
-            || ($user->can(Permissions::FILE_CREATE_OWN->label())
-                && $quote->user_id === $user->id);
+        return ($user->can(Permissions::FILE_CREATE_ALL->label())
+                || ($user->can(Permissions::FILE_CREATE_OWN->label())
+                    && $quote->user_id === $user->id))
+            && ($user->can(Permissions::QUOTE_EDIT_ALL->label())
+                || ($user->can(Permissions::QUOTE_EDIT_OWN->label())
+                    && $quote->user_id === $user->id));
     }
 
     public function update(User $user, Quote $quote): bool
