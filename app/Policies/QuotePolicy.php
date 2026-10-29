@@ -35,6 +35,14 @@ class QuotePolicy
             || $user->can(Permissions::QUOTE_CREATE_OWN->label());
     }
 
+    public function uploadFile(User $user, Quote $quote): bool
+    {
+        return ! $quote->isClosed()
+            && $user->can(Permissions::FILE_CREATE_ALL->label())
+            || ($user->can(Permissions::FILE_CREATE_OWN->label())
+                && $quote->user_id === $user->id);
+    }
+
     public function update(User $user, Quote $quote): bool
     {
         return ! $quote->isClosed()
