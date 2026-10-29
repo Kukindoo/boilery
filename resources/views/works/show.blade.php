@@ -1,5 +1,5 @@
     <x-layouts::app :title="__('Zakázky')">
-        <div class="space-y-3">
+        <div class="space-y-6">
             <x-stellaris.container.model-card
                     :heading="__('Zakázka :order_id', ['order_id' => $work->order_id])"
                     :subheading="$work->user?->name ?? '—'">
