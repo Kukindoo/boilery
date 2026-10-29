@@ -5,6 +5,7 @@
         <h3 class="text-base/7 font-semibold text-gray-900 dark:text-white">
             Přílohy
         </h3>
+        @can('uploadFile', $quote)
         <div class="ml-4 shrink-0 print:hidden">
             <flux:modal.trigger name="upload-file">
                 <flux:button icon="arrow-up-tray">
@@ -12,6 +13,7 @@
                 </flux:button>
             </flux:modal.trigger>
         </div>
+        @endcan
     </div>
     <div class="border-t border-gray-100 dark:border-white/5">
         <dl class="divide-y divide-gray-100 dark:divide-white/5">
@@ -36,6 +38,7 @@
     </div>
 </div>
 
+@can('uploadFile', $quote)
 <flux:modal name="upload-file" class="w-full max-w-5xl">
     <div class="space-y-6">
         <flux:heading size="lg">Nahrát soubor</flux:heading>
@@ -43,3 +46,4 @@
         <livewire:quotes.single-file-upload :quote="$quote"/>
     </div>
 </flux:modal>
+@endcan

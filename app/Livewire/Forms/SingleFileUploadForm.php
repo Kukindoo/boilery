@@ -31,6 +31,14 @@ class SingleFileUploadForm extends Form
      */
     public function submit(Quote $quote): void
     {
+        if (! auth()->user()->can('update', $this->quote)) {
+            abort(403);
+        }
+
+        if (! auth()->user()->can('uploadFile', $this->quote)) {
+            abort(403);
+        }
+
         $this->validate();
 
         app(UploadQuoteFile::class)->handle(
