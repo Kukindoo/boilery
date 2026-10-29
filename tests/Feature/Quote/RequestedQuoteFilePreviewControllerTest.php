@@ -4,6 +4,7 @@ namespace Tests\Feature\Quote;
 
 use App\Enums\FileTypes;
 use App\Enums\Permissions;
+use App\Enums\Roles;
 use App\Models\File;
 use App\Models\Quote;
 use App\Models\User;
@@ -54,6 +55,24 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
             'quote_force_delete_own, own quote' => [Permissions::QUOTE_FORCE_DELETE_OWN, true, false, null],
             'quote_force_delete_own, another quote' => [Permissions::QUOTE_FORCE_DELETE_OWN, false, false, null],
         ];
+    }
+
+    public function test_admin_can_preview_uploaded_jpeg(): void
+    {
+        Storage::fake('local');
+        config(['filesystems.default' => 'local']);
+        $user = User::factory()->create();
+        $user->assignRole(Roles::ADMIN);
+        $quote = Quote::factory()->for(User::factory())->create();
+        $file = $this->createFile($quote);
+        $file->update(['mime_type' => 'image/jpeg', 'extension' => 'jpg']);
+        $image = \Illuminate\Http\UploadedFile::fake()->image('receipt.jpg')->getContent();
+        Storage::disk('local')->put($file->path, $image);
+
+        $this->actingAs($user)->get(route('quotes.files.preview', [$quote, $file]))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/jpeg')
+            ->assertStreamedContent($image);
     }
 
     #[DataProvider('previewPermissions')]
