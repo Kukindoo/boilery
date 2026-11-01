@@ -19,7 +19,7 @@ class WorksController extends Controller
 
     public function show(WorkShowRequest $request, Work $work): View
     {
-        $work->load(['user', 'quote.files']);
+        $work->load(['user', 'files']);
 
         return view('works.show', compact('work'));
     }
