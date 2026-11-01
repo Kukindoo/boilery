@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\QuoteAcceptController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\QuotePrintController;
 use App\Http\Controllers\WorksController;
@@ -51,6 +52,8 @@ Route::middleware(['auth'])->group(function () {
         Route::controller(QuotePrintController::class)->group(function () {
             Route::get('/{quote}/print', 'show')->name('print');
         });
+
+        Route::post('/{quote}/accept', QuoteAcceptController::class)->name('accept');
     });
 
     Route::resource('works', WorksController::class)

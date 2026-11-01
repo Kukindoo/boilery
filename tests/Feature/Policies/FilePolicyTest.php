@@ -6,6 +6,7 @@ use App\Enums\Permissions;
 use App\Models\File;
 use App\Models\Quote;
 use App\Models\User;
+use App\Models\Work;
 use Illuminate\Support\Facades\Gate;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Permission\Models\Role;
@@ -43,6 +44,28 @@ class FilePolicyTest extends FeatureTestCase
             foreach ([$user->id, $user->id + 1, null] as $ownerId) {
                 $file = new File;
                 $file->setRelation('quote', $ownerId === null ? null : Quote::factory()->make(['user_id' => $ownerId]));
+
+                $this->assertSame($permission === $all || ($permission === $own && $ownerId === $user->id), $user->can($ability, $file));
+            }
+        }
+    }
+
+    #[DataProvider('permissions')]
+    public function test_file_permissions_respect_work_ownership(?Permissions $permission): void
+    {
+        $user = User::factory()->create();
+
+        if ($permission !== null) {
+            $role = Role::create(['name' => 'work-file-policy-test', 'guard_name' => 'web']);
+            $role->givePermissionTo($permission);
+            $user->assignRole($role);
+        }
+
+        foreach (['view' => [Permissions::FILE_VIEW_ALL, Permissions::FILE_VIEW_OWN], 'update' => [Permissions::FILE_EDIT_ALL, Permissions::FILE_EDIT_OWN], 'delete' => [Permissions::FILE_DELETE_ALL, Permissions::FILE_DELETE_OWN], 'forceDelete' => [Permissions::FILE_FORCE_DELETE_ALL, Permissions::FILE_FORCE_DELETE_OWN]] as $ability => [$all, $own]) {
+            foreach ([$user->id, $user->id + 1, null] as $ownerId) {
+                $file = new File;
+                $file->setRelation('quote', null);
+                $file->setRelation('work', $ownerId === null ? null : Work::factory()->make(['user_id' => $ownerId]));
 
                 $this->assertSame($permission === $all || ($permission === $own && $ownerId === $user->id), $user->can($ability, $file));
             }

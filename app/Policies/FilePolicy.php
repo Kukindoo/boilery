@@ -20,7 +20,7 @@ class FilePolicy
     {
         return $this->viewAny($user)
             || ($user->can(Permissions::FILE_VIEW_OWN->label())
-                && $file->quote?->user_id === $user->id);
+                && $file->isOwnedBy($user));
     }
 
     public function create(User $user): bool
@@ -33,20 +33,20 @@ class FilePolicy
     {
         return $user->can(Permissions::FILE_EDIT_ALL->label())
             || ($user->can(Permissions::FILE_EDIT_OWN->label())
-                && $file->quote?->user_id === $user->id);
+                && $file->isOwnedBy($user));
     }
 
     public function delete(User $user, File $file): bool
     {
         return $user->can(Permissions::FILE_DELETE_ALL->label())
             || ($user->can(Permissions::FILE_DELETE_OWN->label())
-                && $file->quote?->user_id === $user->id);
+                && $file->isOwnedBy($user));
     }
 
     public function forceDelete(User $user, File $file): bool
     {
         return $user->can(Permissions::FILE_FORCE_DELETE_ALL->label())
             || ($user->can(Permissions::FILE_FORCE_DELETE_OWN->label())
-                && $file->quote?->user_id === $user->id);
+                && $file->isOwnedBy($user));
     }
 }

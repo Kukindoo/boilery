@@ -4,6 +4,7 @@ namespace Tests\Integration\Actions\Quotes;
 
 use App\Actions\Quotes\AcceptQuote;
 use App\Enums\BoilerManufacturers;
+use App\Enums\FileTypes;
 use App\Enums\Permissions;
 use App\Enums\QuoteStatus;
 use App\Models\Quote;
@@ -86,6 +87,42 @@ class AcceptQuoteTest extends IntegrationTestCase
             'work_accepted_at' => now()->toDateString(),
         ]);
         $this->assertDatabaseCount('works', 1);
+    }
+
+    public function test_acceptance_links_all_quote_files_to_its_work_and_preserves_other_quote_files(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+        $quote = Quote::factory()->for(User::factory()->customer())->create();
+        $otherQuote = Quote::factory()->create();
+        $attributes = [
+            'original_name' => 'receipt.jpg',
+            'file_type' => FileTypes::RECEIPT,
+            'extension' => 'jpg',
+            'size' => 16,
+            'mime_type' => 'image/jpeg',
+            'path' => 'quotes/receipt.jpg',
+            'label' => 'Receipt',
+        ];
+        $files = $quote->files()->createMany([$attributes, $attributes]);
+        $otherFile = $otherQuote->files()->create($attributes);
+
+        $acceptedQuote = app(AcceptQuote::class)->handle($quote);
+
+        foreach ($files as $file) {
+            $this->assertDatabaseHas('files', [
+                'id' => $file->id,
+                'quote_id' => $quote->id,
+                'work_id' => $acceptedQuote->work->id,
+                'path' => $attributes['path'],
+            ]);
+        }
+        $this->assertSame(2, $acceptedQuote->work->files()->count());
+        $this->assertDatabaseHas('files', [
+            'id' => $otherFile->id,
+            'quote_id' => $otherQuote->id,
+            'work_id' => null,
+        ]);
+        $this->assertDatabaseCount('files', 3);
     }
 
     #[DataProvider('usersWithoutEditAllPermission')]

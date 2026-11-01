@@ -48,6 +48,8 @@ class AcceptQuote
                 'work_accepted_at' => now(),
             ]);
 
+            $quote->files()->update(['work_id' => $work->id]);
+
             if ($work->wasRecentlyCreated) {
                 activity('works')
                     ->performedOn($work)
@@ -55,7 +57,7 @@ class AcceptQuote
                     ->log('Work created from accepted quote');
             }
 
-            return $quote->load('work');
+            return $quote->fresh()->load('work');
         });
     }
 }
