@@ -16,6 +16,8 @@ class QuoteController extends Controller
 
     public function show(QuoteShowRequest $request, Quote $quote)
     {
+        $quote->load(['user', 'files']);
+
         return view('quotes.show', [
             'quote' => $quote,
         ]);
