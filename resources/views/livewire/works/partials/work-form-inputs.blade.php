@@ -32,14 +32,14 @@
             <flux:field class="px-4 py-6 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:space-y-0 sm:px-6">
                 <flux:label class="sm:pt-2">Datum přijetí</flux:label>
                 <div class="min-w-0 space-y-2 sm:col-span-2">
-                    <flux:input type="date" wire:model="form.workAcceptedAt" />
+                    <flux:date-picker wire:model="form.workAcceptedAt" />
                     <flux:error name="form.workAcceptedAt" />
                 </div>
             </flux:field>
             <flux:field class="px-4 py-6 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:space-y-0 sm:px-6">
                 <flux:label class="sm:pt-2">Datum dokončení</flux:label>
                 <div class="min-w-0 space-y-2 sm:col-span-2">
-                    <flux:input type="date" wire:model="form.workCompletedAt" />
+                    <flux:date-picker wire:model="form.workCompletedAt" />
                     <flux:error name="form.workCompletedAt" />
                 </div>
             </flux:field>
