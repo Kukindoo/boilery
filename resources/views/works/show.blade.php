@@ -18,15 +18,5 @@
                 <x-works.work-attached-images :work="$work"/>
 
             </x-stellaris.container.model-card>
-            @if ($work->quote)
-                @can('view', $work->quote)
-                    <x-stellaris.container.model-card
-                            :heading="__('Poptávka :quote_id', ['quote_id' => $work->quote->id])">
-                        <x-quotes.quote-person-info :quote="$work->quote"/>
-                        <x-quotes.quote-boiler-info :quote="$work->quote"/>
-                        <x-quotes.quote-attachments :quote="$work->quote"/>
-                    </x-stellaris.container.model-card>
-                @endcan
-            @endif
         </div>
 </x-layouts::app>
