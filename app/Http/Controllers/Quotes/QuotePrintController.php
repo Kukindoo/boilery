@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Quotes;
 
 use App\Actions\Files\GenerateFileLabel;
 use App\Enums\FileTypes;

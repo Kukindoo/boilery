@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\QuoteAcceptController;
-use App\Http\Controllers\QuoteController;
-use App\Http\Controllers\QuotePrintController;
+use App\Http\Controllers\Quotes\QuoteAcceptController;
+use App\Http\Controllers\Quotes\QuoteController;
+use App\Http\Controllers\Quotes\QuotePrintController;
 use App\Http\Controllers\Quotes\RequestedQuoteFilePreviewController;
 use App\Http\Controllers\Works\RequestedWorkFilePreviewController;
-use App\Http\Controllers\WorksController;
+use App\Http\Controllers\Works\WorksController;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;

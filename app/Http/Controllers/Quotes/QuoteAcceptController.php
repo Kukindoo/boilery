@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Quotes;
 
 use App\Actions\Quotes\AcceptQuote;
+use App\Http\Controllers\Controller;
 use App\Models\Quote;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;

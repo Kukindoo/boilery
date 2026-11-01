@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Works;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Works\WorkCreateRequest;
 use App\Http\Requests\Works\WorkEditRequest;
 use App\Http\Requests\Works\WorkIndexRequest;
