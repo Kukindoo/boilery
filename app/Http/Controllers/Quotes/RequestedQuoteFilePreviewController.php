@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Quotes;
+namespace App\Http\Controllers\Quotes;
 
 use App\Http\Controllers\Controller;
 use App\Models\File;

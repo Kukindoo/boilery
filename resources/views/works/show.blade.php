@@ -12,9 +12,10 @@
                 @endcan
 
                 <x-works.work-info :work="$work"/>
-                <x-works.boiler-info :work="$work"/>
-                <x-works.repair-info :work="$work"/>
-                <x-works.transport-info :work="$work"/>
+                <x-works.work-boiler-info :work="$work"/>
+                <x-works.work-repair-info :work="$work"/>
+                <x-works.work-transport-info :work="$work"/>
+                <x-works.work-attached-images :work="$work"/>
 
             </x-stellaris.container.model-card>
             @if ($work->quote)

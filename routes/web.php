@@ -3,8 +3,9 @@
 use App\Http\Controllers\QuoteAcceptController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\QuotePrintController;
+use App\Http\Controllers\Quotes\RequestedQuoteFilePreviewController;
+use App\Http\Controllers\Works\RequestedWorkFilePreviewController;
 use App\Http\Controllers\WorksController;
-use App\Livewire\Quotes\RequestedQuoteFilePreviewController;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -58,6 +59,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('works', WorksController::class)
         ->only(['index', 'create', 'show', 'edit']);
+
+    Route::get(
+        'works/{work}/files/{file}/preview',
+        RequestedWorkFilePreviewController::class
+    )->name('works.files.preview');
 });
 
 require __DIR__ . '/auth.php';
