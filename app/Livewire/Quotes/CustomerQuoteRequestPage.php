@@ -4,8 +4,8 @@ namespace App\Livewire\Quotes;
 
 use App\Constants\RateLimiterNames;
 use App\Livewire\Forms\QuoteForm;
-use App\Notifications\QuoteSubmittedAdmin;
-use App\Notifications\QuoteSubmittedCustomer;
+use App\Notifications\Quotes\QuoteSubmittedAdmin;
+use App\Notifications\Quotes\QuoteSubmittedCustomer;
 use App\Traits\PublicRateLimiter;
 use DB;
 use Illuminate\Support\Facades\Notification;
