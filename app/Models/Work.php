@@ -47,6 +47,7 @@ class Work extends Model
         'user_id',
         'quote_id',
         'order_id',
+        'status',
         'type_of_product',
         'type_number',
         'serial_number',
