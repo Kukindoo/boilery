@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\WorkStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +17,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int $user_id
  * @property ?int $quote_id
  * @property string $order_id
+ * @property WorkStatus $status
  * @property ?string $type_of_product
  * @property ?string $type_number
  * @property ?string $serial_number
@@ -96,6 +98,7 @@ class Work extends Model
     protected function casts(): array
     {
         return [
+            'status' => WorkStatus::class,
             'warranty_accepted' => 'boolean',
             'day_of_purchase' => 'date',
             'work_accepted_at' => 'date',
