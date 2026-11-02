@@ -17,6 +17,14 @@
         <dl class="divide-y divide-gray-100 dark:divide-white/5">
             <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Status
+                </dt>
+                <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0 dark:text-gray-300">
+                    <flux:badge size="sm" :color="$work->status->colour()">
+                        {{ $work->status->label() }}
+                    </flux:badge>
+                </dd>
+                <dt class="text-sm font-medium text-gray-900 dark:text-gray-100">
                     Zákazník
                 </dt>
                 <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0 dark:text-gray-300">
