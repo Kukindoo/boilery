@@ -36,6 +36,7 @@ class QuoteSubmittedAdmin extends Notification implements ShouldQueue
     {
         $mail = (new MailMessage)
             ->subject('Nová poptávka')
+            ->greeting('Dobrý den,')
             ->line('Jméno: ' . $this->quote->first_name . ' ' . $this->quote->last_name)
             ->line('Email: ' . $this->quote->email)
             ->line('Telefon: ' . $this->quote->phone)
