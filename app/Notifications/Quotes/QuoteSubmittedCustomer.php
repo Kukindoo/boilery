@@ -4,10 +4,11 @@ namespace App\Notifications\Quotes;
 
 use App\Models\Quote;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class QuoteSubmittedCustomer extends Notification
+class QuoteSubmittedCustomer extends Notification implements ShouldQueue
 {
     use Queueable;
 

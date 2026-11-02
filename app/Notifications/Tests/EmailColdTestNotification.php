@@ -22,6 +22,7 @@ class EmailColdTestNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('Test Email Notification')
+            ->greeting('Hello!')
             ->line('This is just a test email to verify that the email system is working correctly.');
     }
 
