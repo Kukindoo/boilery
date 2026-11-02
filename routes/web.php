@@ -4,6 +4,7 @@ use App\Http\Controllers\Quotes\QuoteAcceptController;
 use App\Http\Controllers\Quotes\QuoteController;
 use App\Http\Controllers\Quotes\QuotePrintController;
 use App\Http\Controllers\Quotes\RequestedQuoteFilePreviewController;
+use App\Http\Controllers\Tests\EmailColdTestController;
 use App\Http\Controllers\Works\RequestedWorkFilePreviewController;
 use App\Http\Controllers\Works\WorksController;
 use App\Livewire\Settings\Appearance;
@@ -64,6 +65,10 @@ Route::middleware(['auth'])->group(function () {
         'works/{work}/files/{file}/preview',
         RequestedWorkFilePreviewController::class
     )->name('works.files.preview');
+
+    Route::post('tests/email',
+        EmailColdTestController::class
+    )->name('tests.email');
 });
 
 require __DIR__ . '/auth.php';
