@@ -13,7 +13,7 @@ use Spatie\Permission\Models\Role;
 
 class WorksPagesTest extends FeatureTestCase
 {
-    public function test_show_displays_related_quote_details(): void
+    public function test_show_does_not_display_related_quote_details(): void
     {
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::WORK_VIEW_ALL, Permissions::QUOTE_VIEW_ALL]);
@@ -25,16 +25,12 @@ class WorksPagesTest extends FeatureTestCase
         $work = Work::factory()->for($quote)->create();
 
         $this->actingAs($user)->get(route('works.show', $work))
-            ->assertSee($quote->first_name)
-            ->assertSee($quote->last_name)
-            ->assertSee($quote->email)
-            ->assertSee($quote->phone)
-            ->assertSee($quote->address)
-            ->assertSee($quote->message)
-            ->assertDontSee($quote->message, false)
-            ->assertSee('Related boiler type')
-            ->assertSee('Related serial number')
-            ->assertSeeLivewire(\App\Livewire\Quotes\QuoteEdit::class);
+            ->assertSee($work->order_id)
+            ->assertDontSee($quote->email)
+            ->assertDontSee($quote->message)
+            ->assertDontSee('Related boiler type')
+            ->assertDontSee('Related serial number')
+            ->assertDontSeeLivewire(\App\Livewire\Quotes\QuoteEdit::class);
     }
 
     public function test_show_without_a_related_quote_still_displays_work_details(): void
@@ -44,10 +40,11 @@ class WorksPagesTest extends FeatureTestCase
         $work = Work::factory()->create();
 
         $this->actingAs($user)->get(route('works.show', $work))
-            ->assertSee($work->order_id);
+            ->assertSee($work->order_id)
+            ->assertSee('Nový');
     }
 
-    public function test_show_displays_related_quote_files(): void
+    public function test_show_does_not_display_related_quote_files(): void
     {
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::WORK_VIEW_ALL, Permissions::QUOTE_VIEW_ALL]);
@@ -64,8 +61,8 @@ class WorksPagesTest extends FeatureTestCase
         $work = Work::factory()->for($quote)->create();
 
         $this->actingAs($user)->get(route('works.show', $work))
-            ->assertSeeLivewire(\App\Livewire\Quotes\QuoteDownloadCard::class)
-            ->assertSee(route('quotes.files.preview', [$quote, $file]))
+            ->assertDontSeeLivewire(\App\Livewire\Quotes\QuoteDownloadCard::class)
+            ->assertDontSee(route('quotes.files.preview', [$quote, $file]))
             ->assertDontSeeLivewire(\App\Livewire\Quotes\SingleFileUpload::class);
     }
 

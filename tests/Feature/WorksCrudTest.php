@@ -15,6 +15,36 @@ use Livewire\Livewire;
 
 class WorksCrudTest extends FeatureTestCase
 {
+    public function test_edit_loads_and_saves_work_status(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo([Permissions::WORK_EDIT_OWN, Permissions::WORK_VIEW_OWN]);
+        $work = Work::factory()->for($user)->create(['status' => \App\Enums\WorkStatus::PROCESSING]);
+
+        Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
+            ->assertSet('form.status', 'processing')
+            ->assertSee('Dokončeno')
+            ->set('form.status', 'finished')
+            ->call('submit')->assertHasNoErrors()
+            ->assertRedirect(route('works.show', $work));
+
+        $this->assertSame(\App\Enums\WorkStatus::FINISHED, $work->refresh()->status);
+        $this->get(route('works.show', $work))->assertOk()->assertSee('Dokončeno');
+    }
+
+    public function test_edit_rejects_invalid_or_empty_status_without_saving(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permissions::WORK_EDIT_OWN);
+        $work = Work::factory()->for($user)->create();
+        $component = Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work]);
+
+        $component->set('form.status', 'invalid')->call('submit')->assertHasErrors(['form.status']);
+        $component->set('form.status', '')->call('submit')->assertHasErrors(['form.status' => 'required']);
+
+        $this->assertSame(\App\Enums\WorkStatus::NEW, $work->refresh()->status);
+    }
+
     public function test_creates_a_work_with_normalized_fields_and_relationships(): void
     {
         $user = User::factory()->create();
