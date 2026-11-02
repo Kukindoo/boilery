@@ -6,6 +6,7 @@ use App\Actions\Works\CreateWork;
 use App\Actions\Works\UpdateWork;
 use App\Dtos\Works\WorkDto;
 use App\Enums\Permissions;
+use App\Enums\WorkStatus;
 use App\Models\Quote;
 use App\Models\Work;
 use Illuminate\Support\Facades\Gate;
@@ -35,6 +36,8 @@ class WorkForm extends Form
     public ?int $quoteId = null;
 
     public string $orderId = '';
+
+    public string $status = WorkStatus::NEW->value;
 
     public ?string $typeOfProduct = null;
 
@@ -81,6 +84,7 @@ class WorkForm extends Form
         $this->userId = $work->user_id;
         $this->quoteId = $work->quote_id;
         $this->orderId = $work->order_id;
+        $this->status = $work->status->value;
         $this->typeOfProduct = $work->type_of_product;
         $this->typeNumber = $work->type_number;
         $this->serialNumber = $work->serial_number;
@@ -103,6 +107,7 @@ class WorkForm extends Form
     public function rules(): array
     {
         return [
+            'status' => ['required', Rule::enum(WorkStatus::class)],
             'userId' => ['required', 'integer', Rule::exists('users', 'id')],
             'quoteId' => ['nullable', 'integer', Rule::exists('quotes', 'id')->whereNull('deleted_at'), Rule::unique('works', 'quote_id')->ignore($this->work)],
             'orderId' => ['required', 'string', 'max:255', Rule::unique('works', 'order_id')->ignore($this->work)],
@@ -181,6 +186,7 @@ class WorkForm extends Form
             transportDistanceInKm: $this->transportDistanceInKm,
             note: ($this->note === '' ? null : $this->note),
             mechanicName: ($this->mechanicName === '' ? null : $this->mechanicName),
+            status: WorkStatus::from($this->status),
         );
     }
 }
