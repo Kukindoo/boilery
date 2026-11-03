@@ -25,13 +25,14 @@ class WorkTest extends FeatureTestCase
             'building_type' => 'House',
             'reported_problem' => 'No heating',
             'work_accepted_at' => '2026-10-01',
+            'work_started_at' => '2026-10-01',
             'work_completed_at' => '2026-10-02',
             'work_performed_description' => 'Replaced pump',
             'transport_from' => 'Prague',
             'transport_to' => 'Brno',
             'transport_rate_in_czk' => 15,
             'transport_distance_in_km' => '12.50',
-            'note' => 'Customer notified',
+            'notes' => 'Customer notified',
             'mechanic_name' => 'Jan Novak',
         ];
         $work = new Work($attributes);
@@ -47,7 +48,9 @@ class WorkTest extends FeatureTestCase
         $this->assertInstanceOf(Carbon::class, $work->day_of_purchase);
         $this->assertSame('2025-01-15', $work->day_of_purchase->toDateString());
         $this->assertInstanceOf(Carbon::class, $work->work_accepted_at);
+        $this->assertInstanceOf(Carbon::class, $work->work_started_at);
         $this->assertSame('2026-10-01', $work->work_accepted_at->toDateString());
+        $this->assertSame('2026-10-01', $work->work_started_at->toDateString());
         $this->assertInstanceOf(Carbon::class, $work->work_completed_at);
         $this->assertSame('2026-10-02', $work->work_completed_at->toDateString());
     }
@@ -72,6 +75,7 @@ class WorkTest extends FeatureTestCase
         $this->assertNull($work->repair_in_warranty);
         $this->assertNull($work->day_of_purchase);
         $this->assertNull($work->work_accepted_at);
+        $this->assertNull($work->work_started_at);
         $this->assertNull($work->work_completed_at);
         $this->assertNull($work->transport_rate_in_czk);
         $this->assertNull($work->transport_distance_in_km);
@@ -89,14 +93,14 @@ class WorkTest extends FeatureTestCase
     public function test_logs_only_changed_attributes_when_updating_a_work(): void
     {
         $this->freezeTime();
-        $work = Work::factory()->create(['note' => 'Original note'])->fresh();
+        $work = Work::factory()->create(['notes' => 'Original notes'])->fresh();
 
-        $work->update(['note' => 'Updated note']);
+        $work->update(['notes' => 'Updated notes']);
 
-        $this->assertDatabaseHas('works', ['id' => $work->id, 'note' => 'Updated note']);
+        $this->assertDatabaseHas('works', ['id' => $work->id, 'notes' => 'Updated notes']);
         $activity = Activity::forSubject($work)->forEvent(ActivityEvent::Updated)->sole();
         $this->assertSame(
-            ['attributes' => ['note' => 'Updated note'], 'old' => ['note' => 'Original note']],
+            ['attributes' => ['notes' => 'Updated notes'], 'old' => ['notes' => 'Original notes']],
             $activity->attribute_changes->toArray(),
         );
     }

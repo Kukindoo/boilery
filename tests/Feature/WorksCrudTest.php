@@ -32,6 +32,28 @@ class WorksCrudTest extends FeatureTestCase
         $this->get(route('works.show', $work))->assertOk()->assertSee('Dokončeno');
     }
 
+    public function test_edit_loads_saves_displays_and_clears_work_start_date(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo([Permissions::WORK_EDIT_OWN, Permissions::WORK_VIEW_OWN]);
+        $work = Work::factory()->for($user)->create(['work_started_at' => '2026-10-20']);
+
+        $component = Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
+            ->assertSet('form.workStartedAt', '2026-10-20')
+            ->assertSee('Datum zahájení');
+        $component->set('form.workStartedAt', 'invalid')->call('submit')
+            ->assertHasErrors(['form.workStartedAt' => 'date_format']);
+        $this->assertSame('2026-10-20', $work->refresh()->work_started_at->toDateString());
+
+        $component->set('form.workStartedAt', '2026-10-21')->call('submit')->assertHasNoErrors();
+        $this->assertSame('2026-10-21', $work->refresh()->work_started_at->toDateString());
+        $this->get(route('works.show', $work))->assertSee('Datum zahájení')->assertSee('21.10.2026');
+
+        Livewire::test(WorkEdit::class, ['work' => $work])
+            ->set('form.workStartedAt', '')->call('submit')->assertHasNoErrors();
+        $this->assertNull($work->refresh()->work_started_at);
+    }
+
     public function test_edit_rejects_invalid_or_empty_status_without_saving(): void
     {
         $user = User::factory()->create();
@@ -56,14 +78,16 @@ class WorksCrudTest extends FeatureTestCase
             ->set('form.quoteId', $quote->id)
             ->set('form.transportDistanceInKm', '12.30')
             ->set('form.dayOfPurchase', '2026-01-02')
-            ->set('form.note', '')
+            ->set('form.workStartedAt', '2026-10-20')
+            ->set('form.notes', '')
             ->call('submit')->assertHasNoErrors();
 
         $work = Work::query()->where('order_id', 'WORK-001')->firstOrFail();
         $this->assertSame($user->id, $work->user_id);
         $this->assertSame('12.30', $work->transport_distance_in_km);
         $this->assertSame('2026-01-02', $work->day_of_purchase->format('Y-m-d'));
-        $this->assertNull($work->note);
+        $this->assertSame('2026-10-20', $work->work_started_at->toDateString());
+        $this->assertNull($work->notes);
         $this->assertTrue($user->works->contains($work));
         $this->assertTrue($quote->work->is($work));
         $this->assertTrue($work->user->is($user));
@@ -99,7 +123,7 @@ class WorksCrudTest extends FeatureTestCase
         Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $unlinked])
             ->set('form.quoteId', $quote->id)->call('submit')->assertHasErrors(['form.quoteId' => 'unique']);
         Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $linked])
-            ->set('form.note', 'Same quote')->call('submit')->assertHasNoErrors();
+            ->set('form.notes', 'Same quote')->call('submit')->assertHasNoErrors();
 
         $this->assertDatabaseCount('works', 2);
         $this->assertNull($unlinked->refresh()->quote_id);
@@ -137,10 +161,11 @@ class WorksCrudTest extends FeatureTestCase
         $work = Work::factory()->for($user)->create();
 
         Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
-            ->set('form.note', 'Repaired')->call('submit')
+            ->assertSet('form.notes', null)
+            ->set('form.notes', 'Repaired')->call('submit')
             ->assertHasNoErrors()->assertRedirect(route('works.show', $work));
 
-        $this->assertSame('Repaired', $work->refresh()->note);
+        $this->assertSame('Repaired', $work->refresh()->notes);
     }
 
     public function test_invalid_and_duplicate_values_are_not_saved(): void
@@ -188,10 +213,10 @@ class WorksCrudTest extends FeatureTestCase
 
         $component = Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work]);
         $user->revokePermissionTo(Permissions::WORK_EDIT_OWN);
-        $component->set('form.note', 'Unauthorized')->call('submit')->assertForbidden();
+        $component->set('form.notes', 'Unauthorized')->call('submit')->assertForbidden();
 
         $this->assertSame($user->id, $work->refresh()->user_id);
-        $this->assertNull($work->note);
+        $this->assertNull($work->notes);
     }
 
     public function test_delete_rechecks_permission_and_soft_deletes_only_after_confirmation(): void

@@ -27,13 +27,14 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property ?string $building_type
  * @property ?string $reported_problem
  * @property ?Carbon $work_accepted_at
+ * @property ?Carbon $work_started_at
  * @property ?Carbon $work_completed_at
  * @property ?string $work_performed_description
  * @property ?string $transport_from
  * @property ?string $transport_to
  * @property ?int $transport_rate_in_czk
  * @property ?float $transport_distance_in_km
- * @property ?string $note
+ * @property ?string $notes
  * @property ?string $mechanic_name
  * @property ?Carbon $created_at
  * @property ?Carbon $deleted_at
@@ -57,13 +58,14 @@ class Work extends Model
         'building_type',
         'reported_problem',
         'work_accepted_at',
+        'work_started_at',
         'work_completed_at',
         'work_performed_description',
         'transport_from',
         'transport_to',
         'transport_rate_in_czk',
         'transport_distance_in_km',
-        'note',
+        'notes',
         'mechanic_name',
     ];
 
@@ -103,6 +105,7 @@ class Work extends Model
             'warranty_accepted' => 'boolean',
             'day_of_purchase' => 'date',
             'work_accepted_at' => 'date',
+            'work_started_at' => 'date',
             'work_completed_at' => 'date',
             'transport_rate_in_czk' => 'integer',
             'transport_distance_in_km' => 'decimal:2',

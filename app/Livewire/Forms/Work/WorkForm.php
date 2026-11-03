@@ -57,6 +57,8 @@ class WorkForm extends Form
 
     public ?string $workAcceptedAt = null;
 
+    public ?string $workStartedAt = null;
+
     public ?string $workCompletedAt = null;
 
     public ?string $workPerformedDescription = null;
@@ -69,7 +71,7 @@ class WorkForm extends Form
 
     public ?float $transportDistanceInKm = null;
 
-    public ?string $note = null;
+    public ?string $notes = null;
 
     public ?string $mechanicName = null;
 
@@ -94,13 +96,14 @@ class WorkForm extends Form
         $this->buildingType = $work->building_type;
         $this->reportedProblem = $work->reported_problem;
         $this->workAcceptedAt = $work->work_accepted_at?->format('Y-m-d');
+        $this->workStartedAt = $work->work_started_at?->format('Y-m-d');
         $this->workCompletedAt = $work->work_completed_at?->format('Y-m-d');
         $this->workPerformedDescription = $work->work_performed_description;
         $this->transportFrom = $work->transport_from;
         $this->transportTo = $work->transport_to;
         $this->transportRateInCzk = $work->transport_rate_in_czk;
         $this->transportDistanceInKm = $work->transport_distance_in_km;
-        $this->note = $work->note;
+        $this->notes = $work->notes;
         $this->mechanicName = $work->mechanic_name;
     }
 
@@ -120,13 +123,14 @@ class WorkForm extends Form
             'buildingType' => ['nullable', 'string', 'max:255'],
             'reportedProblem' => ['nullable', 'string', 'max:255'],
             'workAcceptedAt' => ['nullable', 'date_format:Y-m-d'],
-            'workCompletedAt' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:workAcceptedAt'],
+            'workStartedAt' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:workAcceptedAt'],
+            'workCompletedAt' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:workStartedAt'],
             'workPerformedDescription' => ['nullable', 'string', 'max:16000'],
             'transportFrom' => ['nullable', 'string', 'max:255'],
             'transportTo' => ['nullable', 'string', 'max:255'],
             'transportRateInCzk' => ['nullable', 'integer', 'between:-2147483648,2147483647'],
             'transportDistanceInKm' => ['nullable', 'numeric', 'decimal:0,2', 'between:-999999.99,999999.99'],
-            'note' => ['nullable', 'string', 'max:16000'],
+            'notes' => ['nullable', 'string', 'max:16000'],
             'mechanicName' => ['nullable', 'string', 'max:16000'],
         ];
     }
@@ -178,13 +182,14 @@ class WorkForm extends Form
             buildingType: ($this->buildingType === '' ? null : $this->buildingType),
             reportedProblem: ($this->reportedProblem === '' ? null : $this->reportedProblem),
             workAcceptedAt: ($this->workAcceptedAt === '' ? null : $this->workAcceptedAt),
+            workStartedAt: ($this->workStartedAt === '' ? null : $this->workStartedAt),
             workCompletedAt: ($this->workCompletedAt === '' ? null : $this->workCompletedAt),
             workPerformedDescription: ($this->workPerformedDescription === '' ? null : $this->workPerformedDescription),
             transportFrom: ($this->transportFrom === '' ? null : $this->transportFrom),
             transportTo: ($this->transportTo === '' ? null : $this->transportTo),
             transportRateInCzk: $this->transportRateInCzk,
             transportDistanceInKm: $this->transportDistanceInKm,
-            note: ($this->note === '' ? null : $this->note),
+            notes: ($this->notes === '' ? null : $this->notes),
             mechanicName: ($this->mechanicName === '' ? null : $this->mechanicName),
             status: WorkStatus::from($this->status),
         );

@@ -30,6 +30,10 @@
             <flux:date-picker wire:model="form.workAcceptedAt"/>
         </x-stellaris.livewire.forms.side-to-side.field>
 
+        <x-stellaris.livewire.forms.side-to-side.field label="Datum zahájení">
+            <flux:date-picker wire:model="form.workStartedAt"/>
+        </x-stellaris.livewire.forms.side-to-side.field>
+
         <x-stellaris.livewire.forms.side-to-side.field label="Datum dokončení">
             <flux:date-picker wire:model="form.workCompletedAt"/>
         </x-stellaris.livewire.forms.side-to-side.field>
@@ -79,7 +83,7 @@
         </x-stellaris.livewire.forms.side-to-side.field>
 
         <x-stellaris.livewire.forms.side-to-side.field label="Poznámka">
-            <flux:textarea wire:model="form.note"/>
+            <flux:textarea wire:model="form.notes"/>
         </x-stellaris.livewire.forms.side-to-side.field>
     </x-stellaris.livewire.forms.side-to-side.section>
 

@@ -149,7 +149,7 @@ class AcceptQuoteTest extends IntegrationTestCase
         $action = app(AcceptQuote::class);
         $action->handle($quote);
         $work = $quote->work()->firstOrFail();
-        $work->update(['note' => 'Keep mechanic notes.']);
+        $work->update(['notes' => 'Keep mechanic notes.']);
         $work->delete();
 
         try {
@@ -160,7 +160,7 @@ class AcceptQuoteTest extends IntegrationTestCase
         }
 
         $this->assertDatabaseCount('works', 1);
-        $this->assertDatabaseHas('works', ['id' => $work->id, 'note' => 'Keep mechanic notes.']);
+        $this->assertDatabaseHas('works', ['id' => $work->id, 'notes' => 'Keep mechanic notes.']);
         $this->assertSoftDeleted($work);
         $this->assertSame(QuoteStatus::ACCEPTED, $quote->fresh()->status);
     }

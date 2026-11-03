@@ -36,7 +36,7 @@
                     Poznámka
                 </dt>
                 <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0 dark:text-gray-300">
-                    {{ $work->note ?? '—' }}
+                    {{ $work->notes ?? '—' }}
                 </dd>
             </div>
         </dl>

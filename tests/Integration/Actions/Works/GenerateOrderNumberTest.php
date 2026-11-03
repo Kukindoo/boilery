@@ -65,13 +65,14 @@ class GenerateOrderNumberTest extends IntegrationTestCase
             buildingType: null,
             reportedProblem: null,
             workAcceptedAt: null,
+            workStartedAt: null,
             workCompletedAt: null,
             workPerformedDescription: null,
             transportFrom: null,
             transportTo: null,
             transportRateInCzk: null,
             transportDistanceInKm: null,
-            note: null,
+            notes: null,
             mechanicName: null,
         );
         $action = app(CreateWork::class);
