@@ -19,6 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->prefix('works')
                 ->name('works.')
                 ->group(base_path('routes/works.php'));
+
+            Route::middleware(['web', 'auth'])
+                ->prefix('cold-tests')
+                ->name('cold-tests.')
+                ->group(base_path('routes/cold-tests.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
