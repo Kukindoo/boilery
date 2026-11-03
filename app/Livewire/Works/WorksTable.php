@@ -3,6 +3,7 @@
 namespace App\Livewire\Works;
 
 use App\Actions\Works\DeleteWork;
+use App\Enums\WorkStatus;
 use App\Models\Work;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -17,6 +18,12 @@ class WorksTable extends Component
     use WithPagination;
 
     public string $search = '';
+
+    /** @var list<string> */
+    public array $selectedStatuses = [
+        WorkStatus::NEW,
+        WorkStatus::PROCESSING,
+    ];
 
     #[Locked]
     public ?int $deletingId = null;
@@ -52,11 +59,12 @@ class WorksTable extends Component
 
         return Work::query()
             ->with('user')
+            ->whereIn('status', $this->selectedStatuses)
             ->when($this->search !== '', function ($query): void {
                 $query->where(function ($query): void {
                     $query->where('order_id', 'like', '%' . $this->search . '%')
                         ->orWhere('type_of_product', 'like', '%' . $this->search . '%')
-                        ->orWhereHas('user', fn ($query) => $query->where('name', 'like', '%' . $this->search . '%'));
+                        ->orWhereHas('user', fn($query) => $query->where('name', 'like', '%' . $this->search . '%'));
                 });
             })
             ->orderBy($this->sortBy, $this->sortDirection)
@@ -69,6 +77,11 @@ class WorksTable extends Component
         Gate::authorize('view', $work);
 
         $this->redirect(route('works.show', $work));
+    }
+
+    public function updatedSelectedStatuses(): void
+    {
+        $this->resetPage();
     }
 
     public function updatedSearch(): void
@@ -101,6 +114,6 @@ class WorksTable extends Component
     /** @return list<string> */
     private function sortableColumns(): array
     {
-        return ['order_id', 'type_of_product', 'work_accepted_at', 'work_completed_at', 'created_at'];
+        return ['order_id', 'status', 'work_accepted_at', 'work_completed_at', 'created_at'];
     }
 }

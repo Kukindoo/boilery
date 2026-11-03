@@ -5,7 +5,7 @@
     <x-slot name="filters">
         @include('livewire.quotes.partials.quotes-table-filters')
     </x-slot>
-    <flux:table bleed :paginate="$this->quotes">
+    <flux:table :paginate="$this->quotes">
         <flux:table.columns>
             <flux:table.column>
                 Požadavek

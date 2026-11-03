@@ -10,7 +10,7 @@ enum WorkStatus: string
 
     case FINISHED = 'finished';
 
-    case FAILED = 'failed';
+    case CANCELLED = 'cancelled';
 
     public static function getOptions(): array
     {
@@ -25,7 +25,7 @@ enum WorkStatus: string
             self::NEW => 'Nový',
             self::PROCESSING => 'Probíhá',
             self::FINISHED => 'Dokončeno',
-            self::FAILED => 'Selhalo',
+            self::CANCELLED => 'Zrušeno',
         };
     }
 
@@ -35,7 +35,7 @@ enum WorkStatus: string
             self::NEW => 'orange',
             self::PROCESSING => 'lime',
             self::FINISHED => 'green',
-            self::FAILED => 'red',
+            self::CANCELLED => 'red',
         };
     }
 }

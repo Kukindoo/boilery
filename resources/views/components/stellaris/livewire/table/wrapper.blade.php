@@ -1,14 +1,18 @@
 <flux:card>
-    <div class="flex items-center justify-between gap-4">
+    <div class="flex items-center justify-between gap-4 my-4">
 
-        <flux:heading>
+        <flux:heading size="xl">
             {{ $heading }}
         </flux:heading>
 
         {{ $actions ?? '' }}
     </div>
-    <div class="flex items-center justify-between gap-4 mt-4">
+    <flux:separator />
+    <div class="flex-col items-center justify-between gap-4 space-y-4 my-4">
         {{ $filters ?? '' }}
     </div>
-    {{ $slot }}
+    <flux:separator />
+    <div class="mt-4">
+        {{ $slot }}
+    </div>
 </flux:card>

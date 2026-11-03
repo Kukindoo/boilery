@@ -5,7 +5,7 @@
     <x-slot name="filters">
         @include('livewire.works.partials.works-table-filters')
     </x-slot>
-    <flux:table bleed :paginate="$this->works">
+    <flux:table :paginate="$this->works">
         <flux:table.columns>
             <flux:table.column sortable :sorted="$sortBy === 'order_id'" :direction="$sortDirection"
                                wire:click="sort('order_id')">
@@ -14,9 +14,9 @@
             <flux:table.column>
                 Jméno a příjmení
             </flux:table.column>
-            <flux:table.column sortable :sorted="$sortBy === 'type_of_product'" :direction="$sortDirection"
-                               wire:click="sort('type_of_product')">
-                Typ výrobku
+            <flux:table.column sortable :sorted="$sortBy === 'status'" :direction="$sortDirection"
+                               wire:click="sort('status')">
+                Status
             </flux:table.column>
             <flux:table.column sortable :sorted="$sortBy === 'work_accepted_at'" :direction="$sortDirection"
                                wire:click="sort('work_accepted_at')">
@@ -41,7 +41,9 @@
                         {{ $work->user?->name ?? 'Neznámý' }}
                     </flux:table.cell>
                     <flux:table.cell variant="strong">
-                        {{ $work->type_of_product ?? 'Neznámý' }}
+                        <flux:badge size="sm" :color="$work->status->colour()">
+                            {{ $work->status->label() }}
+                        </flux:badge>
                     </flux:table.cell>
                     <flux:table.cell>
                         {{ $work->work_accepted_at?->format('d.m.Y') ?? '—' }}
