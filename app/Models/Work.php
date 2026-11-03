@@ -98,6 +98,26 @@ class Work extends Model
         return $this->hasMany(File::class, 'work_id');
     }
 
+    public function start(): void
+    {
+        $this->status = WorkStatus::PROCESSING;
+        $this->work_started_at = now();
+        $this->save();
+    }
+
+    public function end(): void
+    {
+        $this->status = WorkStatus::FINISHED;
+        $this->work_completed_at = now();
+        $this->save();
+    }
+
+    public function cancel()
+    {
+        $this->status = WorkStatus::CANCELLED;
+        $this->save();
+    }
+
     protected function casts(): array
     {
         return [

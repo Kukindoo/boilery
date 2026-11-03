@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\Permissions;
+use App\Enums\WorkStatus;
 use App\Models\User;
 use App\Models\Work;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -34,6 +35,24 @@ class WorkPolicy
         return $user->can(Permissions::WORK_EDIT_ALL->label())
             || ($user->can(Permissions::WORK_EDIT_OWN->label())
                 && $work->user_id === $user->id);
+    }
+
+    public function start(User $user, Work $work): bool
+    {
+        return $user->can(Permissions::WORK_EDIT_ALL->label())
+            && $work->status === WorkStatus::NEW;
+    }
+
+    public function end(User $user, Work $work): bool
+    {
+        return $user->can(Permissions::WORK_EDIT_ALL->label())
+            && $work->status === WorkStatus::PROCESSING;
+    }
+
+    public function cancel(User $user, Work $work): bool
+    {
+        return $user->can(Permissions::WORK_EDIT_ALL->label())
+            && $work->status === WorkStatus::PROCESSING;
     }
 
     public function delete(User $user, Work $work): bool
