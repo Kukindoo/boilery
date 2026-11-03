@@ -1,12 +1,5 @@
 <?php
 
-use App\Http\Controllers\Quotes\QuoteAcceptController;
-use App\Http\Controllers\Quotes\QuoteController;
-use App\Http\Controllers\Quotes\QuotePrintController;
-use App\Http\Controllers\Quotes\RequestedQuoteFilePreviewController;
-use App\Http\Controllers\Tests\EmailColdTestController;
-use App\Http\Controllers\Works\RequestedWorkFilePreviewController;
-use App\Http\Controllers\Works\WorksController;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -39,36 +32,6 @@ Route::middleware(['auth'])->group(function () {
             ),
         )
         ->name('two-factor.show');
-
-    Route::name('quotes.')->prefix('quotes')->group(function () {
-        Route::controller(QuoteController::class)->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/{quote}', 'show')->name('show');
-        });
-
-        Route::get(
-            '/{quote}/files/{file}/preview',
-            RequestedQuoteFilePreviewController::class
-        )->name('files.preview');
-
-        Route::controller(QuotePrintController::class)->group(function () {
-            Route::get('/{quote}/print', 'show')->name('print');
-        });
-
-        Route::post('/{quote}/accept', QuoteAcceptController::class)->name('accept');
-    });
-
-    Route::resource('works', WorksController::class)
-        ->only(['index', 'create', 'show', 'edit']);
-
-    Route::get(
-        'works/{work}/files/{file}/preview',
-        RequestedWorkFilePreviewController::class
-    )->name('works.files.preview');
-
-    Route::post('tests/email',
-        EmailColdTestController::class
-    )->name('tests.email');
 });
 
 require __DIR__ . '/auth.php';
