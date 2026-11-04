@@ -8,9 +8,9 @@ use Illuminate\Support\Str;
 
 class GenerateFileLabel
 {
-    public function handle(Quote     $quote,
-                           FileTypes $fileType,
-                           ?string   $extension = null
+    public function handle(Quote $quote,
+        FileTypes $fileType,
+        ?string $extension = null
     ): string {
 
         $fileLabelDirty = implode('_', [
@@ -22,10 +22,16 @@ class GenerateFileLabel
 
         $fileLabel = Str::ascii($fileLabelDirty);
 
-        if (is_null($extension)) {
-            return $fileLabel;
+        $extensionSuffix = is_null($extension) ? '' : '.' . $extension;
+        $existingLabels = $quote->files()->pluck('label');
+        $candidate = $fileLabel . $extensionSuffix;
+        $number = 1;
+
+        while ($existingLabels->contains($candidate)) {
+            $candidate = $fileLabel . '_' . $number . $extensionSuffix;
+            $number++;
         }
 
-        return $fileLabel . '.' . $extension;
+        return $candidate;
     }
 }
