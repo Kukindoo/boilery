@@ -12,7 +12,7 @@ class EndWork
         Gate::authorize('end', $work);
         $work->end();
 
-        activity()
+        activity('works')
             ->performedOn($work)
             ->log('Work finished');
     }

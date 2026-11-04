@@ -12,7 +12,7 @@ class CancelWork
         Gate::authorize('cancel', $work);
         $work->cancel();
 
-        activity()
+        activity('works')
             ->performedOn($work)
             ->log('Work cancelled');
     }

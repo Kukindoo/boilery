@@ -12,7 +12,7 @@ class StartWork
         Gate::authorize('start', $work);
         $work->start();
 
-        activity()
+        activity('works')
             ->performedOn($work)
             ->log('Work started');
     }
