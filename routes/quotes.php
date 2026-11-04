@@ -22,4 +22,4 @@ Route::controller(QuotePrintController::class)->group(function () {
 
 Route::post('/{quote}/accept', QuoteAcceptController::class)->name('accept');
 
-Route::get('/{quote}/generate-pdf', QuotePdfController::class)->name('generate-pdf');
+Route::post('/{quote}/generate-pdf', QuotePdfController::class)->name('generate-pdf');

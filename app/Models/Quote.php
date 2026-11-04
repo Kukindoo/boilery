@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\BoilerManufacturers;
 use App\Enums\FileTypes;
+use App\Enums\QuotePdfStatus;
 use App\Enums\QuoteStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +30,8 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property ?BoilerManufacturers $boiler_manufacturer
  * @property ?string $boiler_serial_number
  * @property ?string $boiler_type
+ * @property ?QuotePdfStatus $pdf_generation_status
+ * @property ?string $pdf_generation_id
  * @property ?Carbon $created_at
  * @property ?Carbon $deleted_at
  * @property ?Carbon $updated_at
@@ -85,6 +88,11 @@ class Quote extends Model
             ->exists();
     }
 
+    public function pdfGenerationInProgress(): bool
+    {
+        return in_array($this->pdf_generation_status, [QuotePdfStatus::QUEUED, QuotePdfStatus::PROCESSING], true);
+    }
+
     /** @return HasOne<Work, $this> */
     public function work(): HasOne
     {
@@ -96,6 +104,7 @@ class Quote extends Model
         return [
             'under_warranty' => 'boolean',
             'status' => QuoteStatus::class,
+            'pdf_generation_status' => QuotePdfStatus::class,
             'boiler_manufacturer' => BoilerManufacturers::class,
         ];
     }

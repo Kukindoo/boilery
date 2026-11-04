@@ -5,13 +5,8 @@
                 Poptávka {{ $quote->id }}
                 <flux:text>{{ $quote->first_name }} {{ $quote->last_name }}</flux:text>
             </flux:heading>
-            <div>
-                @if( auth()->user()->can('generate-pdf', $quote) )
-                    <flux:button size="sm" icon="printer" :href="route('quotes.generate-pdf', $quote)">
-                        Generovat PDF
-                    </flux:button>
-
-                @endif
+            <div class="flex flex-wrap items-start justify-end gap-2">
+                <livewire:quotes.quote-pdf-generation :quote="$quote" />
                 @if( auth()->user()->can('accept', $quote) )
                     <form method="POST" action="{{ route('quotes.accept', $quote) }}" class="inline-block">
                         @csrf
