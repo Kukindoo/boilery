@@ -29,9 +29,15 @@
                         @endforeach
                     </flux:menu.submenu>
                     <flux:menu.separator/>
-                    <flux:menu.item variant="danger" icon="trash" disabled>
+                    <flux:menu.item variant="danger" icon="trash" wire:click="deleteFile({{ $file }})">
                         Smazat
                     </flux:menu.item>
+                    <flux:modal.trigger name="delete-profile">
+                    <flux:menu.item variant="danger" icon="trash">
+                        Smazat
+                    </flux:menu.item>
+                    </flux:modal.trigger>
+
                 </flux:menu>
             </flux:dropdown>
         </div>
@@ -50,4 +56,28 @@
             ></iframe>
         @endif
     </div>
+    <flux:modal name="delete-profile" class="min-w-[22rem]">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">
+                    Smazat přílohu?
+                </flux:heading>
+                <flux:text class="mt-2">
+                    Chystáte se smazat tuto přílohu.<br>
+                    Tuto akci nelze vrátit zpět.
+                </flux:text>
+            </div>
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost">
+                        Zrušit
+                    </flux:button>
+                </flux:modal.close>
+                <flux:button type="submit" variant="danger" wire:click="deleteFile({{ $file }})">
+                    Smazat přílohu
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </li>

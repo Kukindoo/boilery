@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Quotes;
 
+use App\Actions\Files\DeleteFile;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Quote;
+use Exception;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -56,5 +58,14 @@ class QuoteDownloadCard extends Component
             $this->file->path,
             $this->file->label,
         );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function deleteFile(File $file): void
+    {
+        app(DeleteFile::class)->handle($file);
+        $this->redirect(route('quotes.show', $this->quote));
     }
 }
