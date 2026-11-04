@@ -29,13 +29,10 @@
                         @endforeach
                     </flux:menu.submenu>
                     <flux:menu.separator/>
-                    <flux:menu.item variant="danger" icon="trash" wire:click="deleteFile({{ $file }})">
-                        Smazat
-                    </flux:menu.item>
                     <flux:modal.trigger name="delete-profile">
-                    <flux:menu.item variant="danger" icon="trash">
-                        Smazat
-                    </flux:menu.item>
+                        <flux:menu.item variant="danger" icon="trash">
+                            Smazat
+                        </flux:menu.item>
                     </flux:modal.trigger>
 
                 </flux:menu>
@@ -68,7 +65,7 @@
                 </flux:text>
             </div>
             <div class="flex gap-2">
-                <flux:spacer />
+                <flux:spacer/>
                 <flux:modal.close>
                     <flux:button variant="ghost">
                         Zrušit
