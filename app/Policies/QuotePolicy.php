@@ -53,6 +53,12 @@ class QuotePolicy
                     && $quote->user_id === $user->id));
     }
 
+    public function generatePdf(User $user, Quote $quote): bool
+    {
+        return $this->viewAny($user)
+            && $user->can(Permissions::GENERATE_PDF->label());
+    }
+
     public function reassignment(User $user, Quote $quote): bool
     {
         return ! $quote->isClosed()

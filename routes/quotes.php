@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Quotes\QuoteAcceptController;
 use App\Http\Controllers\Quotes\QuoteController;
+use App\Http\Controllers\Quotes\QuotePdfController;
 use App\Http\Controllers\Quotes\QuotePrintController;
 use App\Http\Controllers\Quotes\RequestedQuoteFilePreviewController;
 
@@ -20,3 +21,5 @@ Route::controller(QuotePrintController::class)->group(function () {
 });
 
 Route::post('/{quote}/accept', QuoteAcceptController::class)->name('accept');
+
+Route::get('/{quote}/generate-pdf', QuotePdfController::class)->name('generate-pdf');

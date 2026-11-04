@@ -6,9 +6,9 @@
                 <flux:text>{{ $quote->first_name }} {{ $quote->last_name }}</flux:text>
             </flux:heading>
             <div>
-                @if( auth()->user()->can('view', $quote) )
-                    <flux:button size="sm" icon="printer" :href="route('quotes.print', $quote)" target="_blank">
-                        Vytisknout poptávku
+                @if( auth()->user()->can('generate-pdf', $quote) )
+                    <flux:button size="sm" icon="printer" :href="route('quotes.generate-pdf', $quote)" target="_blank">
+                        Generovat PDF
                     </flux:button>
                 @endif
                 @if( auth()->user()->can('accept', $quote) )
