@@ -29,7 +29,7 @@
                         @endforeach
                     </flux:menu.submenu>
                     <flux:menu.separator/>
-                    <flux:modal.trigger name="delete-profile">
+                    <flux:modal.trigger name="delete-attachment">
                         <flux:menu.item variant="danger" icon="trash">
                             Smazat
                         </flux:menu.item>
@@ -52,7 +52,7 @@
             ></iframe>
         @endif
     </div>
-    <flux:modal name="delete-profile" class="min-w-[22rem]">
+    <flux:modal name="delete-attachment" class="min-w-[22rem]">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg">
