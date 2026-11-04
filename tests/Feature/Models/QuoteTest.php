@@ -13,6 +13,56 @@ use Tests\Feature\FeatureTestCase;
 
 class QuoteTest extends FeatureTestCase
 {
+    public function test_quote_without_files_has_no_summary(): void
+    {
+        $quote = Quote::factory()->create();
+
+        $this->assertFalse($quote->hasQuoteSummary());
+    }
+
+    public function test_detects_summary_creation_and_removal_despite_a_loaded_files_collection(): void
+    {
+        $quote = Quote::factory()->create();
+        $quote->load('files');
+        $attributes = [
+            'original_name' => 'summary.pdf',
+            'file_type' => FileTypes::QUOTE_SUMMARY,
+            'extension' => 'pdf',
+            'size' => 100,
+            'mime_type' => 'application/pdf',
+            'path' => 'quotes/summary.pdf',
+            'label' => 'Summary',
+        ];
+
+        $file = $quote->files()->create($attributes);
+
+        $this->assertTrue($quote->hasQuoteSummary());
+
+        $quote->load('files');
+        $file->delete();
+
+        $this->assertFalse($quote->hasQuoteSummary());
+    }
+
+    public function test_other_attachment_types_and_another_quotes_summary_do_not_count_as_a_summary(): void
+    {
+        $quote = Quote::factory()->create();
+        $otherQuote = Quote::factory()->create();
+        $attributes = [
+            'original_name' => 'receipt.pdf',
+            'file_type' => FileTypes::RECEIPT,
+            'extension' => 'pdf',
+            'size' => 100,
+            'mime_type' => 'application/pdf',
+            'path' => 'quotes/receipt.pdf',
+            'label' => 'Receipt',
+        ];
+        $quote->files()->create($attributes);
+        $otherQuote->files()->create([...$attributes, 'file_type' => FileTypes::QUOTE_SUMMARY]);
+
+        $this->assertFalse($quote->hasQuoteSummary());
+    }
+
     public function test_persists_customer_and_boiler_details_with_the_configured_casts(): void
     {
         $attributes = [
