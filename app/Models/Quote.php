@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\BoilerManufacturers;
+use App\Enums\FileTypes;
 use App\Enums\QuoteStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -75,6 +76,13 @@ class Quote extends Model
     {
         return $this->status === QuoteStatus::ACCEPTED
             or $this->status === QuoteStatus::REJECTED;
+    }
+
+    public function hasQuoteSummary(): bool
+    {
+        return $this->files()
+            ->where('file_type', FileTypes::QUOTE_SUMMARY->value)
+            ->exists();
     }
 
     /** @return HasOne<Work, $this> */

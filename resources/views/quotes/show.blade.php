@@ -7,9 +7,10 @@
             </flux:heading>
             <div>
                 @if( auth()->user()->can('generate-pdf', $quote) )
-                    <flux:button size="sm" icon="printer" :href="route('quotes.generate-pdf', $quote)" target="_blank">
+                    <flux:button size="sm" icon="printer" :href="route('quotes.generate-pdf', $quote)">
                         Generovat PDF
                     </flux:button>
+
                 @endif
                 @if( auth()->user()->can('accept', $quote) )
                     <form method="POST" action="{{ route('quotes.accept', $quote) }}" class="inline-block">
