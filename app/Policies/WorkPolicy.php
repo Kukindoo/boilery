@@ -40,7 +40,9 @@ class WorkPolicy
     public function start(User $user, Work $work): bool
     {
         return $user->can(Permissions::WORK_EDIT_ALL->label())
-            && $work->status === WorkStatus::NEW;
+            && ($work->status === WorkStatus::NEW
+            || $work->status === WorkStatus::FINISHED
+            || $work->status === WorkStatus::CANCELLED);
     }
 
     public function end(User $user, Work $work): bool
