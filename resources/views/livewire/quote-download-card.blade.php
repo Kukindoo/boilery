@@ -34,7 +34,6 @@
                             Smazat
                         </flux:menu.item>
                     </flux:modal.trigger>
-
                 </flux:menu>
             </flux:dropdown>
         </div>
