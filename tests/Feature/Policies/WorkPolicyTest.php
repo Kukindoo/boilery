@@ -3,6 +3,7 @@
 namespace Tests\Feature\Policies;
 
 use App\Enums\Permissions;
+use App\Enums\WorkStatus;
 use App\Models\User;
 use App\Models\Work;
 use Illuminate\Support\Facades\Gate;
@@ -65,6 +66,23 @@ class WorkPolicyTest extends FeatureTestCase
         return $cases;
     }
 
+    /** @return array<string, array{string, WorkStatus, ?Permissions, bool}> */
+    public static function transitionPermissions(): array
+    {
+        $cases = [];
+
+        foreach (['start' => WorkStatus::NEW, 'end' => WorkStatus::PROCESSING] as $ability => $requiredStatus) {
+            foreach (WorkStatus::cases() as $status) {
+                foreach ([null, Permissions::WORK_EDIT_OWN, Permissions::WORK_EDIT_ALL] as $permission) {
+                    $key = $ability . ' ' . $status->value . ' ' . ($permission?->name ?? 'none');
+                    $cases[$key] = [$ability, $status, $permission, $permission === Permissions::WORK_EDIT_ALL && $status === $requiredStatus];
+                }
+            }
+        }
+
+        return $cases;
+    }
+
     #[DataProvider('permissions')]
     public function test_create_requires_its_own_permission(?Permissions $permission): void
     {
@@ -98,6 +116,15 @@ class WorkPolicyTest extends FeatureTestCase
             'work_completed_at' => $completed ? '2026-10-01' : null,
             'deleted_at' => $trashed ? '2026-10-01 12:00:00' : null,
         ]);
+
+        $this->assertSame($allowed, $user->can($ability, $work));
+    }
+
+    #[DataProvider('transitionPermissions')]
+    public function test_transitions_require_edit_all_permission_and_the_correct_status(string $ability, WorkStatus $status, ?Permissions $permission, bool $allowed): void
+    {
+        $user = $this->userWithPermission($permission);
+        $work = Work::factory()->make(['user_id' => $user->id, 'status' => $status]);
 
         $this->assertSame($allowed, $user->can($ability, $work));
     }

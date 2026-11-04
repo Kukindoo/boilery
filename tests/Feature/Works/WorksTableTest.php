@@ -3,6 +3,7 @@
 namespace Tests\Feature\Works;
 
 use App\Enums\Permissions;
+use App\Enums\WorkStatus;
 use App\Livewire\Works\WorksTable;
 use App\Models\User;
 use App\Models\Work;
@@ -18,6 +19,7 @@ class WorksTableTest extends FeatureTestCase
         $newer = Work::factory()->for($user)->create([
             'order_id' => 'ORDER-NEW',
             'type_of_product' => 'Boiler',
+            'status' => WorkStatus::PROCESSING,
             'work_accepted_at' => '2026-01-02',
             'work_completed_at' => '2026-01-03',
             'created_at' => '2026-01-02',
@@ -27,10 +29,41 @@ class WorksTableTest extends FeatureTestCase
         Livewire::actingAs($user)->test(WorksTable::class)
             ->assertSeeInOrder([$newer->order_id, $older->order_id])
             ->assertSee($user->name)
-            ->assertSee('Boiler')
+            ->assertSee('Status')
+            ->assertSee('Probíhá')
+            ->assertDontSee('Typ výrobku')
+            ->assertDontSee('Boiler')
             ->assertSee('02.01.2026')
             ->assertSee('03.01.2026')
             ->assertDontSee('ORDER-DELETED');
+    }
+
+    public function test_filters_by_multiple_statuses_and_resets_pagination(): void
+    {
+        $user = $this->viewer();
+        Work::factory()->for($user)->create(['order_id' => 'NEW-WORK', 'status' => WorkStatus::NEW]);
+        Work::factory()->for($user)->create(['order_id' => 'ACTIVE-WORK', 'status' => WorkStatus::PROCESSING]);
+        Work::factory()->for($user)->create(['order_id' => 'DONE-WORK', 'status' => WorkStatus::FINISHED]);
+        Work::factory()->for($user)->create(['order_id' => 'CANCELLED-WORK', 'status' => WorkStatus::CANCELLED]);
+
+        Livewire::actingAs($user)->test(WorksTable::class)
+            ->assertSee('NEW-WORK')->assertSee('ACTIVE-WORK')
+            ->assertDontSee('DONE-WORK')->assertDontSee('CANCELLED-WORK')
+            ->set('selectedStatuses', [WorkStatus::FINISHED->value, WorkStatus::CANCELLED->value])
+            ->assertSee('DONE-WORK')->assertSee('CANCELLED-WORK')
+            ->call('setPage', 2)
+            ->set('selectedStatuses', [WorkStatus::NEW->value, WorkStatus::PROCESSING->value])
+            ->assertSet('paginators.page', 1)
+            ->assertSee('NEW-WORK')->assertSee('ACTIVE-WORK')
+            ->assertDontSee('DONE-WORK')->assertDontSee('CANCELLED-WORK')
+            ->set('search', 'ACTIVE')
+            ->assertSee('ACTIVE-WORK')->assertDontSee('NEW-WORK')
+            ->set('selectedStatuses', [WorkStatus::FINISHED->value])
+            ->assertSee('Žádné zakázky.')
+            ->set('search', '')
+            ->assertSee('DONE-WORK')
+            ->set('selectedStatuses', [])
+            ->assertSee('Žádné zakázky.');
     }
 
     public function test_paginates_fifteen_works(): void
@@ -66,6 +99,20 @@ class WorksTableTest extends FeatureTestCase
             ->assertSet('sortDirection', 'desc')
             ->assertSeeInOrder(['ORDER-15', 'ORDER-14'])
             ->assertDontSee('ORDER-00');
+    }
+
+    public function test_sorts_works_by_status(): void
+    {
+        $user = $this->viewer();
+        Work::factory()->for($user)->create(['order_id' => 'NEW-WORK', 'status' => WorkStatus::NEW]);
+        Work::factory()->for($user)->create(['order_id' => 'FINISHED-WORK', 'status' => WorkStatus::FINISHED]);
+
+        Livewire::actingAs($user)->test(WorksTable::class)
+            ->set('selectedStatuses', [WorkStatus::NEW->value, WorkStatus::FINISHED->value])
+            ->call('sort', 'status')
+            ->assertSeeInOrder(['FINISHED-WORK', 'NEW-WORK'])
+            ->call('sort', 'status')
+            ->assertSeeInOrder(['NEW-WORK', 'FINISHED-WORK']);
     }
 
     public function test_rejects_unrecognized_sort_columns(): void
@@ -127,7 +174,7 @@ class WorksTableTest extends FeatureTestCase
     public function test_escapes_work_details(): void
     {
         $user = $this->viewer();
-        Work::factory()->for($user)->create(['type_of_product' => '<script>alert(1)</script>']);
+        Work::factory()->for($user)->create(['order_id' => '<script>alert(1)</script>']);
 
         Livewire::actingAs($user)->test(WorksTable::class)
             ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)
