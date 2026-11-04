@@ -71,11 +71,17 @@ class WorkPolicyTest extends FeatureTestCase
     {
         $cases = [];
 
-        foreach (['start' => WorkStatus::NEW, 'end' => WorkStatus::PROCESSING] as $ability => $requiredStatus) {
+        $allowedStatuses = [
+            'start' => [WorkStatus::NEW, WorkStatus::FINISHED, WorkStatus::CANCELLED],
+            'end' => [WorkStatus::PROCESSING],
+            'cancel' => [WorkStatus::PROCESSING],
+        ];
+
+        foreach ($allowedStatuses as $ability => $statuses) {
             foreach (WorkStatus::cases() as $status) {
                 foreach ([null, Permissions::WORK_EDIT_OWN, Permissions::WORK_EDIT_ALL] as $permission) {
                     $key = $ability . ' ' . $status->value . ' ' . ($permission?->name ?? 'none');
-                    $cases[$key] = [$ability, $status, $permission, $permission === Permissions::WORK_EDIT_ALL && $status === $requiredStatus];
+                    $cases[$key] = [$ability, $status, $permission, $permission === Permissions::WORK_EDIT_ALL && in_array($status, $statuses, true)];
                 }
             }
         }

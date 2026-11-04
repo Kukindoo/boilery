@@ -17,6 +17,8 @@ class WorkLifecycleTest extends FeatureTestCase
     {
         return [
             'start' => ['start', WorkStatus::NEW, WorkStatus::PROCESSING, 'work_started_at', 'Work started'],
+            'restart finished' => ['start', WorkStatus::FINISHED, WorkStatus::PROCESSING, 'work_started_at', 'Work started'],
+            'restart cancelled' => ['start', WorkStatus::CANCELLED, WorkStatus::PROCESSING, 'work_started_at', 'Work started'],
             'end' => ['end', WorkStatus::PROCESSING, WorkStatus::FINISHED, 'work_completed_at', 'Work finished'],
         ];
     }
@@ -27,6 +29,7 @@ class WorkLifecycleTest extends FeatureTestCase
         return [
             'start' => ['start', WorkStatus::NEW],
             'end' => ['end', WorkStatus::PROCESSING],
+            'cancel' => ['cancel', WorkStatus::PROCESSING],
         ];
     }
 
@@ -102,17 +105,22 @@ class WorkLifecycleTest extends FeatureTestCase
         $work = Work::factory()->create();
 
         $this->actingAs($user)->get(route('works.show', $work))
-            ->assertSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku');
+            ->assertSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
         $this->post(route('works.start', $work));
         $this->get(route('works.show', $work))
-            ->assertDontSee('Zahájit zakázku')->assertSee('Dokončit zakázku');
+            ->assertDontSee('Zahájit zakázku')->assertSee('Dokončit zakázku')->assertSee('Zrušit zakázku');
         $this->post(route('works.end', $work));
         $this->get(route('works.show', $work))
-            ->assertDontSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku');
+            ->assertSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
+
+        $this->post(route('works.start', $work))->assertRedirect(route('works.show', $work));
+        $this->post(route('works.cancel', $work))->assertRedirect(route('works.show', $work));
+        $this->get(route('works.show', $work))
+            ->assertSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
 
         $user->revokePermissionTo(Permissions::WORK_EDIT_ALL);
         $newWork = Work::factory()->create();
         $this->get(route('works.show', $newWork))
-            ->assertDontSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku');
+            ->assertDontSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
     }
 }
