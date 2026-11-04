@@ -2,9 +2,13 @@
 
 namespace App\Livewire\Works;
 
+use App\Actions\Works\CancelWork;
 use App\Actions\Works\DeleteWork;
+use App\Actions\Works\EndWork;
+use App\Actions\Works\StartWork;
 use App\Enums\WorkStatus;
 use App\Models\Work;
+use Exception;
 use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
@@ -64,7 +68,7 @@ class WorksTable extends Component
                 $query->where(function ($query): void {
                     $query->where('order_id', 'like', '%' . $this->search . '%')
                         ->orWhere('type_of_product', 'like', '%' . $this->search . '%')
-                        ->orWhereHas('user', fn($query) => $query->where('name', 'like', '%' . $this->search . '%'));
+                        ->orWhereHas('user', fn ($query) => $query->where('name', 'like', '%' . $this->search . '%'));
                 });
             })
             ->orderBy($this->sortBy, $this->sortDirection)
@@ -109,6 +113,36 @@ class WorksTable extends Component
     public function render(): View
     {
         return view('livewire.works-table');
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function startWork(Work $work): void
+    {
+        Gate::authorize('start', $work);
+        app(StartWork::class)->handle($work);
+        $this->resetPage();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function endWork(Work $work): void
+    {
+        Gate::authorize('end', $work);
+        app(EndWork::class)->handle($work);
+        $this->resetPage();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function cancelWork(Work $work): void
+    {
+        Gate::authorize('cancel', $work);
+        app(CancelWork::class)->handle($work);
+        $this->resetPage();
     }
 
     /** @return list<string> */
