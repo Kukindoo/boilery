@@ -80,9 +80,13 @@ enum Permissions: int
 
     case FILE_FORCE_DELETE_OWN = 38;
 
+    case GENERATE_PDF = 39;
+
     public function label(): string
     {
         return match ($this) {
+            self::GENERATE_PDF => 'Generate PDF',
+
             self::FILE_VIEW_ALL => 'View all files',
             self::FILE_VIEW_OWN => 'View own files',
             self::FILE_CREATE_ALL => 'Create all files',
