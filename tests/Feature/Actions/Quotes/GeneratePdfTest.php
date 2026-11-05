@@ -38,15 +38,38 @@ class GeneratePdfTest extends FeatureTestCase
         Http::preventStrayRequests();
     }
 
+    public function test_upload_and_pdf_generation_require_an_assigned_customer(): void
+    {
+        Storage::fake('local');
+        $quote = Quote::factory()->create(['user_id' => null]);
+
+        foreach (['upload', 'pdf'] as $operation) {
+            try {
+                if ($operation === 'upload') {
+                    app(UploadQuoteFile::class)->handle(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
+                } else {
+                    app(GeneratePdf::class)->handle($quote);
+                }
+                $this->fail('Saving a file without a customer must fail.');
+            } catch (\Illuminate\Validation\ValidationException $exception) {
+                $this->assertArrayHasKey('user_id', $exception->errors());
+            }
+        }
+
+        Storage::disk()->assertEmpty();
+        $this->assertSame(0, $quote->files()->count());
+        Http::assertNothingSent();
+    }
+
     public function test_saves_quote_summary_on_the_default_disk_with_file_metadata(): void
     {
         Storage::fake('quote-documents');
         config([
             'filesystems.default' => 'quote-documents',
-            'app.files.quote_save_directory' => 'custom/quotes/{quote_id}',
+            'app.files.user_save_directory' => 'custom/users/{user_id}',
         ]);
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->create([
+        $quote = Quote::factory()->for(\App\Models\User::factory())->create([
             'first_name' => 'Jiří',
             'last_name' => 'Novák',
             'boiler_manufacturer' => BoilerManufacturers::DRAZICE,
@@ -69,7 +92,7 @@ class GeneratePdfTest extends FeatureTestCase
             'size' => 30,
         ]);
         $this->assertSame(FileTypes::QUOTE_SUMMARY, $file->file_type);
-        $this->assertStringStartsWith("custom/quotes/{$quote->id}/", $file->path);
+        $this->assertStringStartsWith("custom/users/{$quote->user_id}/", $file->path);
         Storage::disk()->assertExists($file->path);
         $this->assertSame(self::PDF_CONTENT, Storage::disk()->get($file->path));
         Http::assertSent(fn (Request $request): bool => $request->url() === self::ENDPOINT
@@ -84,7 +107,7 @@ class GeneratePdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->create(['address' => null]);
+        $quote = Quote::factory()->for(\App\Models\User::factory())->create(['address' => null]);
         $action = app(GeneratePdf::class);
 
         $first = $action->handle($quote);
@@ -101,13 +124,13 @@ class GeneratePdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->create();
+        $quote = Quote::factory()->for(\App\Models\User::factory())->create();
         $upload = app(UploadQuoteFile::class);
         $image = $upload->handle(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
         $image->update(['label' => '<script>attachment</script>.png']);
         $document = $upload->handle(UploadedFile::fake()->create('receipt.pdf', 10, 'application/pdf'), $quote, FileTypes::RECEIPT);
         $summary = $upload->handle(UploadedFile::fake()->create('old-summary.pdf', 10, 'application/pdf'), $quote, FileTypes::QUOTE_SUMMARY);
-        $otherQuote = Quote::factory()->create();
+        $otherQuote = Quote::factory()->for(\App\Models\User::factory())->create();
         $otherImage = $upload->handle(UploadedFile::fake()->image('other.png'), $otherQuote, FileTypes::BOILER_LABEL);
         $imageSource = 'data:image/png;base64,' . base64_encode(Storage::disk()->get($image->path));
         $quote->load('files');
@@ -128,7 +151,7 @@ class GeneratePdfTest extends FeatureTestCase
     public function test_missing_image_prevents_generating_an_incomplete_summary(): void
     {
         Storage::fake('local');
-        $quote = Quote::factory()->create();
+        $quote = Quote::factory()->for(\App\Models\User::factory())->create();
         $image = app(UploadQuoteFile::class)->handle(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
         Storage::disk()->delete($image->path);
 
@@ -148,7 +171,7 @@ class GeneratePdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response('Rendering failed', 500)]);
-        $quote = Quote::factory()->create();
+        $quote = Quote::factory()->for(\App\Models\User::factory())->create();
 
         $this->expectException(CouldNotGeneratePdf::class);
 
@@ -163,7 +186,7 @@ class GeneratePdfTest extends FeatureTestCase
     public function test_storage_failure_does_not_create_a_database_record(): void
     {
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->create();
+        $quote = Quote::factory()->for(\App\Models\User::factory())->create();
         $disk = Mockery::mock(FilesystemAdapter::class);
         $disk->shouldReceive('put')->once()->with(Mockery::type('string'), self::PDF_CONTENT)->andReturnFalse();
         Storage::shouldReceive('disk')->once()->withNoArgs()->andReturn($disk);
@@ -182,7 +205,7 @@ class GeneratePdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->create();
+        $quote = Quote::factory()->for(\App\Models\User::factory())->create();
         File::creating(function (File $file): void {
             throw new RuntimeException('File record could not be saved.');
         });

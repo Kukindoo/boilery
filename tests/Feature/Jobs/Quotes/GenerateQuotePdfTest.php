@@ -4,7 +4,7 @@ namespace Tests\Feature\Jobs\Quotes;
 
 use App\Actions\Quotes\QueuePdf;
 use App\Enums\FileTypes;
-use App\Enums\QuotePdfStatus;
+use App\Enums\PdfGenerationStatus;
 use App\Jobs\Quotes\GenerateQuotePdf;
 use App\Models\Quote;
 use App\Models\User;
@@ -40,7 +40,7 @@ class GenerateQuotePdfTest extends FeatureTestCase
         Storage::fake('local');
         $quote = $this->queuedQuote();
         Http::fake([self::ENDPOINT => function (Request $request) use ($quote) {
-            $this->assertSame(QuotePdfStatus::PROCESSING, $quote->fresh()->pdf_generation_status);
+            $this->assertSame(PdfGenerationStatus::PROCESSING, $quote->fresh()->pdf_generation_status);
 
             return Http::response('%PDF-1.7 generated summary', 200);
         }]);
@@ -48,8 +48,9 @@ class GenerateQuotePdfTest extends FeatureTestCase
         GenerateQuotePdf::dispatchSync($quote->id, self::GENERATION_ID);
         GenerateQuotePdf::dispatchSync($quote->id, self::GENERATION_ID);
 
-        $this->assertSame(QuotePdfStatus::COMPLETED, $quote->fresh()->pdf_generation_status);
+        $this->assertSame(PdfGenerationStatus::COMPLETED, $quote->fresh()->pdf_generation_status);
         $file = $quote->files()->sole();
+        $this->assertStringStartsWith("files/users/{$quote->user_id}/", $file->path);
         $this->assertSame(FileTypes::QUOTE_SUMMARY, $file->file_type);
         Storage::disk()->assertExists($file->path);
         $this->assertSame('%PDF-1.7 generated summary', Storage::disk()->get($file->path));
@@ -61,19 +62,19 @@ class GenerateQuotePdfTest extends FeatureTestCase
         Storage::fake('local');
         config(['queue.default' => 'database']);
         Http::fake([self::ENDPOINT => Http::response('%PDF-1.7 queued summary', 200)]);
-        $quote = Quote::factory()->create();
+        $quote = Quote::factory()->for(User::factory())->create();
         $this->actingAs(User::factory()->admin()->create());
 
         app(QueuePdf::class)->handle($quote);
 
-        $this->assertSame(QuotePdfStatus::QUEUED, $quote->fresh()->pdf_generation_status);
+        $this->assertSame(PdfGenerationStatus::QUEUED, $quote->fresh()->pdf_generation_status);
         $this->assertFalse($quote->hasQuoteSummary());
         $this->assertDatabaseHas('jobs', ['queue' => 'default']);
 
         $this->artisan('queue:work', ['connection' => 'database', '--queue' => 'default', '--once' => true, '--sleep' => 0])
             ->assertExitCode(0);
 
-        $this->assertSame(QuotePdfStatus::COMPLETED, $quote->fresh()->pdf_generation_status);
+        $this->assertSame(PdfGenerationStatus::COMPLETED, $quote->fresh()->pdf_generation_status);
         Storage::disk()->assertExists($quote->files()->sole()->path);
         $this->assertDatabaseMissing('jobs', ['queue' => 'default']);
         Http::assertSentCount(1);
@@ -90,7 +91,7 @@ class GenerateQuotePdfTest extends FeatureTestCase
         try {
             GenerateQuotePdf::dispatchSync($quote->id, self::GENERATION_ID);
         } finally {
-            $this->assertSame(QuotePdfStatus::FAILED, $quote->fresh()->pdf_generation_status);
+            $this->assertSame(PdfGenerationStatus::FAILED, $quote->fresh()->pdf_generation_status);
             $this->assertFalse($quote->hasQuoteSummary());
             Storage::disk()->assertEmpty();
         }
@@ -104,7 +105,7 @@ class GenerateQuotePdfTest extends FeatureTestCase
         GenerateQuotePdf::dispatchSync($quote->id, $oldId);
         (new GenerateQuotePdf($quote->id, $oldId))->failed(new RuntimeException('Old failure'));
 
-        $this->assertSame(QuotePdfStatus::QUEUED, $quote->fresh()->pdf_generation_status);
+        $this->assertSame(PdfGenerationStatus::QUEUED, $quote->fresh()->pdf_generation_status);
         $this->assertFalse($quote->hasQuoteSummary());
         Http::assertNothingSent();
     }
@@ -121,7 +122,7 @@ class GenerateQuotePdfTest extends FeatureTestCase
         GenerateQuotePdf::dispatchSync($quote->id, self::GENERATION_ID);
         (new GenerateQuotePdf($quote->id, self::GENERATION_ID))->failed(new RuntimeException('Late failure'));
 
-        $this->assertSame(QuotePdfStatus::COMPLETED, $quote->fresh()->pdf_generation_status);
+        $this->assertSame(PdfGenerationStatus::COMPLETED, $quote->fresh()->pdf_generation_status);
         $this->assertSame(1, $quote->files()->count());
         Http::assertNothingSent();
     }
@@ -139,8 +140,8 @@ class GenerateQuotePdfTest extends FeatureTestCase
 
     private function queuedQuote(): Quote
     {
-        return Quote::factory()->create([
-            'pdf_generation_status' => QuotePdfStatus::QUEUED,
+        return Quote::factory()->for(User::factory())->create([
+            'pdf_generation_status' => PdfGenerationStatus::QUEUED,
             'pdf_generation_id' => self::GENERATION_ID,
         ]);
     }

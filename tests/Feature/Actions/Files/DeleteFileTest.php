@@ -90,7 +90,7 @@ class DeleteFileTest extends FeatureTestCase
     public function test_storage_failure_preserves_the_database_record(): void
     {
         Storage::fake('file-documents');
-        $file = $this->upload(Quote::factory()->create());
+        $file = $this->upload(Quote::factory()->for(User::factory())->create());
         $this->actingAs($this->operator(Permissions::FILE_DELETE_ALL));
         $disk = Mockery::mock(FilesystemAdapter::class);
         $disk->shouldReceive('delete')->once()->with($file->path)->andReturnFalse();
@@ -109,7 +109,7 @@ class DeleteFileTest extends FeatureTestCase
     public function test_removes_the_record_when_the_stored_file_is_already_missing(): void
     {
         Storage::fake('file-documents');
-        $file = $this->upload(Quote::factory()->create());
+        $file = $this->upload(Quote::factory()->for(User::factory())->create());
         Storage::disk()->delete($file->path);
         $this->actingAs($this->operator(Permissions::FILE_DELETE_ALL));
 
