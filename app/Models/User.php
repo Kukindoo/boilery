@@ -15,6 +15,8 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @property string $name
  * @property string $email
+ * @property string $phone
+ * @property string|null $address
  * @property string|null $remember_token
  * @property Carbon|null $email_verified_at
  */
@@ -31,6 +33,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
+        'address',
         'password',
     ];
 

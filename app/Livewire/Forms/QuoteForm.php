@@ -89,7 +89,7 @@ class QuoteForm extends Form
     public function submit(): Quote
     {
         $this->validate();
-        $namePlate = new NamePlate($this->firstName, $this->lastName, $this->email);
+        $namePlate = new NamePlate($this->firstName, $this->lastName, $this->email, $this->phone, $this->address);
 
         $user = app(CreateCustomer::class)->handle($namePlate);
 

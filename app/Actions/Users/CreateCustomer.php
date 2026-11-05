@@ -22,6 +22,11 @@ class CreateCustomer
 
         $user->assignRole(Roles::CUSTOMER->value);
 
+        $user->update([
+            'phone' => $namePlate->phone,
+            'address' => $namePlate->address ?: null,
+        ]);
+
         return $user;
     }
 }
