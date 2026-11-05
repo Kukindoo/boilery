@@ -56,6 +56,7 @@
         <flux:modal name="service-protocol-preview" class="w-full max-w-5xl">
             <div class="space-y-4">
                 <flux:heading size="lg">Servisní protokol – {{ $work->order_id }}</flux:heading>
+                <livewire:works.work-pdf-generation :work="$work" />
 
                 <iframe
                     title="Náhled servisního protokolu {{ $work->order_id }}"
