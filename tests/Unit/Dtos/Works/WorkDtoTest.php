@@ -3,6 +3,7 @@
 namespace Tests\Unit\Dtos\Works;
 
 use App\Dtos\Works\WorkDto;
+use App\Enums\BoilerManufacturers;
 use Tests\Unit\UnitTestCase;
 
 class WorkDtoTest extends UnitTestCase
@@ -14,6 +15,7 @@ class WorkDtoTest extends UnitTestCase
             quoteId: 7,
             orderId: 'ORDER-1',
             typeOfProduct: 'Boiler',
+            boilerManufacturer: BoilerManufacturers::DRAZICE,
             typeNumber: 'TYPE-1',
             serialNumber: 'SERIAL-1',
             warrantyAccepted: true,
@@ -39,6 +41,7 @@ class WorkDtoTest extends UnitTestCase
             'order_id' => 'ORDER-1',
             'status' => \App\Enums\WorkStatus::NEW,
             'type_of_product' => 'Boiler',
+            'boiler_manufacturer' => 'drazice',
             'type_number' => 'TYPE-1',
             'serial_number' => 'SERIAL-1',
             'warranty_accepted' => true,
@@ -91,6 +94,7 @@ class WorkDtoTest extends UnitTestCase
             'order_id' => null,
             'status' => \App\Enums\WorkStatus::NEW,
             'type_of_product' => null,
+            'boiler_manufacturer' => null,
             'type_number' => null,
             'serial_number' => null,
             'warranty_accepted' => null,
@@ -143,6 +147,7 @@ class WorkDtoTest extends UnitTestCase
             'order_id' => null,
             'status' => \App\Enums\WorkStatus::NEW,
             'type_of_product' => null,
+            'boiler_manufacturer' => null,
             'type_number' => null,
             'serial_number' => null,
             'warranty_accepted' => false,

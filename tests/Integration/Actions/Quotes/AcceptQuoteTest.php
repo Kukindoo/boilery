@@ -79,7 +79,8 @@ class AcceptQuoteTest extends IntegrationTestCase
             'quote_id' => $quote->id,
             'user_id' => $quote->user_id,
             'order_id' => 'QUOTE-' . $quote->id,
-            'type_of_product' => 'drazice',
+            'type_of_product' => null,
+            'boiler_manufacturer' => 'drazice',
             'type_number' => 'OKCE 125',
             'serial_number' => 'SERIAL-123',
             'reported_problem' => 'Water does not heat up.',
@@ -87,6 +88,17 @@ class AcceptQuoteTest extends IntegrationTestCase
             'work_accepted_at' => now()->toDateString(),
         ]);
         $this->assertDatabaseCount('works', 1);
+    }
+
+    public function test_acceptance_keeps_unknown_manufacturer_and_product_type_nullable(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+        $quote = Quote::factory()->for(User::factory()->customer())->create(['boiler_manufacturer' => null]);
+
+        $accepted = app(AcceptQuote::class)->handle($quote);
+
+        $this->assertNull($accepted->work->boiler_manufacturer);
+        $this->assertNull($accepted->work->type_of_product);
     }
 
     public function test_acceptance_links_all_quote_files_to_its_work_and_preserves_other_quote_files(): void

@@ -17,6 +17,12 @@
         <dl class="divide-y divide-subtle-border dark:divide-primary-dark-border/5">
             <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-heading-text dark:text-secondary-dark-text">
+                    Výrobce bojleru
+                </dt>
+                <dd class="mt-1 text-sm/6 text-body-text sm:col-span-2 sm:mt-0 dark:text-muted-dark-text">
+                    {{ $work->boiler_manufacturer?->label() ?? '—' }}
+                </dd>
+                <dt class="text-sm font-medium text-heading-text dark:text-secondary-dark-text">
                     Typ výrobku
                 </dt>
                 <dd class="mt-1 text-sm/6 text-body-text sm:col-span-2 sm:mt-0 dark:text-muted-dark-text">

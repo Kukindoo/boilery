@@ -22,8 +22,7 @@ readonly class CreateWork
             $attributes = $data->toArray();
 
             if ($data->orderId === null || $data->orderId === '') {
-                $manufacturer = BoilerManufacturers::tryFrom($data->typeOfProduct ?? '')
-                    ?? BoilerManufacturers::UNKNOWN;
+                $manufacturer = $data->boilerManufacturer ?? BoilerManufacturers::UNKNOWN;
                 $attributes['order_id'] = $this->generateOrderNumber->handle($manufacturer);
             }
 

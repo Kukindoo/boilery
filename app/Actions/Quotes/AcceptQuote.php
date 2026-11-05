@@ -41,7 +41,7 @@ class AcceptQuote
             $work = $quote->work()->withTrashed()->firstOrCreate([], [
                 'user_id' => $quote->user_id,
                 'order_id' => 'QUOTE-' . $quote->id,
-                'type_of_product' => $quote->boiler_manufacturer?->value,
+                'boiler_manufacturer' => $quote->boiler_manufacturer,
                 'type_number' => $quote->boiler_type,
                 'serial_number' => $quote->boiler_serial_number,
                 'reported_problem' => $quote->message,

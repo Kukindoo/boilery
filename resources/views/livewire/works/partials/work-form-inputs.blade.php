@@ -44,6 +44,16 @@
     </x-stellaris.livewire.forms.side-to-side.section>
 
     <x-stellaris.livewire.forms.side-to-side.section title="Informace o výrobku">
+        <x-stellaris.livewire.forms.side-to-side.field label="Výrobce bojleru">
+            <flux:select wire:model="form.boilerManufacturer">
+                <flux:select.option value="">Zvolte výrobce bojleru...</flux:select.option>
+                @foreach (\App\Enums\BoilerManufacturers::cases() as $manufacturer)
+                    <flux:select.option :value="$manufacturer->value">{{ $manufacturer->label() }}</flux:select.option>
+                @endforeach
+            </flux:select>
+            <flux:error name="form.boilerManufacturer" />
+        </x-stellaris.livewire.forms.side-to-side.field>
+
         <x-stellaris.livewire.forms.side-to-side.field label="Typ výrobku">
             <flux:input wire:model="form.typeOfProduct"/>
         </x-stellaris.livewire.forms.side-to-side.field>

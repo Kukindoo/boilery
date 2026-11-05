@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\BoilerManufacturers;
+use App\Enums\FileTypes;
+use App\Enums\WorkPdfStatus;
 use App\Enums\WorkStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +22,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property string $order_id
  * @property WorkStatus $status
  * @property ?string $type_of_product
+ * @property ?BoilerManufacturers $boiler_manufacturer
  * @property ?string $type_number
  * @property ?string $serial_number
  * @property bool $warranty_accepted
@@ -50,6 +54,7 @@ class Work extends Model
         'order_id',
         'status',
         'type_of_product',
+        'boiler_manufacturer',
         'type_number',
         'serial_number',
         'warranty_accepted',
@@ -98,6 +103,16 @@ class Work extends Model
         return $this->hasMany(File::class, 'work_id');
     }
 
+    public function hasServiceProtocol(): bool
+    {
+        return $this->files()->where('file_type', FileTypes::SERVICE_PROTOCOL->value)->exists();
+    }
+
+    public function pdfGenerationInProgress(): bool
+    {
+        return in_array($this->pdf_generation_status, [WorkPdfStatus::QUEUED, WorkPdfStatus::PROCESSING], true);
+    }
+
     public function start(): void
     {
         $this->status = WorkStatus::PROCESSING;
@@ -122,6 +137,8 @@ class Work extends Model
     {
         return [
             'status' => WorkStatus::class,
+            'pdf_generation_status' => WorkPdfStatus::class,
+            'boiler_manufacturer' => BoilerManufacturers::class,
             'warranty_accepted' => 'boolean',
             'day_of_purchase' => 'date',
             'work_accepted_at' => 'date',

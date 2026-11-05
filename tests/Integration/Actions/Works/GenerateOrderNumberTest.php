@@ -56,7 +56,8 @@ class GenerateOrderNumberTest extends IntegrationTestCase
             userId: User::factory()->create()->id,
             quoteId: null,
             orderId: null,
-            typeOfProduct: BoilerManufacturers::DRAZICE->value,
+            typeOfProduct: 'Ohřívač vody',
+            boilerManufacturer: BoilerManufacturers::DRAZICE,
             typeNumber: null,
             serialNumber: null,
             warrantyAccepted: false,
@@ -87,7 +88,7 @@ class GenerateOrderNumberTest extends IntegrationTestCase
         $this->assertSame('CUSTOM-123', $action->handle($data)->fresh()->order_id);
 
         $data->orderId = '';
-        $data->typeOfProduct = null;
+        $data->boilerManufacturer = null;
         $this->assertSame('320261022N', $action->handle($data)->fresh()->order_id);
     }
 }

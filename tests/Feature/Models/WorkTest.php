@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Models;
 
+use App\Enums\BoilerManufacturers;
 use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
@@ -17,6 +18,7 @@ class WorkTest extends FeatureTestCase
         $attributes = [
             'order_id' => 'WORK-2026-001',
             'type_of_product' => 'Boiler',
+            'boiler_manufacturer' => 'drazice',
             'type_number' => 'B-100',
             'serial_number' => 'SN-001',
             'warranty_accepted' => true,
@@ -42,6 +44,7 @@ class WorkTest extends FeatureTestCase
         $work->refresh();
 
         $this->assertDatabaseHas('works', ['id' => $work->id, ...$attributes]);
+        $this->assertSame(BoilerManufacturers::DRAZICE, $work->boiler_manufacturer);
         $this->assertTrue($work->warranty_accepted);
         $this->assertSame(15, $work->transport_rate_in_czk);
         $this->assertSame('12.50', $work->transport_distance_in_km);
@@ -71,6 +74,7 @@ class WorkTest extends FeatureTestCase
         $work = Work::factory()->create()->fresh();
 
         $this->assertNull($work->quote);
+        $this->assertNull($work->boiler_manufacturer);
         $this->assertFalse($work->warranty_accepted);
         $this->assertNull($work->repair_in_warranty);
         $this->assertNull($work->day_of_purchase);
