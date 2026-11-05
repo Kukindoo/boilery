@@ -18,7 +18,7 @@
                     Zákazník
                 </dt>
                 <dd class="mt-1 text-sm/6 text-body-text sm:col-span-2 sm:mt-0 dark:text-muted-dark-text">
-                    {{ $quote->first_name }} {{ $quote->last_name }}
+                    <x-customers.customer-name :customer="$quote->user" :name="trim($quote->first_name.' '.$quote->last_name)" />
                 </dd>
                 <dt class="text-sm font-medium text-heading-text dark:text-secondary-dark-text">
                     Telefón

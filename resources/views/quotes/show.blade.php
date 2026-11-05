@@ -3,7 +3,9 @@
         <div class="flex items-center justify-between gap-4">
             <flux:heading>
                 Poptávka {{ $quote->id }}
-                <flux:text>{{ $quote->first_name }} {{ $quote->last_name }}</flux:text>
+                <flux:text>
+                    <x-customers.customer-name :customer="$quote->user" :name="trim($quote->first_name.' '.$quote->last_name)" />
+                </flux:text>
             </flux:heading>
             <div class="flex flex-wrap items-start justify-end gap-2">
                 <livewire:quotes.quote-pdf-generation :quote="$quote" />

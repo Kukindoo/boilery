@@ -1,8 +1,10 @@
 <x-layouts::app :title="__('Zakázky')">
     <div class="space-y-6">
         <x-stellaris.container.model-card
-                :heading="__('Zakázka :order_id', ['order_id' => $work->order_id])"
-                :subheading="$work->user?->name ?? '—'">
+                :heading="__('Zakázka :order_id', ['order_id' => $work->order_id])">
+            <x-slot name="subheading">
+                <x-customers.customer-name :customer="$work->user" />
+            </x-slot>
             <x-slot name="actions">
                 <div>
                     <flux:modal.trigger name="service-protocol-preview">
