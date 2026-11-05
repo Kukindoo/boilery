@@ -3,7 +3,7 @@
 namespace App\Jobs\Quotes;
 
 use App\Actions\Quotes\GeneratePdf;
-use App\Enums\QuotePdfStatus;
+use App\Enums\PdfGenerationStatus;
 use App\Models\Quote;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -28,8 +28,8 @@ class GenerateQuotePdf implements ShouldQueue
     {
         $claimed = Quote::query()->whereKey($this->quoteId)
             ->where('pdf_generation_id', $this->generationId)
-            ->whereIn('pdf_generation_status', [QuotePdfStatus::QUEUED, QuotePdfStatus::FAILED])
-            ->update(['pdf_generation_status' => QuotePdfStatus::PROCESSING]);
+            ->whereIn('pdf_generation_status', [PdfGenerationStatus::QUEUED, PdfGenerationStatus::FAILED])
+            ->update(['pdf_generation_status' => PdfGenerationStatus::PROCESSING]);
 
         if (! $claimed) {
             return;
@@ -47,7 +47,7 @@ class GenerateQuotePdf implements ShouldQueue
 
         Quote::query()->whereKey($this->quoteId)
             ->where('pdf_generation_id', $this->generationId)
-            ->update(['pdf_generation_status' => QuotePdfStatus::COMPLETED]);
+            ->update(['pdf_generation_status' => PdfGenerationStatus::COMPLETED]);
     }
 
     public function failed(?Throwable $exception): void
@@ -60,6 +60,6 @@ class GenerateQuotePdf implements ShouldQueue
 
         Quote::query()->whereKey($this->quoteId)
             ->where('pdf_generation_id', $this->generationId)
-            ->update(['pdf_generation_status' => $quote->hasQuoteSummary() ? QuotePdfStatus::COMPLETED : QuotePdfStatus::FAILED]);
+            ->update(['pdf_generation_status' => $quote->hasQuoteSummary() ? PdfGenerationStatus::COMPLETED : PdfGenerationStatus::FAILED]);
     }
 }

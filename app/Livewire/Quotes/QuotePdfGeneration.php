@@ -3,7 +3,7 @@
 namespace App\Livewire\Quotes;
 
 use App\Actions\Quotes\QueuePdf;
-use App\Enums\QuotePdfStatus;
+use App\Enums\PdfGenerationStatus;
 use App\Models\Quote;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
@@ -32,7 +32,7 @@ class QuotePdfGeneration extends Component
         Gate::authorize('view', $this->quote);
         $this->quote->refresh();
 
-        if ($this->quote->pdf_generation_status === QuotePdfStatus::COMPLETED) {
+        if ($this->quote->pdf_generation_status === PdfGenerationStatus::COMPLETED) {
             $this->redirect(route('quotes.show', $this->quote), navigate: true);
         }
     }

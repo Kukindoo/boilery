@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Enums\BoilerManufacturers;
 use App\Enums\FileTypes;
-use App\Enums\WorkPdfStatus;
+use App\Enums\PdfGenerationStatus;
 use App\Enums\WorkStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +20,8 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int $user_id
  * @property ?int $quote_id
  * @property string $order_id
+ * @property ?PdfGenerationStatus $pdf_generation_status
+ * @property ?string $pdf_generation_id
  * @property WorkStatus $status
  * @property ?string $type_of_product
  * @property ?BoilerManufacturers $boiler_manufacturer
@@ -110,7 +112,7 @@ class Work extends Model
 
     public function pdfGenerationInProgress(): bool
     {
-        return in_array($this->pdf_generation_status, [WorkPdfStatus::QUEUED, WorkPdfStatus::PROCESSING], true);
+        return in_array($this->pdf_generation_status, [PdfGenerationStatus::QUEUED, PdfGenerationStatus::PROCESSING], true);
     }
 
     public function start(): void
@@ -137,7 +139,7 @@ class Work extends Model
     {
         return [
             'status' => WorkStatus::class,
-            'pdf_generation_status' => WorkPdfStatus::class,
+            'pdf_generation_status' => PdfGenerationStatus::class,
             'boiler_manufacturer' => BoilerManufacturers::class,
             'warranty_accepted' => 'boolean',
             'day_of_purchase' => 'date',

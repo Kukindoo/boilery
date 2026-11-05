@@ -2,7 +2,7 @@
 
 namespace App\Actions\Quotes;
 
-use App\Enums\QuotePdfStatus;
+use App\Enums\PdfGenerationStatus;
 use App\Jobs\Quotes\GenerateQuotePdf;
 use App\Models\Quote;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +25,7 @@ class QueuePdf
                     return;
                 }
 
-                $lockedQuote->pdf_generation_status = QuotePdfStatus::QUEUED;
+                $lockedQuote->pdf_generation_status = PdfGenerationStatus::QUEUED;
                 $lockedQuote->pdf_generation_id = $generationId;
                 $lockedQuote->save();
 
@@ -34,7 +34,7 @@ class QueuePdf
         } catch (Throwable $exception) {
             Quote::query()->whereKey($quote->id)
                 ->where('pdf_generation_id', $generationId)
-                ->update(['pdf_generation_status' => QuotePdfStatus::FAILED]);
+                ->update(['pdf_generation_status' => PdfGenerationStatus::FAILED]);
 
             throw $exception;
         }

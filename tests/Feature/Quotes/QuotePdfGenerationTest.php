@@ -3,7 +3,7 @@
 namespace Tests\Feature\Quotes;
 
 use App\Enums\FileTypes;
-use App\Enums\QuotePdfStatus;
+use App\Enums\PdfGenerationStatus;
 use App\Jobs\Quotes\GenerateQuotePdf;
 use App\Livewire\Quotes\QuotePdfGeneration;
 use App\Models\Quote;
@@ -29,7 +29,7 @@ class QuotePdfGenerationTest extends FeatureTestCase
             ->assertDontSee('Generovat PDF');
 
         $generationId = $quote->fresh()->pdf_generation_id;
-        $this->assertSame(QuotePdfStatus::QUEUED, $quote->fresh()->pdf_generation_status);
+        $this->assertSame(PdfGenerationStatus::QUEUED, $quote->fresh()->pdf_generation_status);
         $this->assertNotNull($generationId);
         $component->call('generate');
         $this->assertSame($generationId, $quote->fresh()->pdf_generation_id);
@@ -50,7 +50,7 @@ class QuotePdfGenerationTest extends FeatureTestCase
         $this->post(route('quotes.generate-pdf', $quote))->assertRedirectToRoute('quotes.show', $quote);
 
         Queue::assertPushed(GenerateQuotePdf::class, 1);
-        $this->assertSame(QuotePdfStatus::QUEUED, $quote->fresh()->pdf_generation_status);
+        $this->assertSame(PdfGenerationStatus::QUEUED, $quote->fresh()->pdf_generation_status);
     }
 
     public function test_customer_cannot_queue_a_pdf_for_their_quote(): void
@@ -78,7 +78,7 @@ class QuotePdfGenerationTest extends FeatureTestCase
 
     public function test_reloading_the_component_preserves_the_processing_indicator(): void
     {
-        $quote = Quote::factory()->create(['pdf_generation_status' => QuotePdfStatus::PROCESSING]);
+        $quote = Quote::factory()->create(['pdf_generation_status' => PdfGenerationStatus::PROCESSING]);
 
         Livewire::actingAs(User::factory()->admin()->create())
             ->test(QuotePdfGeneration::class, ['quote' => $quote])
@@ -90,10 +90,10 @@ class QuotePdfGenerationTest extends FeatureTestCase
     public function test_completion_refreshes_the_page_to_display_the_new_attachment_and_success_message(): void
     {
         $user = User::factory()->admin()->create();
-        $quote = Quote::factory()->create(['pdf_generation_status' => QuotePdfStatus::PROCESSING]);
+        $quote = Quote::factory()->create(['pdf_generation_status' => PdfGenerationStatus::PROCESSING]);
         $component = Livewire::actingAs($user)->test(QuotePdfGeneration::class, ['quote' => $quote]);
         $this->addSummary($quote);
-        $quote->forceFill(['pdf_generation_status' => QuotePdfStatus::COMPLETED])->save();
+        $quote->forceFill(['pdf_generation_status' => PdfGenerationStatus::COMPLETED])->save();
 
         $component->call('checkProgress')->assertRedirect(route('quotes.show', $quote));
 
@@ -107,12 +107,12 @@ class QuotePdfGenerationTest extends FeatureTestCase
     {
         Queue::fake([GenerateQuotePdf::class]);
         $quote = Quote::factory()->create([
-            'pdf_generation_status' => QuotePdfStatus::PROCESSING,
+            'pdf_generation_status' => PdfGenerationStatus::PROCESSING,
             'pdf_generation_id' => '00000000-0000-4000-8000-000000000001',
         ]);
         $component = Livewire::actingAs(User::factory()->admin()->create())
             ->test(QuotePdfGeneration::class, ['quote' => $quote]);
-        $quote->forceFill(['pdf_generation_status' => QuotePdfStatus::FAILED])->save();
+        $quote->forceFill(['pdf_generation_status' => PdfGenerationStatus::FAILED])->save();
 
         $component->call('checkProgress')
             ->assertSee('PDF se nepodařilo vygenerovat.')
