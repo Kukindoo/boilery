@@ -16,12 +16,17 @@
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         Přehled
                     </flux:navlist.item>
-                    <flux:navlist.item icon="clipboard-document-list" :href="route('quotes.index')" :current="request()->routeIs('quotes.index')" wire:navigate>
+                    <flux:navlist.item icon="clipboard-document-list" :href="route('quotes.index')" :current="request()->routeIs('quotes.*')" wire:navigate>
                         Poptávky
                     </flux:navlist.item>
-                    <flux:navlist.item icon="clipboard-document-list" :href="route('works.index')" :current="request()->routeIs('works.index')" wire:navigate>
+                    <flux:navlist.item icon="clipboard-document-list" :href="route('works.index')" :current="request()->routeIs('works.*')" wire:navigate>
                         Zakázky
                     </flux:navlist.item>
+                    @can('viewAny', \App\Models\User::class)
+                        <flux:navlist.item icon="users" :href="route('customers.index')" :current="request()->routeIs('customers.*')" wire:navigate>
+                            Zákazníci
+                        </flux:navlist.item>
+                    @endcan
                 </flux:navlist.group>
             </flux:navlist>
 
