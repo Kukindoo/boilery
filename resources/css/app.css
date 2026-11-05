@@ -23,16 +23,16 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
-    --color-accent: var(--color-strong-text);
-    --color-accent-content: var(--color-strong-text);
-    --color-accent-foreground: var(--color-primary-bg);
+    --color-accent: var(--color-neutral-800);
+    --color-accent-content: var(--color-neutral-800);
+    --color-accent-foreground: var(--color-white);
 }
 
 /* Shared website palette. Explicit view colours use these semantic roles.
    Light and dark values can be changed independently here. */
 @theme inline {
     /* Backgrounds */
-    --color-primary-bg: #ffffff;
+    --color-primary-bg: #e7decdff;
     --color-navigation-bg: var(--color-zinc-50);
     --color-muted-bg: var(--color-zinc-100);
     --color-secondary-bg: var(--color-zinc-200);
@@ -67,9 +67,9 @@
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-primary-dark-text);
-        --color-accent-content: var(--color-primary-dark-text);
-        --color-accent-foreground: var(--color-strong-text);
+        --color-accent: var(--color-white);
+        --color-accent-content: var(--color-white);
+        --color-accent-foreground: var(--color-neutral-800);
     }
 }
 
