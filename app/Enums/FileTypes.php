@@ -12,6 +12,8 @@ enum FileTypes: string
 
     case WARRANTY = 'warranty';
 
+    case SERVICE_PROTOCOL = 'service-protocol';
+
     case QUOTE_SUMMARY = 'quote-summary';
 
     public static function getOptions(): array
@@ -28,6 +30,7 @@ enum FileTypes: string
             self::BOILER_LABEL => 'Štítek',
             self::RECEIPT => 'Kupní smlouva',
             self::WARRANTY => 'Záruka',
+            self::SERVICE_PROTOCOL => 'Servisní protokol',
             self::QUOTE_SUMMARY => 'Shrnutí poptávky',
         };
     }
@@ -39,6 +42,7 @@ enum FileTypes: string
             self::BOILER_LABEL => 'stitek',
             self::RECEIPT => 'kupni_smlouva',
             self::WARRANTY => 'zaruka',
+            self::SERVICE_PROTOCOL => 'servisni_protokol',
             self::QUOTE_SUMMARY => 'shrnuti_poptavky'
         };
     }
