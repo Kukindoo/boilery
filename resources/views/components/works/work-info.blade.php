@@ -3,7 +3,7 @@
 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800/50 dark:shadow-none dark:inset-ring dark:inset-ring-white/10">
     <div class="px-4 py-6 sm:px-6 flex items-center justify-between">
         <h3 class="text-base/7 font-semibold text-gray-900 dark:text-white">
-            Informace o poptávce
+            Informace o Zakázce
         </h3>
         <div class="ml-4 shrink-0 print:hidden">
             @can('update', $work)
