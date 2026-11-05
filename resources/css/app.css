@@ -23,25 +23,46 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
-    --prussian-blue: #0a122aff;
-    --sage-green: #698f3fff;
-    --bright-snow: #fbfaf8ff;
-    --bone: #e7decdff;
-    --clay-soil: #804e49ff;
-
-    --color-text-primary-100: #e5e5e5;
-
-    --color-primary-bg: var(--bright-snow);
-    --color-primary-dark-bg: var(--prussian-blue);
-
-    --color-primary-dark-text: var(--bone);
-
-    --color-primary-dark-button-bg: var(--sage-green);
-
-
     --color-accent: var(--color-neutral-800);
     --color-accent-content: var(--color-neutral-800);
     --color-accent-foreground: var(--color-white);
+}
+
+/* Shared website palette. Explicit view colours use these semantic roles.
+   Light and dark values can be changed independently here. */
+@theme inline {
+    /* Backgrounds */
+    --color-primary-bg: #e7decdff;
+    --color-navigation-bg: var(--color-zinc-50);
+    --color-muted-bg: var(--color-zinc-100);
+    --color-secondary-bg: var(--color-zinc-200);
+    --color-primary-dark-hover-bg: var(--color-zinc-600);
+    --color-secondary-dark-bg: var(--color-zinc-700);
+    --color-primary-dark-bg: var(--color-zinc-800);
+    --color-navigation-dark-bg: var(--color-zinc-900);
+    --color-card-bg: var(--color-white);
+    --color-card-dark-bg: rgb(255 255 255 / 10%);
+
+    /* Text and icons */
+    --color-primary-text: #000000;
+    --color-primary-dark-text: #ffffff;
+    --color-secondary-dark-text: var(--color-zinc-100);
+    --color-muted-dark-text: var(--color-zinc-300);
+    --color-subtle-text: var(--color-zinc-400);
+    --color-muted-text: var(--color-zinc-500);
+    --color-secondary-text: var(--color-zinc-600);
+    --color-body-text: var(--color-zinc-700);
+    --color-strong-text: var(--color-zinc-800);
+    --color-heading-text: var(--color-zinc-900);
+
+    /* Borders and dividers */
+    --color-primary-dark-border: #ffffff;
+    --color-subtle-border: var(--color-zinc-100);
+    --color-primary-border: var(--color-zinc-200);
+    --color-control-border: var(--color-zinc-300);
+    --color-control-dark-border: var(--color-zinc-600);
+    --color-primary-dark-border-strong: var(--color-zinc-700);
+    --color-subtle-dark-border: var(--color-zinc-800);
 }
 
 @layer theme {

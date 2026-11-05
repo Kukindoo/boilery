@@ -4,7 +4,7 @@
     @include('partials.head')
 </head>
 <body class="min-h-screen bg-primary-bg dark:bg-primary-dark-bg">
-<flux:header container class="border-b border-zinc-200 bg-primary-bg dark:border-zinc-700 dark:bg-primary-dark-bg">
+<flux:header container class="border-b border-primary-border bg-navigation-bg dark:border-primary-dark-border-strong dark:bg-navigation-dark-bg">
     <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
     <a href="{{ route('home') }}" class="ms-2 me-5 flex items-center space-x-2 rtl:space-x-reverse lg:ms-0" wire:navigate>
@@ -32,7 +32,7 @@
 </flux:header>
 
 <!-- Mobile Menu -->
-<flux:sidebar stashable sticky class="lg:hidden border-e border-zinc-200 bg-primary-bg dark:border-zinc-700 dark:bg-primary-dark-bg">
+<flux:sidebar stashable sticky class="lg:hidden border-e border-primary-border bg-navigation-bg dark:border-primary-dark-border-strong dark:bg-navigation-dark-bg">
     <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
     <a href="{{ route('dashboard') }}" class="ms-1 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>

@@ -1,11 +1,11 @@
 <section
-        class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800/50 dark:shadow-none dark:inset-ring dark:inset-ring-white/10">
+        class="overflow-hidden bg-card-bg shadow-sm sm:rounded-lg dark:bg-card-dark-bg dark:shadow-none dark:inset-ring dark:inset-ring-primary-dark-border/10">
     <div class="px-4 py-6 sm:px-6">
-        <h3 class="text-base/7 font-semibold text-gray-900 dark:text-white">
+        <h3 class="text-base/7 font-semibold text-heading-text dark:text-primary-dark-text">
             {{ $title }}
         </h3>
     </div>
-    <div class="divide-y divide-gray-100 border-t border-gray-100 dark:divide-white/5 dark:border-white/5">
+    <div class="divide-y divide-subtle-border border-t border-subtle-border dark:divide-primary-dark-border/5 dark:border-primary-dark-border/5">
         {{ $slot }}
     </div>
 </section>

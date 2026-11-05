@@ -31,7 +31,7 @@
     </div>
 
     <div class="sm:col-span-2">
-        <label for="boiler-manufacturer" class="block text-sm/6 font-semibold text-gray-900 dark:text-white">
+        <label for="boiler-manufacturer" class="block text-sm/6 font-semibold text-heading-text dark:text-primary-dark-text">
             Výrobce bojlerů
         </label>
         <flux:select wire:model="form.boilerManufacturer" variant="listbox" placeholder="Zvolte výrobce bojlerů...">

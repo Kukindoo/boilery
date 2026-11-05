@@ -1,4 +1,4 @@
-<flux:card>
+<flux:card class="bg-card-bg dark:bg-card-dark-bg">
     <div class="flex items-center justify-between gap-4 my-4">
 
         <flux:heading size="xl">

@@ -3,8 +3,8 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <body class="min-h-screen bg-primary-bg dark:bg-primary-dark-bg">
+        <flux:sidebar sticky stashable class="border-e border-primary-border bg-navigation-bg dark:border-primary-dark-border-strong dark:bg-navigation-dark-bg">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
             <a href="{{ route('home') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
@@ -56,7 +56,7 @@
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
                                 <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
                                     <span
-                                        class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
+                                        class="flex h-full w-full items-center justify-center rounded-lg bg-secondary-bg text-primary-text dark:bg-secondary-dark-bg dark:text-primary-dark-text"
                                     >
                                         {{ auth()->user()->initials() }}
                                     </span>
@@ -106,7 +106,7 @@
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
                                 <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
                                     <span
-                                        class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
+                                        class="flex h-full w-full items-center justify-center rounded-lg bg-secondary-bg text-primary-text dark:bg-secondary-dark-bg dark:text-primary-dark-text"
                                     >
                                         {{ auth()->user()->initials() }}
                                     </span>
