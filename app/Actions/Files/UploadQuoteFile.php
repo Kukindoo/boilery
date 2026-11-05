@@ -13,14 +13,10 @@ class UploadQuoteFile
      * @throws Exception
      */
     public function handle($file,
-                           Quote $quote,
-                           FileTypes $fileType)
+        Quote $quote,
+        FileTypes $fileType)
     {
-        $directory = str_replace(
-            '{quote_id}',
-            $quote->id,
-            config('app.files.quote_save_directory')
-        );
+        $directory = app(GetUserFileDirectory::class)->handle($quote->user_id);
 
         $path = $file->store($directory);
 
