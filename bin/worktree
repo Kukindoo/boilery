@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+usage() {
+    printf 'Usage: %s <new-branch>\nCreates ../<project>--<branch> from the current HEAD and installs Laravel.\n' "$0"
+}
+
+fail() {
+    printf 'Error: %s\n' "$*" >&2
+    exit 1
+}
+
+if [[ $# -eq 1 && ( $1 == --help || $1 == -h ) ]]; then
+    usage
+    exit 0
+fi
+if [[ $# -ne 1 ]]; then
+    usage >&2
+    exit 1
+fi
+
+for executable in git php composer node npm; do
+    command -v "$executable" >/dev/null 2>&1 || fail "Missing command: $executable"
+done
+
+script_directory=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
+source_root=$(git -C "$script_directory" rev-parse --show-toplevel)
+branch=$1
+[[ $branch != -* ]] || fail 'Branch names cannot start with a dash.'
+git check-ref-format "refs/heads/$branch" >/dev/null || fail "Invalid branch: $branch"
+if git -C "$source_root" show-ref --verify --quiet "refs/heads/$branch"; then
+    fail "Branch already exists: $branch"
+fi
+
+# Use the primary worktree name even when invoked from a linked worktree.
+common_directory=$(cd -- "$source_root" && cd -- "$(git rev-parse --git-common-dir)" && pwd -P)
+project=$(basename -- "$(dirname -- "$common_directory")")
+directory_branch=${branch//\//-}
+destination="$(dirname -- "$source_root")/${project}--${directory_branch}"
+[[ ! -e $destination && ! -L $destination ]] || fail "Destination already exists: $destination"
+[[ -f $source_root/composer.json && -f $source_root/package.json ]] || fail 'Expected a Laravel project with composer.json and package.json.'
+[[ -f $source_root/.env ]] || fail "Missing source environment file: $source_root/.env"
+
+if [[ -n $(git -C "$source_root" status --porcelain) ]]; then
+    printf 'Note: uncommitted changes stay in the source; the new branch starts at HEAD.\n'
+fi
+printf 'Creating %s on branch %s\n' "$destination" "$branch"
+printf 'The copied .env retains database settings. The project hook regenerates APP_KEY and runs migrations.\n'
+git -C "$source_root" worktree add -b "$branch" -- "$destination" HEAD
+
+trap 'result=$?; printf "Setup failed (exit %s). Worktree retained at %s; fix the error and run the remaining commands there.\n" "$result" "$destination" >&2; exit "$result"' ERR
+cd -- "$destination"
+[[ ! -e .env && ! -L .env ]] || fail 'Refusing to overwrite an existing .env in the new worktree.'
+# Copy before Composer because its install hooks may boot the application.
+(umask 077; cp -- "$source_root/.env" .env)
+chmod 600 .env
+
+composer install
+npm install
+composer run-script post-root-package-install
+composer run-script post-create-project-cmd
+
+printf '\nWorktree ready: %s\nBranch: %s\n' "$destination" "$branch"
