@@ -2,7 +2,7 @@
     <form id="single-file-upload-form" wire:submit="submit">
         <div class="mx-auto max-w-xl lg:mr-0 lg:max-w-lg space-y-5">
             <div class="sm:col-span-2">
-                <label for="file-type" class="block text-sm/6 font-semibold text-gray-900 dark:text-white">
+                <label for="file-type" class="block text-sm/6 font-semibold text-heading-text dark:text-primary-dark-text">
                     Typ souborů
                 </label>
                 <flux:select wire:model="form.fileType" variant="listbox" placeholder="Zvolte výrobce bojlerů...">
@@ -43,7 +43,7 @@
 
             <div class="mt-8 flex justify-end">
                 <button type="submit"
-                        class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-primary-dark-button-bg dark:hover:bg-primary-dark-button-bg/50 dark:focus-visible:outline-primary-dark-button-bg">
+                        class="rounded-md bg-accent px-3.5 py-2.5 text-center text-sm font-semibold text-accent-foreground shadow-xs hover:bg-accent/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
                     Nahrát
                 </button>
             </div>

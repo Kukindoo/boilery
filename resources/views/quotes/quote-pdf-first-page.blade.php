@@ -5,7 +5,7 @@
 
     @include('partials.head')
 </head>
-<body class="min-h-screen bg-white dark:bg-zinc-800">
+<body class="min-h-screen bg-primary-bg dark:bg-primary-dark-bg">
 <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
     <div class="flex items-center justify-between gap-4">
         <flux:heading>

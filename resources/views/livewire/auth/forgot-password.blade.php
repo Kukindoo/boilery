@@ -18,7 +18,7 @@
         <flux:button variant="primary" type="submit" class="w-full">Poslat resetovací odkaz</flux:button>
     </form>
 
-    <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-400">
+    <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-subtle-text">
         <span>nebo, vrátit se na </span>
         <flux:link :href="route('login')" wire:navigate>Přihlášení</flux:link>
     </div>
