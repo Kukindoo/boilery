@@ -24,6 +24,13 @@ class WorkPolicy
                 && $work->user_id === $user->id);
     }
 
+    public function generatePdf(User $user, Work $work): bool
+    {
+        return $this->viewAny($user)
+            && $user->can(Permissions::GENERATE_PDF->label())
+            && ! $work->hasServiceProtocol();
+    }
+
     public function create(User $user): bool
     {
         return $user->can(Permissions::WORK_CREATE_ALL->label())
