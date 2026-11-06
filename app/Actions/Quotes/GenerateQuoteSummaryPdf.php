@@ -8,6 +8,7 @@ use App\Models\File;
 use App\Models\Quote;
 use App\Traits\LogsActionActivity;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -26,6 +27,9 @@ readonly class GenerateQuoteSummaryPdf
     public function handle(Quote $quote): File
     {
         try {
+            $fileType = FileTypes::QUOTE_SUMMARY;
+            $fileLabel = $this->generateFileLabel->handle($quote->user, $quote->id, $fileType, 'pdf');
+
             $attachments = $this->getAttachments($quote);
 
             $content = Pdf::view('quotes.pdfs.summary', [
@@ -41,25 +45,30 @@ readonly class GenerateQuoteSummaryPdf
                 throw new RuntimeException('Could not store the quote summary PDF.');
             }
 
-            $fileType = FileTypes::QUOTE_SUMMARY;
-            $fileLabel = $this->generateFileLabel->handle($quote->user, $quote->id, $fileType, 'pdf');
             try {
-                $file = $quote->files()->create([
-                    'path' => $path,
-                    'original_name' => $fileLabel,
-                    'extension' => 'pdf',
-                    'mime_type' => 'application/pdf',
-                    'file_type' => $fileType->value,
-                    'size' => mb_strlen($content, '8bit'),
-                    'label' => $fileLabel,
-                ]);
+                $file = DB::transaction(function () use ($quote, $path, $fileLabel, $fileType, $content): File {
+                    $file = $quote->files()->create([
+                        'path' => $path,
+                        'original_name' => $fileLabel,
+                        'extension' => 'pdf',
+                        'mime_type' => 'application/pdf',
+                        'file_type' => $fileType->value,
+                        'size' => mb_strlen($content, '8bit'),
+                        'label' => $fileLabel,
+                    ]);
+                    $this->logActionCompleted('quotes', $quote, 'Quote summary PDF generated', ['file_id' => $file->id]);
+
+                    return $file;
+                }, attempts: 5);
             } catch (Throwable $exception) {
                 $disk->delete($path);
 
                 throw $exception;
             }
 
-            $this->logActionCompleted('quotes', $quote, 'Quote summary PDF generated', ['file_id' => $file->id]);
+            if (DB::transactionLevel() > 0) {
+                DB::afterRollBack(fn () => $disk->delete($path));
+            }
 
             return $file;
         } catch (Throwable $exception) {
@@ -75,7 +84,7 @@ readonly class GenerateQuoteSummaryPdf
 
         return $quote->files()
             ->where('file_type', '!=', FileTypes::QUOTE_SUMMARY->value)
-            ->orderBy('id')
+            ->orderBy('files.id')
             ->get()
             ->map(function (File $file) use ($disk): array {
                 $image = null;

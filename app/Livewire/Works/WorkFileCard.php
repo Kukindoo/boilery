@@ -3,7 +3,7 @@
 namespace App\Livewire\Works;
 
 use App\Actions\Files\ChangeFileType;
-use App\Actions\Files\DeleteFile;
+use App\Actions\Files\DetachFile;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Work;
@@ -27,7 +27,7 @@ class WorkFileCard extends Component
     public function mount(Work $work, File $file): void
     {
         Gate::authorize('view', $work);
-        abort_unless($file->work_id === $work->id, 404);
+        abort_unless($file->isAttachedTo($work), 404);
         $this->work = $work;
         $this->file = $file;
     }
@@ -56,11 +56,15 @@ class WorkFileCard extends Component
         }, attempts: 5);
     }
 
-    public function deleteFile(DeleteFile $deleteFile): void
+    /**
+     * @throws Throwable
+     */
+    public function deleteFile(DetachFile $detachFile): void
     {
-        Gate::authorize('view', $this->work);
-        $file = $this->work->files()->findOrFail($this->file->id);
-        $deleteFile->handle($file);
+        $work = Work::query()->findOrFail($this->work->id);
+        Gate::authorize('view', $work);
+        $file = $work->files()->findOrFail($this->file->id);
+        $detachFile->handle($work, $file);
         $this->redirect(route('works.show', $this->work), navigate: true);
     }
 

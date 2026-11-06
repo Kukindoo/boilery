@@ -10,7 +10,7 @@
             <span class="truncate font-medium text-heading-text dark:text-secondary-dark-text">
                 {{ $file->file_type->label() }}
             </span>
-            <span class="truncate text-subtle-text">{{ $file->label }}</span>
+                <span class="truncate text-subtle-text">{{ $file->label }}</span>
             </div>
         </div>
         <div class="ml-4 shrink-0">
@@ -23,23 +23,23 @@
                     </flux:menu.item>
                     <flux:menu.separator/>
                     @can('update', $work)
-                    @can('update', $file)
-                    <flux:menu.submenu heading="Změnit typ">
-                        @foreach(App\Enums\FileTypes::cases() as $_fileType)
-                            <flux:menu.item wire:click="changeFileType('{{ $_fileType->value }}')">
-                                {{ $_fileType->label() }}
-                            </flux:menu.item>
-                        @endforeach
-                    </flux:menu.submenu>
-                    @endcan
+                        @can('update', $file)
+                            <flux:menu.submenu heading="Změnit typ">
+                                @foreach(App\Enums\FileTypes::cases() as $_fileType)
+                                    <flux:menu.item wire:click="changeFileType('{{ $_fileType->value }}')">
+                                        {{ $_fileType->label() }}
+                                    </flux:menu.item>
+                                @endforeach
+                            </flux:menu.submenu>
+                        @endcan
                     @endcan
                     <flux:menu.separator/>
-                    @can('delete', $file)
-                    <flux:modal.trigger name="delete-work-attachment-{{ $file->id }}">
-                        <flux:menu.item variant="danger" icon="trash">
-                            Smazat
-                        </flux:menu.item>
-                    </flux:modal.trigger>
+                    @can('detach', [$file, $work])
+                        <flux:modal.trigger name="delete-work-attachment-{{ $file->id }}">
+                            <flux:menu.item variant="danger" icon="trash">
+                                Odebrat
+                            </flux:menu.item>
+                        </flux:modal.trigger>
                     @endcan
                 </flux:menu>
             </flux:dropdown>
@@ -60,30 +60,30 @@
             ></iframe>
         @endif
     </div>
-    @can('delete', $file)
-    <flux:modal name="delete-work-attachment-{{ $file->id }}" class="min-w-[22rem]">
-        <div class="space-y-6">
-            <div>
-                <flux:heading size="lg">
-                    Smazat přílohu?
-                </flux:heading>
-                <flux:text class="mt-2">
-                    Chystáte se smazat tuto přílohu.<br>
-                    Tuto akci nelze vrátit zpět.
-                </flux:text>
-            </div>
-            <div class="flex gap-2">
-                <flux:spacer/>
-                <flux:modal.close>
-                    <flux:button variant="ghost">
-                        Zrušit
+    @can('detach', [$file, $work])
+        <flux:modal name="delete-work-attachment-{{ $file->id }}" class="min-w-[22rem]">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg">
+                        Odebrat přílohu?
+                    </flux:heading>
+                    <flux:text class="mt-2">
+                        Příloha bude odebrána z této zakázky.<br>
+                        Pokud soubor nemá jiné přílohy, bude odstraněn.
+                    </flux:text>
+                </div>
+                <div class="flex gap-2">
+                    <flux:spacer/>
+                    <flux:modal.close>
+                        <flux:button variant="ghost">
+                            Zrušit
+                        </flux:button>
+                    </flux:modal.close>
+                    <flux:button type="submit" variant="danger" wire:click="deleteFile">
+                        Odebrat přílohu
                     </flux:button>
-                </flux:modal.close>
-                <flux:button type="submit" variant="danger" wire:click="deleteFile">
-                    Smazat přílohu
-                </flux:button>
+                </div>
             </div>
-        </div>
-    </flux:modal>
+        </flux:modal>
     @endcan
 </li>

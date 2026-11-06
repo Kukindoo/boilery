@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\OwnsFiles;
 use App\Enums\BoilerManufacturers;
 use App\Enums\FileTypes;
 use App\Enums\PdfGenerationStatus;
 use App\Enums\QuoteStatus;
+use App\Traits\HasFiles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -36,9 +37,10 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property ?Carbon $deleted_at
  * @property ?Carbon $updated_at
  */
-class Quote extends Model
+class Quote extends Model implements OwnsFiles
 {
     use HasFactory, LogsActivity, SoftDeletes;
+    use HasFiles;
 
     protected $fillable = [
         'status',
@@ -63,14 +65,7 @@ class Quote extends Model
             ->logOnlyDirty();
     }
 
-    /**
-     * @return HasMany<File, $this>
-     */
-    public function files(): HasMany
-    {
-        return $this->hasMany(File::class, 'quote_id');
-    }
-
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -98,6 +93,11 @@ class Quote extends Model
     public function work(): HasOne
     {
         return $this->hasOne(Work::class, 'quote_id');
+    }
+
+    public function isFileOwner(User $user): bool
+    {
+        return $this->user_id === $user->id;
     }
 
     protected function casts(): array

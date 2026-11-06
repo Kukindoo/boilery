@@ -3,7 +3,7 @@
 namespace App\Livewire\Quotes;
 
 use App\Actions\Files\ChangeFileType;
-use App\Actions\Files\DeleteFile;
+use App\Actions\Files\DetachFile;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Quote;
@@ -70,11 +70,11 @@ class QuoteDownloadCard extends Component
     /**
      * @throws Throwable
      */
-    public function deleteFile(DeleteFile $deleteFile): void
+    public function deleteFile(DetachFile $detachFile): void
     {
         $quote = $this->authorizedQuote();
         $file = $quote->files()->findOrFail($this->file->id);
-        $deleteFile->handle($file);
+        $detachFile->handle($quote, $file);
         $this->redirect(route('quotes.show', $quote));
     }
 

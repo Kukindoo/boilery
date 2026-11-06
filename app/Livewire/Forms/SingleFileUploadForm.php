@@ -2,12 +2,16 @@
 
 namespace App\Livewire\Forms;
 
-use App\Actions\Files\UploadQuoteFile;
+use App\Actions\Files\UploadFile;
 use App\Enums\FileTypes;
 use App\Models\Quote;
-use Exception;
+use App\Models\Work;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Form;
+use Throwable;
 
 class SingleFileUploadForm extends Form
 {
@@ -27,19 +31,19 @@ class SingleFileUploadForm extends Form
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
-    public function submit(Quote $quote): void
+    public function submit(Quote|Work $parent, UploadFile $uploadFile): void
     {
-        if (! auth()->user()->can('uploadFile', $quote)) {
-            abort(403);
-        }
-
+        Gate::authorize('uploadFile', $parent);
         $this->validate();
 
-        app(UploadQuoteFile::class)->handle(
-            $this->file,
-            $quote,
-            $this->fileType);
+        try {
+            $uploadFile->handle($this->file, $parent, $this->fileType);
+        } catch (ValidationException $exception) {
+            throw ValidationException::withMessages(
+                Arr::prependKeysWith($exception->errors(), $this->getPropertyName() . '.'),
+            );
+        }
     }
 }

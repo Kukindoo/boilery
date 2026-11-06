@@ -46,7 +46,7 @@ class AcceptQuote
                     'work_accepted_at' => now(),
                 ]);
 
-                $quote->files()->update(['work_id' => $work->id]);
+                $work->files()->syncWithoutDetaching($quote->files()->pluck('files.id')->all());
 
                 if ($work->wasRecentlyCreated) {
                     $this->logActionCompleted('works', $work, 'Work created from accepted quote', ['quote_id' => $quote->id]);

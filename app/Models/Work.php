@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\OwnsFiles;
 use App\Enums\BoilerManufacturers;
 use App\Enums\FileTypes;
 use App\Enums\PdfGenerationStatus;
 use App\Enums\WorkStatus;
+use App\Traits\HasFiles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -46,9 +47,10 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property ?Carbon $deleted_at
  * @property ?Carbon $updated_at
  */
-class Work extends Model
+class Work extends Model implements OwnsFiles
 {
     use HasFactory, LogsActivity, SoftDeletes;
+    use HasFiles;
 
     protected $fillable = [
         'user_id',
@@ -100,12 +102,6 @@ class Work extends Model
         return $this->belongsTo(Quote::class, 'quote_id');
     }
 
-    /** @return HasMany<File, $this> */
-    public function files(): HasMany
-    {
-        return $this->hasMany(File::class, 'work_id');
-    }
-
     public function hasServiceProtocol(): bool
     {
         return $this->files()->where('file_type', FileTypes::SERVICE_PROTOCOL->value)->exists();
@@ -134,6 +130,11 @@ class Work extends Model
     {
         $this->status = WorkStatus::CANCELLED;
         $this->save();
+    }
+
+    public function isFileOwner(User $user): bool
+    {
+        return $this->user_id === $user->id;
     }
 
     protected function casts(): array

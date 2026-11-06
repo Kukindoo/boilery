@@ -7,6 +7,7 @@ use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Work;
 use App\Traits\LogsActionActivity;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -25,6 +26,9 @@ readonly class GenerateServiceProtocolPdf
     public function handle(Work $work): File
     {
         try {
+            $fileType = FileTypes::SERVICE_PROTOCOL;
+            $fileLabel = $this->generateFileLabel->handle($work->user, $work->id, $fileType, 'pdf');
+
             $content = Pdf::view('works.pdfs.service-protocol', [
                 'work' => $work,
                 'customer' => [
@@ -42,25 +46,30 @@ readonly class GenerateServiceProtocolPdf
                 throw new RuntimeException('Could not store the service protocol PDF.');
             }
 
-            $fileType = FileTypes::SERVICE_PROTOCOL;
-            $fileLabel = $this->generateFileLabel->handle($work->user, $work->id, $fileType, 'pdf');
             try {
-                $file = $work->files()->create([
-                    'path' => $path,
-                    'original_name' => $fileLabel,
-                    'extension' => 'pdf',
-                    'mime_type' => 'application/pdf',
-                    'file_type' => $fileType->value,
-                    'size' => mb_strlen($content, '8bit'),
-                    'label' => $fileLabel,
-                ]);
+                $file = DB::transaction(function () use ($work, $path, $fileLabel, $fileType, $content): File {
+                    $file = $work->files()->create([
+                        'path' => $path,
+                        'original_name' => $fileLabel,
+                        'extension' => 'pdf',
+                        'mime_type' => 'application/pdf',
+                        'file_type' => $fileType->value,
+                        'size' => mb_strlen($content, '8bit'),
+                        'label' => $fileLabel,
+                    ]);
+                    $this->logActionCompleted('works', $work, 'Service protocol PDF generated', ['file_id' => $file->id]);
+
+                    return $file;
+                }, attempts: 5);
             } catch (Throwable $exception) {
                 $disk->delete($path);
 
                 throw $exception;
             }
 
-            $this->logActionCompleted('works', $work, 'Service protocol PDF generated', ['file_id' => $file->id]);
+            if (DB::transactionLevel() > 0) {
+                DB::afterRollBack(fn () => $disk->delete($path));
+            }
 
             return $file;
         } catch (Throwable $exception) {
