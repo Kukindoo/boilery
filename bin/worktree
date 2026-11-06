@@ -55,9 +55,29 @@ cd -- "$destination"
 (umask 077; cp -- "$source_root/.env" .env)
 chmod 600 .env
 
+if [[ -d $source_root/.ai/skills ]]; then
+    mkdir -p .ai/skills
+    cp -R -- "$source_root/.ai/skills/." .ai/skills/
+fi
+
 composer install
 npm install
 composer run-script post-root-package-install
 composer run-script post-create-project-cmd
+
+if [[ -f $source_root/boost.json ]]; then
+    cp -- "$source_root/boost.json" boost.json
+fi
+php -r '
+    $path = "boost.json";
+    $config = is_file($path)
+        ? json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR)
+        : [];
+    $config["agents"] = ["codex"];
+    if (file_put_contents($path, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL) === false) {
+        throw new RuntimeException("Could not configure Boost for Codex.");
+    }
+'
+php artisan boost:install --guidelines --skills --mcp --no-interaction
 
 printf '\nWorktree ready: %s\nBranch: %s\n' "$destination" "$branch"
