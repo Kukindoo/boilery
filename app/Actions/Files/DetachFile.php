@@ -3,11 +3,13 @@
 namespace App\Actions\Files;
 
 use App\Contracts\OwnsFiles;
+use App\Jobs\Files\DeleteStoredFile;
 use App\Models\File;
 use App\Traits\LogsActionActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use RuntimeException;
 use Throwable;
 
 class DetachFile
@@ -30,6 +32,18 @@ class DetachFile
                     'fileable_type' => $parent->getMorphClass(),
                     'fileable_id' => $parent->getKey(),
                 ]);
+
+                if ($attachedFile->attachments()->lockForUpdate()->first(['fileables.id']) === null) {
+                    $disk = config('filesystems.default');
+                    if (! $attachedFile->delete()) {
+                        throw new RuntimeException('Could not delete the orphaned file record.');
+                    }
+                    $this->logActionCompleted('files', $attachedFile, 'Orphaned file deleted', [
+                        'path' => $attachedFile->path,
+                        'disk' => $disk,
+                    ]);
+                    DeleteStoredFile::dispatch($attachedFile->path, $disk)->onQueue('default')->afterCommit();
+                }
             }, attempts: 5);
         } catch (Throwable $exception) {
             $this->logActionAttempt('files', $file, $exception);
