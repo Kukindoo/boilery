@@ -2,14 +2,26 @@
 
 namespace Tests\Feature\Quote;
 
+use App\Actions\Users\CreateCustomer;
 use App\Livewire\Quotes\CustomerQuoteRequestPage;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Feature\FeatureTestCase;
 
 class CustomerQuoteContactDetailsTest extends FeatureTestCase
 {
+    /** @return array<string, array{bool, bool}> */
+    public static function duplicateEmails(): array
+    {
+        return [
+            'guest using existing email' => [false, false],
+            'guest using staff email' => [false, true],
+            'signed-in user using another email' => [true, false],
+        ];
+    }
+
     public function test_guest_submission_saves_contact_details_on_new_customer(): void
     {
         Notification::fake();
@@ -51,10 +63,20 @@ class CustomerQuoteContactDetailsTest extends FeatureTestCase
         $this->assertNull($user->address);
     }
 
-    public function test_guest_submission_updates_existing_customer_contact_details(): void
+    #[DataProvider('duplicateEmails')]
+    public function test_submission_rejects_an_existing_email_and_preserves_the_account(bool $authenticated, bool $staff): void
     {
         Notification::fake();
         $user = User::factory()->create(['phone' => '+420 111 222 333', 'address' => 'Praha']);
+        if ($staff) {
+            $user->assignRole(\App\Enums\Roles::ADMIN);
+        }
+        $roles = $user->roles()->pluck('roles.id')->all();
+        $before = $user->refresh()->getRawOriginal();
+        if ($authenticated) {
+            $this->actingAs(User::factory()->create(['name' => 'Jana Nováková']));
+        }
+        $userCount = User::count();
 
         Livewire::test(CustomerQuoteRequestPage::class)
             ->set('form.firstName', 'Jan')
@@ -64,10 +86,15 @@ class CustomerQuoteContactDetailsTest extends FeatureTestCase
             ->set('form.address', 'Brno')
             ->set('form.message', 'Oprava ohřívače')
             ->call('submit')
-            ->assertHasNoErrors();
+            ->assertHasErrors(['form.email' => 'unique'])
+            ->assertSee(CreateCustomer::EMAIL_ALREADY_EXISTS_MESSAGE)
+            ->assertSet('submitted', false);
 
-        $this->assertSame('+420 604 123 456', $user->refresh()->phone);
-        $this->assertSame('Brno', $user->address);
-        $this->assertSame('+420 604 123 456', $user->quotes()->sole()->phone);
+        $this->assertSame($before, $user->fresh()->getRawOriginal());
+        $this->assertSame($roles, $user->roles()->pluck('roles.id')->all());
+        $this->assertDatabaseCount('users', $userCount);
+        $this->assertDatabaseCount('quotes', 0);
+        $this->assertDatabaseCount('files', 0);
+        Notification::assertNothingSent();
     }
 }

@@ -7,10 +7,23 @@ use App\Dtos\NamePlate;
 use App\Enums\Roles;
 use App\Models\User;
 use Exception;
+use Illuminate\Validation\ValidationException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Integration\IntegrationTestCase;
 
 class CreateCustomerTest extends IntegrationTestCase
 {
+    /** @return array<string, array{bool, bool}> */
+    public static function existingAccounts(): array
+    {
+        return [
+            'guest using customer email' => [false, false],
+            'guest using staff email' => [false, true],
+            'signed-in user using another customer email' => [true, false],
+            'signed-in user using staff email' => [true, true],
+        ];
+    }
+
     /**
      * @throws Exception
      */
@@ -48,6 +61,8 @@ class CreateCustomerTest extends IntegrationTestCase
 
         $userCount = User::count();
 
+        $this->actingAs($existingUser);
+
         $customer = app(CreateCustomer::class)->handle($this->namePlateObject());
 
         $this->assertSame($existingUser->id, $customer->id);
@@ -70,6 +85,8 @@ class CreateCustomerTest extends IntegrationTestCase
 
         $userCount = User::count();
 
+        $this->actingAs($existingUser);
+
         $customer = app(CreateCustomer::class)->handle($this->namePlateObject());
 
         $this->assertSame($existingUser->id, $customer->id);
@@ -89,6 +106,8 @@ class CreateCustomerTest extends IntegrationTestCase
         $this->assertSame([Roles::CUSTOMER->value], $existingUser->roles()->pluck('id')->all());
 
         $userCount = User::count();
+
+        $this->actingAs($existingUser);
 
         $customer = app(CreateCustomer::class)->handle($this->namePlateObject());
 
@@ -114,6 +133,8 @@ class CreateCustomerTest extends IntegrationTestCase
             'address' => 'Praha',
         ]);
 
+        $this->actingAs($existingUser);
+
         $customer = app(CreateCustomer::class)->handle(
             new NamePlate('Jan', 'Novak', 'jan@example.com', '+420 604 123 456', ''),
         );
@@ -121,6 +142,38 @@ class CreateCustomerTest extends IntegrationTestCase
         $this->assertSame($existingUser->id, $customer->id);
         $this->assertNull($existingUser->refresh()->address);
         $this->assertSame('+420 604 123 456', $existingUser->phone);
+    }
+
+    #[DataProvider('existingAccounts')]
+    public function test_rejects_an_existing_email_without_changing_the_account(bool $authenticated, bool $staff): void
+    {
+        $existingUser = User::factory()->create([
+            'email' => 'jan@example.com',
+            'phone' => '+420 111 222 333',
+            'address' => 'Praha',
+        ]);
+        if ($staff) {
+            $existingUser->assignRole(Roles::ADMIN);
+        }
+        if ($authenticated) {
+            $this->actingAs(User::factory()->create());
+        }
+        $before = $existingUser->refresh()->getRawOriginal();
+        $roles = $existingUser->roles()->pluck('roles.id')->all();
+        $userCount = User::count();
+
+        try {
+            app(CreateCustomer::class)->handle($this->namePlateObject());
+            $this->fail('An existing email must be rejected.');
+        } catch (ValidationException $exception) {
+            $this->assertSame([
+                'email' => [CreateCustomer::EMAIL_ALREADY_EXISTS_MESSAGE],
+            ], $exception->errors());
+        }
+
+        $this->assertSame($before, $existingUser->fresh()->getRawOriginal());
+        $this->assertSame($roles, $existingUser->roles()->pluck('roles.id')->all());
+        $this->assertDatabaseCount('users', $userCount);
     }
 
     private function namePlateObject(): NamePlate
