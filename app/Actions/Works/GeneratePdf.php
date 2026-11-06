@@ -2,7 +2,6 @@
 
 namespace App\Actions\Works;
 
-use App\Actions\Files\GetUserFileDirectory;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Work;
@@ -21,7 +20,7 @@ class GeneratePdf
     {
         $work->loadMissing('user');
         $label = Str::ascii($work->order_id . '_' . FileTypes::SERVICE_PROTOCOL->snake()) . '.pdf';
-        $directory = app(GetUserFileDirectory::class)->handle($work->user_id);
+        $directory = config('app.files.attachments_save_directory');
         $path = mb_rtrim($directory, '/') . '/' . Str::uuid() . '.pdf';
         $disk = Storage::disk();
 

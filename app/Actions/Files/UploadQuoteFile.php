@@ -16,7 +16,7 @@ class UploadQuoteFile
         Quote $quote,
         FileTypes $fileType)
     {
-        $directory = app(GetUserFileDirectory::class)->handle($quote->user_id);
+        $directory = config('app.files.attachments_save_directory');
 
         $path = $file->store($directory);
 

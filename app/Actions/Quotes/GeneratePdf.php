@@ -3,7 +3,6 @@
 namespace App\Actions\Quotes;
 
 use App\Actions\Files\GenerateFileLabel;
-use App\Actions\Files\GetUserFileDirectory;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Quote;
@@ -24,7 +23,7 @@ readonly class GeneratePdf
     {
         $fileType = FileTypes::QUOTE_SUMMARY;
         $fileLabel = $this->generateFileLabel->handle($quote, $fileType, 'pdf');
-        $directory = app(GetUserFileDirectory::class)->handle($quote->user_id);
+        $directory = config('app.files.attachments_save_directory');
         $path = mb_rtrim($directory, '/') . '/' . Str::uuid() . '.pdf';
 
         $disk = Storage::disk();

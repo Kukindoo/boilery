@@ -133,7 +133,7 @@ return [
     */
 
     'files' => [
-        'user_save_directory' => 'files/users/{user_id}',
+        'attachments_save_directory' => 'files/attachments',
         'mimes' => ['jpg', 'png', 'jpeg'],
         'max_size' => 10240, // in KB
     ],
