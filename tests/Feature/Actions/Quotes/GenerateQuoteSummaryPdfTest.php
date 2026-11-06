@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Actions\Quotes;
 
-use App\Actions\Files\UploadQuoteFile;
-use App\Actions\Quotes\GeneratePdf;
+use App\Actions\Quotes\GenerateQuoteSummaryPdf;
 use App\Enums\BoilerManufacturers;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Quote;
+use App\Models\User;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Client\Request;
 use Illuminate\Http\UploadedFile;
@@ -18,7 +18,7 @@ use RuntimeException;
 use Spatie\LaravelPdf\Exceptions\CouldNotGeneratePdf;
 use Tests\Feature\FeatureTestCase;
 
-class GeneratePdfTest extends FeatureTestCase
+class GenerateQuoteSummaryPdfTest extends FeatureTestCase
 {
     private const ENDPOINT = 'https://api.cloudflare.com/client/v4/accounts/test-account/browser-rendering/pdf';
 
@@ -38,20 +38,20 @@ class GeneratePdfTest extends FeatureTestCase
         Http::preventStrayRequests();
     }
 
-    public function test_upload_and_pdf_generation_support_quotes_without_an_assigned_customer(): void
+    public function test_summary_label_uses_the_assigned_customer_instead_of_quote_contact_details(): void
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->create(['user_id' => null]);
+        $customer = User::factory()->create(['name' => 'Jiří Novák']);
+        $quote = Quote::factory()->for($customer)->create([
+            'first_name' => 'Jan',
+            'last_name' => 'Svoboda',
+        ]);
 
-        $attachment = app(UploadQuoteFile::class)->handle(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
-        $summary = app(GeneratePdf::class)->handle($quote);
+        $summary = app(GenerateQuoteSummaryPdf::class)->handle($quote);
 
-        $this->assertSame(2, $quote->files()->count());
-        foreach ([$attachment, $summary] as $file) {
-            $this->assertStringStartsWith('files/attachments/', $file->path);
-            Storage::disk()->assertExists($file->path);
-        }
+        $this->assertSame("Jiri_Novak_{$quote->id}_shrnuti_poptavky.pdf", $summary->label);
+        Storage::disk()->assertExists($summary->path);
     }
 
     public function test_saves_quote_summary_on_the_default_disk_with_file_metadata(): void
@@ -62,14 +62,14 @@ class GeneratePdfTest extends FeatureTestCase
             'app.files.attachments_save_directory' => 'custom/attachments',
         ]);
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->for(\App\Models\User::factory())->create([
+        $quote = Quote::factory()->for(User::factory()->state(['name' => 'Jiří Novák']))->create([
             'first_name' => 'Jiří',
             'last_name' => 'Novák',
             'boiler_manufacturer' => BoilerManufacturers::DRAZICE,
             'message' => '<script>alert("test")</script>',
         ]);
 
-        $file = app(GeneratePdf::class)->handle($quote);
+        $file = app(GenerateQuoteSummaryPdf::class)->handle($quote);
 
         $this->assertModelExists($file);
         $this->assertTrue($quote->files()->sole()->is($file));
@@ -100,8 +100,8 @@ class GeneratePdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->for(\App\Models\User::factory())->create(['address' => null]);
-        $action = app(GeneratePdf::class);
+        $quote = Quote::factory()->for(User::factory())->create(['address' => null]);
+        $action = app(GenerateQuoteSummaryPdf::class);
 
         $first = $action->handle($quote);
         $second = $action->handle($quote);
@@ -117,18 +117,17 @@ class GeneratePdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->for(\App\Models\User::factory())->create();
-        $upload = app(UploadQuoteFile::class);
-        $image = $upload->handle(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
+        $quote = Quote::factory()->for(User::factory())->create();
+        $image = $this->createAttachment(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
         $image->update(['label' => '<script>attachment</script>.png']);
-        $document = $upload->handle(UploadedFile::fake()->create('receipt.pdf', 10, 'application/pdf'), $quote, FileTypes::RECEIPT);
-        $summary = $upload->handle(UploadedFile::fake()->create('old-summary.pdf', 10, 'application/pdf'), $quote, FileTypes::QUOTE_SUMMARY);
-        $otherQuote = Quote::factory()->for(\App\Models\User::factory())->create();
-        $otherImage = $upload->handle(UploadedFile::fake()->image('other.png'), $otherQuote, FileTypes::BOILER_LABEL);
+        $document = $this->createAttachment(UploadedFile::fake()->create('receipt.pdf', 10, 'application/pdf'), $quote, FileTypes::RECEIPT);
+        $summary = $this->createAttachment(UploadedFile::fake()->create('old-summary.pdf', 10, 'application/pdf'), $quote, FileTypes::QUOTE_SUMMARY);
+        $otherQuote = Quote::factory()->for(User::factory())->create();
+        $otherImage = $this->createAttachment(UploadedFile::fake()->image('other.png'), $otherQuote, FileTypes::BOILER_LABEL);
         $imageSource = 'data:image/png;base64,' . base64_encode(Storage::disk()->get($image->path));
         $quote->load('files');
 
-        app(GeneratePdf::class)->handle($quote);
+        app(GenerateQuoteSummaryPdf::class)->handle($quote);
 
         Http::assertSent(fn (Request $request): bool => str_contains($request['html'], 'Přílohy')
             && str_contains($request['html'], $imageSource)
@@ -144,15 +143,15 @@ class GeneratePdfTest extends FeatureTestCase
     public function test_missing_image_prevents_generating_an_incomplete_summary(): void
     {
         Storage::fake('local');
-        $quote = Quote::factory()->for(\App\Models\User::factory())->create();
-        $image = app(UploadQuoteFile::class)->handle(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
+        $quote = Quote::factory()->for(User::factory())->create();
+        $image = $this->createAttachment(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
         Storage::disk()->delete($image->path);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Could not read quote attachment: ' . $image->label);
 
         try {
-            app(GeneratePdf::class)->handle($quote);
+            app(GenerateQuoteSummaryPdf::class)->handle($quote);
         } finally {
             Http::assertNothingSent();
             $this->assertDatabaseMissing('files', ['quote_id' => $quote->id, 'file_type' => 'quote-summary']);
@@ -164,12 +163,12 @@ class GeneratePdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response('Rendering failed', 500)]);
-        $quote = Quote::factory()->for(\App\Models\User::factory())->create();
+        $quote = Quote::factory()->for(User::factory())->create();
 
         $this->expectException(CouldNotGeneratePdf::class);
 
         try {
-            app(GeneratePdf::class)->handle($quote);
+            app(GenerateQuoteSummaryPdf::class)->handle($quote);
         } finally {
             $this->assertDatabaseMissing('files', ['quote_id' => $quote->id]);
             Storage::disk()->assertEmpty();
@@ -179,16 +178,16 @@ class GeneratePdfTest extends FeatureTestCase
     public function test_storage_failure_does_not_create_a_database_record(): void
     {
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->for(\App\Models\User::factory())->create();
+        $quote = Quote::factory()->for(User::factory())->create();
         $disk = Mockery::mock(FilesystemAdapter::class);
         $disk->shouldReceive('put')->once()->with(Mockery::type('string'), self::PDF_CONTENT)->andReturnFalse();
-        Storage::shouldReceive('disk')->once()->withNoArgs()->andReturn($disk);
+        Storage::shouldReceive('disk')->withNoArgs()->andReturn($disk);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Could not store the quote summary PDF.');
 
         try {
-            app(GeneratePdf::class)->handle($quote);
+            app(GenerateQuoteSummaryPdf::class)->handle($quote);
         } finally {
             $this->assertDatabaseMissing('files', ['quote_id' => $quote->id]);
         }
@@ -198,7 +197,7 @@ class GeneratePdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->for(\App\Models\User::factory())->create();
+        $quote = Quote::factory()->for(User::factory())->create();
         File::creating(function (File $file): void {
             throw new RuntimeException('File record could not be saved.');
         });
@@ -207,10 +206,23 @@ class GeneratePdfTest extends FeatureTestCase
         $this->expectExceptionMessage('File record could not be saved.');
 
         try {
-            app(GeneratePdf::class)->handle($quote);
+            app(GenerateQuoteSummaryPdf::class)->handle($quote);
         } finally {
             $this->assertDatabaseMissing('files', ['quote_id' => $quote->id]);
             Storage::disk()->assertEmpty();
         }
+    }
+
+    private function createAttachment(UploadedFile $upload, Quote $quote, FileTypes $fileType): File
+    {
+        return $quote->files()->create([
+            'path' => $upload->store('files/attachments'),
+            'original_name' => $upload->getClientOriginalName(),
+            'label' => $upload->getClientOriginalName(),
+            'extension' => $upload->getClientOriginalExtension(),
+            'mime_type' => $upload->getMimeType(),
+            'size' => $upload->getSize(),
+            'file_type' => $fileType,
+        ]);
     }
 }

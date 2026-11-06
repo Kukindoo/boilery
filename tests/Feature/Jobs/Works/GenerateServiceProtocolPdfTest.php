@@ -5,7 +5,7 @@ namespace Tests\Feature\Jobs\Works;
 use App\Actions\Works\QueuePdf;
 use App\Enums\FileTypes;
 use App\Enums\PdfGenerationStatus;
-use App\Jobs\Works\GenerateWorkPdf;
+use App\Jobs\Works\GenerateServiceProtocolPdf;
 use App\Models\User;
 use App\Models\Work;
 use Illuminate\Http\Client\Request;
@@ -15,7 +15,7 @@ use RuntimeException;
 use Spatie\LaravelPdf\Exceptions\CouldNotGeneratePdf;
 use Tests\Feature\FeatureTestCase;
 
-class GenerateWorkPdfTest extends FeatureTestCase
+class GenerateServiceProtocolPdfTest extends FeatureTestCase
 {
     private const GENERATION_ID = '00000000-0000-4000-8000-000000000001';
 
@@ -48,8 +48,8 @@ class GenerateWorkPdfTest extends FeatureTestCase
             return Http::response('%PDF-1.7 generated service_protocol', 200);
         }]);
 
-        GenerateWorkPdf::dispatchSync($work->id, self::GENERATION_ID);
-        GenerateWorkPdf::dispatchSync($work->id, self::GENERATION_ID);
+        GenerateServiceProtocolPdf::dispatchSync($work->id, self::GENERATION_ID);
+        GenerateServiceProtocolPdf::dispatchSync($work->id, self::GENERATION_ID);
 
         $this->assertSame(PdfGenerationStatus::COMPLETED, $work->fresh()->pdf_generation_status);
         $file = $work->files()->sole();
@@ -92,7 +92,7 @@ class GenerateWorkPdfTest extends FeatureTestCase
         $this->expectException(CouldNotGeneratePdf::class);
 
         try {
-            GenerateWorkPdf::dispatchSync($work->id, self::GENERATION_ID);
+            GenerateServiceProtocolPdf::dispatchSync($work->id, self::GENERATION_ID);
         } finally {
             $this->assertSame(PdfGenerationStatus::FAILED, $work->fresh()->pdf_generation_status);
             $this->assertFalse($work->hasServiceProtocol());
@@ -105,8 +105,8 @@ class GenerateWorkPdfTest extends FeatureTestCase
         $work = $this->queuedWork();
         $oldId = '00000000-0000-4000-8000-000000000002';
 
-        GenerateWorkPdf::dispatchSync($work->id, $oldId);
-        (new GenerateWorkPdf($work->id, $oldId))->failed(new RuntimeException('Old failure'));
+        GenerateServiceProtocolPdf::dispatchSync($work->id, $oldId);
+        (new GenerateServiceProtocolPdf($work->id, $oldId))->failed(new RuntimeException('Old failure'));
 
         $this->assertSame(PdfGenerationStatus::QUEUED, $work->fresh()->pdf_generation_status);
         $this->assertFalse($work->hasServiceProtocol());
@@ -122,8 +122,8 @@ class GenerateWorkPdfTest extends FeatureTestCase
             'size' => 100, 'mime_type' => 'application/pdf', 'path' => 'service_protocol.pdf',
         ]);
 
-        GenerateWorkPdf::dispatchSync($work->id, self::GENERATION_ID);
-        (new GenerateWorkPdf($work->id, self::GENERATION_ID))->failed(new RuntimeException('Late failure'));
+        GenerateServiceProtocolPdf::dispatchSync($work->id, self::GENERATION_ID);
+        (new GenerateServiceProtocolPdf($work->id, self::GENERATION_ID))->failed(new RuntimeException('Late failure'));
 
         $this->assertSame(PdfGenerationStatus::COMPLETED, $work->fresh()->pdf_generation_status);
         $this->assertSame(1, $work->files()->count());
@@ -135,7 +135,7 @@ class GenerateWorkPdfTest extends FeatureTestCase
         $work = $this->queuedWork();
         $work->delete();
 
-        GenerateWorkPdf::dispatchSync($work->id, self::GENERATION_ID);
+        GenerateServiceProtocolPdf::dispatchSync($work->id, self::GENERATION_ID);
 
         $this->assertFalse($work->hasServiceProtocol());
         Http::assertNothingSent();

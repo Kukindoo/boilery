@@ -4,65 +4,45 @@ namespace Tests\Feature\Actions\Files;
 
 use App\Actions\Files\GenerateFileLabel;
 use App\Enums\FileTypes;
-use App\Models\Quote;
+use App\Models\User;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Feature\FeatureTestCase;
 
 class GenerateFileLabelTest extends FeatureTestCase
 {
-    /** @return array<string, array{?string, list<string>, string}> */
-    public static function existingLabels(): array
+    /** @return array<string, array{string, int, FileTypes, ?string, string}> */
+    public static function labels(): array
     {
         return [
-            'unused label' => ['pdf', [], '.pdf'],
-            'first duplicate' => ['pdf', ['.pdf'], '_1.pdf'],
-            'several duplicates' => ['pdf', ['.pdf', '_1.pdf', '_2.pdf'], '_3.pdf'],
-            'available gap' => ['pdf', ['.pdf', '_2.pdf'], '_1.pdf'],
-            'different extension' => ['pdf', ['.jpg'], '.pdf'],
-            'unused extensionless label' => [null, [], ''],
-            'extensionless duplicates' => [null, ['', '_1'], '_2'],
+            'quote summary' => ['Jiří Novák', 42, FileTypes::QUOTE_SUMMARY, 'pdf', 'Jiri_Novak_42_shrnuti_poptavky.pdf'],
+            'service protocol' => ['Anna Nováková-Svobodová', 9, FileTypes::SERVICE_PROTOCOL, 'pdf', 'Anna_Novakova_Svobodova_9_servisni_protokol.pdf'],
+            'image attachment' => ['Jan Novák', 3, FileTypes::BOILER_LABEL, 'png', 'Jan_Novak_3_stitek.png'],
+            'without extension' => ['Jiří Novák', 42, FileTypes::QUOTE_SUMMARY, null, 'Jiri_Novak_42_shrnuti_poptavky'],
+            'empty extension' => ['Jiří Novák', 42, FileTypes::QUOTE_SUMMARY, '', 'Jiri_Novak_42_shrnuti_poptavky'],
         ];
     }
 
-    /** @param list<string> $existingSuffixes */
-    #[DataProvider('existingLabels')]
-    public function test_returns_the_first_available_label(?string $extension, array $existingSuffixes, string $expectedSuffix): void
-    {
-        $quote = Quote::factory()->create(['first_name' => 'Jiří', 'last_name' => 'Novák']);
-        $baseLabel = "Jiri_Novak_{$quote->id}_shrnuti_poptavky";
-        $quote->load('files');
+    #[DataProvider('labels')]
+    public function test_generates_an_ascii_label_from_the_customer_name_and_record_id(
+        string $name,
+        int $id,
+        FileTypes $fileType,
+        ?string $extension,
+        string $expectedLabel,
+    ): void {
+        $user = User::factory()->make(['name' => $name]);
 
-        foreach ($existingSuffixes as $suffix) {
-            $this->createFile($quote, $baseLabel . $suffix);
-        }
-
-        $label = app(GenerateFileLabel::class)->handle($quote, FileTypes::QUOTE_SUMMARY, $extension);
-
-        $this->assertSame($baseLabel . $expectedSuffix, $label);
-    }
-
-    public function test_files_belonging_to_another_quote_do_not_reserve_the_label(): void
-    {
-        $quote = Quote::factory()->create(['first_name' => 'Jan', 'last_name' => 'Novak']);
-        $otherQuote = Quote::factory()->create();
-        $expectedLabel = "Jan_Novak_{$quote->id}_shrnuti_poptavky.pdf";
-        $this->createFile($otherQuote, $expectedLabel);
-
-        $label = app(GenerateFileLabel::class)->handle($quote, FileTypes::QUOTE_SUMMARY, 'pdf');
+        $label = app(GenerateFileLabel::class)->handle($user, $id, $fileType, $extension);
 
         $this->assertSame($expectedLabel, $label);
     }
 
-    private function createFile(Quote $quote, string $label): void
+    public function test_extension_is_optional(): void
     {
-        $quote->files()->create([
-            'label' => $label,
-            'original_name' => $label,
-            'path' => 'files/' . $label,
-            'extension' => 'pdf',
-            'mime_type' => 'application/pdf',
-            'size' => 10,
-            'file_type' => FileTypes::QUOTE_SUMMARY,
-        ]);
+        $user = User::factory()->make(['name' => 'Jan Novák']);
+
+        $label = app(GenerateFileLabel::class)->handle($user, 9, FileTypes::SERVICE_PROTOCOL);
+
+        $this->assertSame('Jan_Novak_9_servisni_protokol', $label);
     }
 }

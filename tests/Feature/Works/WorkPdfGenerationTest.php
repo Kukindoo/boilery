@@ -4,7 +4,7 @@ namespace Tests\Feature\Works;
 
 use App\Enums\FileTypes;
 use App\Enums\PdfGenerationStatus;
-use App\Jobs\Works\GenerateWorkPdf;
+use App\Jobs\Works\GenerateServiceProtocolPdf;
 use App\Livewire\Works\WorkPdfGeneration;
 use App\Models\User;
 use App\Models\Work;
@@ -17,7 +17,7 @@ class WorkPdfGenerationTest extends FeatureTestCase
 {
     public function test_button_queues_generation_and_shows_queued_status_without_rendering_a_pdf(): void
     {
-        Queue::fake([GenerateWorkPdf::class]);
+        Queue::fake([GenerateServiceProtocolPdf::class]);
         Http::preventStrayRequests();
         $user = User::factory()->admin()->create();
         $work = Work::factory()->create();
@@ -33,16 +33,16 @@ class WorkPdfGenerationTest extends FeatureTestCase
         $this->assertNotNull($generationId);
         $component->call('generate');
         $this->assertSame($generationId, $work->fresh()->pdf_generation_id);
-        Queue::assertPushed(GenerateWorkPdf::class, fn (GenerateWorkPdf $job): bool => $job->workId === $work->id
+        Queue::assertPushed(GenerateServiceProtocolPdf::class, fn (GenerateServiceProtocolPdf $job): bool => $job->workId === $work->id
             && $job->generationId === $generationId && $job->queue === 'default' && $job->afterCommit === true);
-        Queue::assertPushed(GenerateWorkPdf::class, 1);
+        Queue::assertPushed(GenerateServiceProtocolPdf::class, 1);
         Http::assertNothingSent();
         $this->assertDatabaseMissing('files', ['work_id' => $work->id]);
     }
 
     public function test_customer_cannot_queue_a_pdf_for_their_work(): void
     {
-        Queue::fake([GenerateWorkPdf::class]);
+        Queue::fake([GenerateServiceProtocolPdf::class]);
         $user = User::factory()->customer()->create();
         $user->givePermissionTo(\App\Enums\Permissions::WORK_VIEW_OWN->label());
         $work = Work::factory()->for($user)->create();
@@ -92,7 +92,7 @@ class WorkPdfGenerationTest extends FeatureTestCase
 
     public function test_failure_stops_polling_and_allows_retry_with_a_new_generation_id(): void
     {
-        Queue::fake([GenerateWorkPdf::class]);
+        Queue::fake([GenerateServiceProtocolPdf::class]);
         $work = Work::factory()->create([
             'pdf_generation_status' => PdfGenerationStatus::PROCESSING,
             'pdf_generation_id' => '00000000-0000-4000-8000-000000000001',
@@ -109,12 +109,12 @@ class WorkPdfGenerationTest extends FeatureTestCase
             ->assertSee('PDF čeká na zpracování.');
 
         $this->assertNotSame('00000000-0000-4000-8000-000000000001', $work->fresh()->pdf_generation_id);
-        Queue::assertPushed(GenerateWorkPdf::class, 1);
+        Queue::assertPushed(GenerateServiceProtocolPdf::class, 1);
     }
 
     public function test_an_existing_summary_prevents_another_generation(): void
     {
-        Queue::fake([GenerateWorkPdf::class]);
+        Queue::fake([GenerateServiceProtocolPdf::class]);
         $work = Work::factory()->create();
         $this->addSummary($work);
 

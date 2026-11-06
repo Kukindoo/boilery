@@ -4,7 +4,7 @@ namespace Tests\Feature\Quotes;
 
 use App\Enums\FileTypes;
 use App\Enums\PdfGenerationStatus;
-use App\Jobs\Quotes\GenerateQuotePdf;
+use App\Jobs\Quotes\GenerateQuoteSummaryPdf;
 use App\Livewire\Quotes\QuotePdfGeneration;
 use App\Models\Quote;
 use App\Models\User;
@@ -17,7 +17,7 @@ class QuotePdfGenerationTest extends FeatureTestCase
 {
     public function test_button_queues_generation_and_shows_queued_status_without_rendering_a_pdf(): void
     {
-        Queue::fake([GenerateQuotePdf::class]);
+        Queue::fake([GenerateQuoteSummaryPdf::class]);
         Http::preventStrayRequests();
         $user = User::factory()->admin()->create();
         $quote = Quote::factory()->create();
@@ -33,29 +33,29 @@ class QuotePdfGenerationTest extends FeatureTestCase
         $this->assertNotNull($generationId);
         $component->call('generate');
         $this->assertSame($generationId, $quote->fresh()->pdf_generation_id);
-        Queue::assertPushed(GenerateQuotePdf::class, fn (GenerateQuotePdf $job): bool => $job->quoteId === $quote->id
+        Queue::assertPushed(GenerateQuoteSummaryPdf::class, fn (GenerateQuoteSummaryPdf $job): bool => $job->quoteId === $quote->id
             && $job->generationId === $generationId && $job->queue === 'default' && $job->afterCommit === true);
-        Queue::assertPushed(GenerateQuotePdf::class, 1);
+        Queue::assertPushed(GenerateQuoteSummaryPdf::class, 1);
         Http::assertNothingSent();
         $this->assertDatabaseMissing('files', ['quote_id' => $quote->id]);
     }
 
     public function test_post_endpoint_queues_the_job_and_get_cannot_generate_a_pdf(): void
     {
-        Queue::fake([GenerateQuotePdf::class]);
+        Queue::fake([GenerateQuoteSummaryPdf::class]);
         $user = User::factory()->admin()->create();
         $quote = Quote::factory()->create();
 
         $this->actingAs($user)->get(route('quotes.generate-pdf', $quote))->assertMethodNotAllowed();
         $this->post(route('quotes.generate-pdf', $quote))->assertRedirectToRoute('quotes.show', $quote);
 
-        Queue::assertPushed(GenerateQuotePdf::class, 1);
+        Queue::assertPushed(GenerateQuoteSummaryPdf::class, 1);
         $this->assertSame(PdfGenerationStatus::QUEUED, $quote->fresh()->pdf_generation_status);
     }
 
     public function test_customer_cannot_queue_a_pdf_for_their_quote(): void
     {
-        Queue::fake([GenerateQuotePdf::class]);
+        Queue::fake([GenerateQuoteSummaryPdf::class]);
         $user = User::factory()->customer()->create();
         $quote = Quote::factory()->for($user)->create();
 
@@ -105,7 +105,7 @@ class QuotePdfGenerationTest extends FeatureTestCase
 
     public function test_failure_stops_polling_and_allows_retry_with_a_new_generation_id(): void
     {
-        Queue::fake([GenerateQuotePdf::class]);
+        Queue::fake([GenerateQuoteSummaryPdf::class]);
         $quote = Quote::factory()->create([
             'pdf_generation_status' => PdfGenerationStatus::PROCESSING,
             'pdf_generation_id' => '00000000-0000-4000-8000-000000000001',
@@ -122,12 +122,12 @@ class QuotePdfGenerationTest extends FeatureTestCase
             ->assertSee('PDF čeká na zpracování.');
 
         $this->assertNotSame('00000000-0000-4000-8000-000000000001', $quote->fresh()->pdf_generation_id);
-        Queue::assertPushed(GenerateQuotePdf::class, 1);
+        Queue::assertPushed(GenerateQuoteSummaryPdf::class, 1);
     }
 
     public function test_an_existing_summary_prevents_another_generation(): void
     {
-        Queue::fake([GenerateQuotePdf::class]);
+        Queue::fake([GenerateQuoteSummaryPdf::class]);
         $quote = Quote::factory()->create();
         $this->addSummary($quote);
 
