@@ -41,7 +41,7 @@ class QuoteSubmittedAdmin extends Notification implements ShouldQueue
             ->line('Email: ' . $this->quote->email)
             ->line('Telefon: ' . $this->quote->phone)
             ->line('Adresa: ' . ($this->quote->address ?? 'Neuvedeno'))
-            ->line('Výrobce kotle: ' . ($this->quote->boiler_manufacturer->label() ?? 'Neuvedeno'))
+            ->line('Výrobce kotle: ' . ($this->quote->boiler_manufacturer?->label() ?? 'Neuvedeno'))
             ->line('Výrobní číslo: ' . ($this->quote->boiler_serial_number ?? 'Neuvedeno'))
             ->line('Typ kotle: ' . ($this->quote->boiler_type ?? 'Neuvedeno'))
             ->line('Záruka: ' . ($this->quote->under_warranty ? 'Ano' : 'Ne'))
