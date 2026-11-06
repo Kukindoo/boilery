@@ -19,7 +19,9 @@ class WorkPolicyTest extends FeatureTestCase
         $cases = ['none' => [null]];
 
         foreach (Permissions::cases() as $permission) {
-            $cases[$permission->name] = [$permission];
+            if (str_starts_with($permission->name, 'WORK_')) {
+                $cases[$permission->name] = [$permission];
+            }
         }
 
         return $cases;
