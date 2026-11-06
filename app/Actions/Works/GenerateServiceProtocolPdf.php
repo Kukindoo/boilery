@@ -2,6 +2,7 @@
 
 namespace App\Actions\Works;
 
+use App\Actions\Files\GenerateFileLabel;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Work;
@@ -11,19 +12,15 @@ use RuntimeException;
 use Spatie\LaravelPdf\Facades\Pdf;
 use Throwable;
 
-class GeneratePdf
+readonly class GenerateServiceProtocolPdf
 {
+    public function __construct(private GenerateFileLabel $generateFileLabel) {}
+
     /**
      * @throws Throwable
      */
     public function handle(Work $work): File
     {
-        $work->loadMissing('user');
-        $label = Str::ascii($work->order_id . '_' . FileTypes::SERVICE_PROTOCOL->snake()) . '.pdf';
-        $directory = config('app.files.attachments_save_directory');
-        $path = mb_rtrim($directory, '/') . '/' . Str::uuid() . '.pdf';
-        $disk = Storage::disk();
-
         $content = Pdf::view('works.pdfs.service-protocol', [
             'work' => $work,
             'customer' => [
@@ -31,21 +28,27 @@ class GeneratePdf
                 'address' => $work->user?->address,
                 'phone' => $work->user?->phone,
             ],
-        ])->format('a4')->generatePdfContent();
+        ])->format('a4')
+            ->generatePdfContent();
 
+        $disk = Storage::disk();
+        $directory = config('app.files.attachments_save_directory');
+        $path = mb_rtrim($directory, '/') . '/' . Str::uuid() . '.pdf';
         if (! $disk->put($path, $content)) {
             throw new RuntimeException('Could not store the service protocol PDF.');
         }
 
+        $fileType = FileTypes::SERVICE_PROTOCOL;
+        $fileLabel = $this->generateFileLabel->handle($work->user, $work->id, $fileType, 'pdf');
         try {
             return $work->files()->create([
                 'path' => $path,
-                'original_name' => $label,
+                'original_name' => $fileLabel,
                 'extension' => 'pdf',
                 'mime_type' => 'application/pdf',
-                'file_type' => FileTypes::SERVICE_PROTOCOL,
+                'file_type' => $fileType->value,
                 'size' => mb_strlen($content, '8bit'),
-                'label' => $label,
+                'label' => $fileLabel,
             ]);
         } catch (Throwable $exception) {
             $disk->delete($path);

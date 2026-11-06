@@ -3,7 +3,7 @@
 namespace App\Actions\Works;
 
 use App\Enums\PdfGenerationStatus;
-use App\Jobs\Works\GenerateWorkPdf;
+use App\Jobs\Works\GenerateServiceProtocolPdf;
 use App\Models\Work;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -29,7 +29,7 @@ class QueuePdf
                 $lockedWork->pdf_generation_id = $generationId;
                 $lockedWork->save();
 
-                GenerateWorkPdf::dispatch($lockedWork->id, $generationId)->onQueue('default')->afterCommit();
+                GenerateServiceProtocolPdf::dispatch($lockedWork->id, $generationId)->onQueue('default')->afterCommit();
             });
         } catch (Throwable $exception) {
             Work::query()->whereKey($work->id)

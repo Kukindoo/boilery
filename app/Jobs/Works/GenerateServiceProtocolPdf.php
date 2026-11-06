@@ -2,14 +2,14 @@
 
 namespace App\Jobs\Works;
 
-use App\Actions\Works\GeneratePdf;
+use App\Actions\Works\GenerateServiceProtocolPdf;
 use App\Enums\PdfGenerationStatus;
 use App\Models\Work;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
-class GenerateWorkPdf implements ShouldQueue
+class GenerateServiceProtocolPdf implements ShouldQueue
 {
     use Queueable;
 
@@ -24,7 +24,7 @@ class GenerateWorkPdf implements ShouldQueue
     /**
      * @throws Throwable
      */
-    public function handle(GeneratePdf $generatePdf): void
+    public function handle(GenerateServiceProtocolPdf $generatePdf): void
     {
         $claimed = Work::query()->whereKey($this->workId)
             ->where('pdf_generation_id', $this->generationId)

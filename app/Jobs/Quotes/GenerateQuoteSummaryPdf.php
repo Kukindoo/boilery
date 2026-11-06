@@ -2,14 +2,14 @@
 
 namespace App\Jobs\Quotes;
 
-use App\Actions\Quotes\GeneratePdf;
+use App\Actions\Quotes\GenerateQuoteSummaryPdf;
 use App\Enums\PdfGenerationStatus;
 use App\Models\Quote;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
-class GenerateQuotePdf implements ShouldQueue
+class GenerateQuoteSummaryPdf implements ShouldQueue
 {
     use Queueable;
 
@@ -24,7 +24,7 @@ class GenerateQuotePdf implements ShouldQueue
     /**
      * @throws Throwable
      */
-    public function handle(GeneratePdf $generatePdf): void
+    public function handle(GenerateQuoteSummaryPdf $generatePdf): void
     {
         $claimed = Quote::query()->whereKey($this->quoteId)
             ->where('pdf_generation_id', $this->generationId)

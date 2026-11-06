@@ -3,7 +3,7 @@
 namespace App\Actions\Quotes;
 
 use App\Enums\PdfGenerationStatus;
-use App\Jobs\Quotes\GenerateQuotePdf;
+use App\Jobs\Quotes\GenerateQuoteSummaryPdf;
 use App\Models\Quote;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -29,7 +29,7 @@ class QueuePdf
                 $lockedQuote->pdf_generation_id = $generationId;
                 $lockedQuote->save();
 
-                GenerateQuotePdf::dispatch($lockedQuote->id, $generationId)->onQueue('default')->afterCommit();
+                GenerateQuoteSummaryPdf::dispatch($lockedQuote->id, $generationId)->onQueue('default')->afterCommit();
             });
         } catch (Throwable $exception) {
             Quote::query()->whereKey($quote->id)
