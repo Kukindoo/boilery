@@ -2,7 +2,6 @@
 
 @php
     $fields = [
-        'Zákazník' => $work->user?->name ?? '—',
         'Poptávka' => ($work->quote && auth()->user()->can('view', $work->quote)) ? $work->quote_id : '—',
         'Datum přijetí' => $work->work_accepted_at?->format('d.m.Y') ?? '—',
         'Datum zahájení' => $work->work_started_at?->format('d.m.Y') ?? '—',
@@ -24,6 +23,10 @@
         <flux:badge size="sm" :color="$work->status->colour()">
             {{ $work->status->label() }}
         </flux:badge>
+    </x-stellaris.container.show-row>
+
+    <x-stellaris.container.show-row title="Zákazník">
+        <x-customers.customer-name :customer="$work->user" />
     </x-stellaris.container.show-row>
 
     @foreach ($fields as $label => $value)
