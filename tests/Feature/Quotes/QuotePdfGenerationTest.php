@@ -5,7 +5,9 @@ namespace Tests\Feature\Quotes;
 use App\Enums\FileTypes;
 use App\Enums\PdfGenerationStatus;
 use App\Jobs\Quotes\GenerateQuoteSummaryPdf;
+use App\Livewire\Quotes\QuoteDownloadCard;
 use App\Livewire\Quotes\QuotePdfGeneration;
+use App\Models\File;
 use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
@@ -92,14 +94,15 @@ class QuotePdfGenerationTest extends FeatureTestCase
         $user = User::factory()->admin()->create();
         $quote = Quote::factory()->create(['pdf_generation_status' => PdfGenerationStatus::PROCESSING]);
         $component = Livewire::actingAs($user)->test(QuotePdfGeneration::class, ['quote' => $quote]);
-        $this->addSummary($quote);
+        $summary = $this->addSummary($quote);
         $quote->forceFill(['pdf_generation_status' => PdfGenerationStatus::COMPLETED])->save();
 
         $component->call('checkProgress')->assertRedirect(route('quotes.show', $quote));
 
         $this->get(route('quotes.show', $quote))
             ->assertSee('PDF je připraveno ke stažení v přílohách.')
-            ->assertSee('summary.pdf')
+            ->assertSeeLivewire(QuoteDownloadCard::class)
+            ->assertSee(route('quotes.files.preview', [$quote, $summary]), false)
             ->assertDontSee('wire:poll.2s', false);
     }
 
@@ -138,9 +141,9 @@ class QuotePdfGenerationTest extends FeatureTestCase
         Queue::assertNothingPushed();
     }
 
-    private function addSummary(Quote $quote): void
+    private function addSummary(Quote $quote): File
     {
-        $quote->files()->create([
+        return $quote->files()->create([
             'original_name' => 'summary.pdf', 'label' => 'summary.pdf',
             'file_type' => FileTypes::QUOTE_SUMMARY, 'extension' => 'pdf',
             'size' => 100, 'mime_type' => 'application/pdf', 'path' => 'summary.pdf',
