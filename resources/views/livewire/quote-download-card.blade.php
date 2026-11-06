@@ -70,7 +70,7 @@
                         Zrušit
                     </flux:button>
                 </flux:modal.close>
-                <flux:button type="submit" variant="danger" wire:click="deleteFile({{ $file }})">
+                <flux:button type="submit" variant="danger" wire:click="deleteFile">
                     Smazat přílohu
                 </flux:button>
             </div>

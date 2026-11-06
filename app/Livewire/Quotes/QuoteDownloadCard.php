@@ -2,70 +2,87 @@
 
 namespace App\Livewire\Quotes;
 
+use App\Actions\Files\ChangeFileType;
 use App\Actions\Files\DeleteFile;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Quote;
-use Exception;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class QuoteDownloadCard extends Component
 {
+    #[Locked]
     public Quote $quote;
 
+    #[Locked]
     public File $file;
 
     public ?FileTypes $file_type;
 
     public function mount(Quote $quote, File $file): void
     {
+        $quote = Quote::query()->findOrFail($quote->id);
+        Gate::authorize('view', $quote);
+        $file = $quote->files()->findOrFail($file->id);
+
         $this->quote = $quote;
         $this->file = $file;
-        $this->file_type = $this->file->file_type ?? FileTypes::UNKNOWN;
+        $this->file_type = $file->file_type ?? FileTypes::UNKNOWN;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.quote-download-card');
     }
 
-    public function changeFileType(FileTypes $file_type): void
+    /**
+     * @throws Throwable
+     */
+    public function changeFileType(FileTypes $file_type, ChangeFileType $changeFileType): void
     {
-        if (! auth()->user()->can('update', $this->quote)) {
-            abort(403);
-        }
+        $this->file = DB::transaction(function () use ($file_type, $changeFileType): File {
+            $quote = Quote::query()->lockForUpdate()->findOrFail($this->quote->id);
+            Gate::authorize('view', $quote);
+            Gate::authorize('update', $quote);
+            $file = $quote->files()->lockForUpdate()->findOrFail($this->file->id);
 
-        if (! auth()->user()->can('update', $this->file)) {
-            abort(403);
-        }
-
-        if (! in_array($file_type->value, array_column(FileTypes::cases(), 'value'))) {
-            abort(405);
-        }
-
-        $this->file->update([
-            'file_type' => $file_type,
-        ]);
-
+            return $changeFileType->handle($file, $file_type);
+        }, attempts: 5);
         $this->file_type = $file_type;
     }
 
     public function downloadFile(): StreamedResponse
     {
-        return Storage::disk(config('filesystems.default'))->download(
-            $this->file->path,
-            $this->file->label,
-        );
+        $quote = $this->authorizedQuote();
+        $file = $quote->files()->findOrFail($this->file->id);
+        Gate::authorize('view', $file);
+
+        return Storage::disk()->download($file->path, $file->label);
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
-    public function deleteFile(File $file): void
+    public function deleteFile(DeleteFile $deleteFile): void
     {
-        app(DeleteFile::class)->handle($file);
-        $this->redirect(route('quotes.show', $this->quote));
+        $quote = $this->authorizedQuote();
+        $file = $quote->files()->findOrFail($this->file->id);
+        $deleteFile->handle($file);
+        $this->redirect(route('quotes.show', $quote));
+    }
+
+    private function authorizedQuote(): Quote
+    {
+        $quote = Quote::query()->findOrFail($this->quote->id);
+        Gate::authorize('view', $quote);
+
+        return $quote;
     }
 }
