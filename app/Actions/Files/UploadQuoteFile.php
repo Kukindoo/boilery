@@ -23,7 +23,8 @@ class UploadQuoteFile
         $extension = $file->getClientOriginalExtension();
 
         $fileLabel = app(GenerateFileLabel::class)->handle(
-            $quote,
+            $quote->user,
+            $quote->id,
             $fileType,
             $extension,
         );
