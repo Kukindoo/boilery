@@ -6,6 +6,7 @@ use App\Actions\Files\GenerateFileLabel;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Quote;
+use App\Traits\LogsActionActivity;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -15,6 +16,8 @@ use Throwable;
 
 readonly class GenerateQuoteSummaryPdf
 {
+    use LogsActionActivity;
+
     public function __construct(private GenerateFileLabel $generateFileLabel) {}
 
     /**
@@ -22,35 +25,45 @@ readonly class GenerateQuoteSummaryPdf
      */
     public function handle(Quote $quote): File
     {
-        $attachments = $this->getAttachments($quote);
-
-        $content = Pdf::view('quotes.pdfs.summary', [
-            'quote' => $quote,
-            'attachments' => $attachments,
-        ])->format('a4')
-            ->generatePdfContent();
-
-        $disk = Storage::disk();
-        $directory = config('app.files.attachments_save_directory');
-        $path = mb_rtrim($directory, '/') . '/' . Str::uuid() . '.pdf';
-        if (! $disk->put($path, $content)) {
-            throw new RuntimeException('Could not store the quote summary PDF.');
-        }
-
-        $fileType = FileTypes::QUOTE_SUMMARY;
-        $fileLabel = $this->generateFileLabel->handle($quote->user, $quote->id, $fileType, 'pdf');
         try {
-            return $quote->files()->create([
-                'path' => $path,
-                'original_name' => $fileLabel,
-                'extension' => 'pdf',
-                'mime_type' => 'application/pdf',
-                'file_type' => $fileType->value,
-                'size' => mb_strlen($content, '8bit'),
-                'label' => $fileLabel,
-            ]);
+            $attachments = $this->getAttachments($quote);
+
+            $content = Pdf::view('quotes.pdfs.summary', [
+                'quote' => $quote,
+                'attachments' => $attachments,
+            ])->format('a4')
+                ->generatePdfContent();
+
+            $disk = Storage::disk();
+            $directory = config('app.files.attachments_save_directory');
+            $path = mb_rtrim($directory, '/') . '/' . Str::uuid() . '.pdf';
+            if (! $disk->put($path, $content)) {
+                throw new RuntimeException('Could not store the quote summary PDF.');
+            }
+
+            $fileType = FileTypes::QUOTE_SUMMARY;
+            $fileLabel = $this->generateFileLabel->handle($quote->user, $quote->id, $fileType, 'pdf');
+            try {
+                $file = $quote->files()->create([
+                    'path' => $path,
+                    'original_name' => $fileLabel,
+                    'extension' => 'pdf',
+                    'mime_type' => 'application/pdf',
+                    'file_type' => $fileType->value,
+                    'size' => mb_strlen($content, '8bit'),
+                    'label' => $fileLabel,
+                ]);
+            } catch (Throwable $exception) {
+                $disk->delete($path);
+
+                throw $exception;
+            }
+
+            $this->logActionCompleted('quotes', $quote, 'Quote summary PDF generated', ['file_id' => $file->id]);
+
+            return $file;
         } catch (Throwable $exception) {
-            $disk->delete($path);
+            $this->logActionAttempt('quotes', $quote, $exception);
 
             throw $exception;
         }

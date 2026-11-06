@@ -152,7 +152,7 @@ class WorkForm extends Form
     public function update(): Work
     {
         abort_if($this->work === null, 404);
-        $work = Work::query()->lockForUpdate()->findOrFail($this->work->id);
+        $work = Work::query()->findOrFail($this->work->id);
         Gate::authorize('update', $work);
         $this->validate();
         $this->authorizeAssignments(false);
