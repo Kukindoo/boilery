@@ -51,7 +51,7 @@ class QuoteForm extends Form
         $mimes = implode(',', config('app.files.mimes'));
         $maxSize = config('app.files.max_size');
 
-        $rules = [
+        return [
             'firstName' => ['required', 'string', 'max:255'],
             'lastName' => ['required', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:500'],
@@ -66,10 +66,6 @@ class QuoteForm extends Form
             'fileReceipt' => ['nullable', 'file', "mimes:$mimes", "max:$maxSize"],
             'fileWarrantyDocument' => ['nullable', 'file', "mimes:$mimes", "max:$maxSize"],
         ];
-
-        $rules['email'][] = Rule::unique(User::class, 'email')->ignore(auth()->id());
-
-        return $rules;
     }
 
     public function messages(): array
@@ -96,7 +92,9 @@ class QuoteForm extends Form
      */
     public function submit(): Quote
     {
-        $this->validate();
+        $rules = $this->rules();
+        $rules['email'][] = Rule::unique(User::class, 'email')->ignore(auth()->id());
+        $this->validate($rules);
         $namePlate = new NamePlate($this->firstName, $this->lastName, $this->email, $this->phone, $this->address);
 
         try {
