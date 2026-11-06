@@ -58,6 +58,7 @@ class Quote extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
+            ->useLogName('quotes')
             ->logAll()
             ->logOnlyDirty();
     }
