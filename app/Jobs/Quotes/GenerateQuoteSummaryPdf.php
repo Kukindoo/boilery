@@ -2,7 +2,7 @@
 
 namespace App\Jobs\Quotes;
 
-use App\Actions\Quotes\GenerateQuoteSummaryPdf;
+use App\Actions\Quotes\GenerateQuoteSummaryPdf as GeneratePdfAction;
 use App\Enums\PdfGenerationStatus;
 use App\Models\Quote;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,7 +24,7 @@ class GenerateQuoteSummaryPdf implements ShouldQueue
     /**
      * @throws Throwable
      */
-    public function handle(GenerateQuoteSummaryPdf $generatePdf): void
+    public function handle(GeneratePdfAction $generatePdf): void
     {
         $claimed = Quote::query()->whereKey($this->quoteId)
             ->where('pdf_generation_id', $this->generationId)
