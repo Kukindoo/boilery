@@ -1,6 +1,6 @@
 <x-layouts::app :title="__('Zakázky')">
     <div class="space-y-6">
-        <x-stellaris.container.model-card
+        <x-stellaris.container.index-card
                 :heading="__('Zakázka :order_id', ['order_id' => $work->order_id])">
             <x-slot name="subheading">
                 <x-customers.customer-name :customer="$work->user" />
@@ -51,7 +51,7 @@
             <x-works.work-transport-info :work="$work"/>
             <x-works.work-attached-images :work="$work"/>
 
-        </x-stellaris.container.model-card>
+        </x-stellaris.container.index-card>
 
         <flux:modal name="service-protocol-preview" class="w-full max-w-5xl">
             <div class="space-y-4">

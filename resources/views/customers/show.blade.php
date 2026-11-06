@@ -1,6 +1,6 @@
 <x-layouts::app title="Zákazník">
     <div class="space-y-6">
-        <x-stellaris.container.model-card :heading="$customer->name" :subheading="$customer->email">
+        <x-stellaris.container.index-card :heading="$customer->name" :subheading="$customer->email">
             <x-slot name="actions">
                 <div class="flex gap-2">
                     <flux:button size="sm" :href="route('customers.index')">
@@ -15,6 +15,6 @@
             </x-slot>
 
             <x-customers.customer-info :customer="$customer" />
-        </x-stellaris.container.model-card>
+        </x-stellaris.container.index-card>
     </div>
 </x-layouts::app>
