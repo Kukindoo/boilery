@@ -39,7 +39,7 @@ class SingleFileUploadTest extends FeatureTestCase
             ->assertRedirect(route('quotes.show', $quote));
 
         $this->assertDatabaseHas('files', ['quote_id' => $quote->id, 'original_name' => 'receipt.jpg']);
-        $this->assertStringStartsWith("files/users/{$quote->user_id}/", $quote->files()->sole()->path);
+        $this->assertStringStartsWith('files/attachments/', $quote->files()->sole()->path);
         Storage::disk('local')->assertExists($quote->files()->sole()->path);
     }
 

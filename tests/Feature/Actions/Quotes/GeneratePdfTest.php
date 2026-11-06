@@ -38,27 +38,20 @@ class GeneratePdfTest extends FeatureTestCase
         Http::preventStrayRequests();
     }
 
-    public function test_upload_and_pdf_generation_require_an_assigned_customer(): void
+    public function test_upload_and_pdf_generation_support_quotes_without_an_assigned_customer(): void
     {
         Storage::fake('local');
+        Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
         $quote = Quote::factory()->create(['user_id' => null]);
 
-        foreach (['upload', 'pdf'] as $operation) {
-            try {
-                if ($operation === 'upload') {
-                    app(UploadQuoteFile::class)->handle(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
-                } else {
-                    app(GeneratePdf::class)->handle($quote);
-                }
-                $this->fail('Saving a file without a customer must fail.');
-            } catch (\Illuminate\Validation\ValidationException $exception) {
-                $this->assertArrayHasKey('user_id', $exception->errors());
-            }
-        }
+        $attachment = app(UploadQuoteFile::class)->handle(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
+        $summary = app(GeneratePdf::class)->handle($quote);
 
-        Storage::disk()->assertEmpty();
-        $this->assertSame(0, $quote->files()->count());
-        Http::assertNothingSent();
+        $this->assertSame(2, $quote->files()->count());
+        foreach ([$attachment, $summary] as $file) {
+            $this->assertStringStartsWith('files/attachments/', $file->path);
+            Storage::disk()->assertExists($file->path);
+        }
     }
 
     public function test_saves_quote_summary_on_the_default_disk_with_file_metadata(): void
@@ -66,7 +59,7 @@ class GeneratePdfTest extends FeatureTestCase
         Storage::fake('quote-documents');
         config([
             'filesystems.default' => 'quote-documents',
-            'app.files.user_save_directory' => 'custom/users/{user_id}',
+            'app.files.attachments_save_directory' => 'custom/attachments',
         ]);
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
         $quote = Quote::factory()->for(\App\Models\User::factory())->create([
@@ -92,7 +85,7 @@ class GeneratePdfTest extends FeatureTestCase
             'size' => 30,
         ]);
         $this->assertSame(FileTypes::QUOTE_SUMMARY, $file->file_type);
-        $this->assertStringStartsWith("custom/users/{$quote->user_id}/", $file->path);
+        $this->assertStringStartsWith('custom/attachments/', $file->path);
         Storage::disk()->assertExists($file->path);
         $this->assertSame(self::PDF_CONTENT, Storage::disk()->get($file->path));
         Http::assertSent(fn (Request $request): bool => $request->url() === self::ENDPOINT

@@ -53,7 +53,7 @@ class GenerateWorkPdfTest extends FeatureTestCase
 
         $this->assertSame(PdfGenerationStatus::COMPLETED, $work->fresh()->pdf_generation_status);
         $file = $work->files()->sole();
-        $this->assertStringStartsWith("files/users/{$work->user_id}/", $file->path);
+        $this->assertStringStartsWith('files/attachments/', $file->path);
         $this->assertSame(FileTypes::SERVICE_PROTOCOL, $file->file_type);
         Storage::disk()->assertExists($file->path);
         $this->assertSame('%PDF-1.7 generated service_protocol', Storage::disk()->get($file->path));

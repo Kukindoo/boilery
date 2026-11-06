@@ -50,7 +50,7 @@ class GenerateQuotePdfTest extends FeatureTestCase
 
         $this->assertSame(PdfGenerationStatus::COMPLETED, $quote->fresh()->pdf_generation_status);
         $file = $quote->files()->sole();
-        $this->assertStringStartsWith("files/users/{$quote->user_id}/", $file->path);
+        $this->assertStringStartsWith('files/attachments/', $file->path);
         $this->assertSame(FileTypes::QUOTE_SUMMARY, $file->file_type);
         Storage::disk()->assertExists($file->path);
         $this->assertSame('%PDF-1.7 generated summary', Storage::disk()->get($file->path));
