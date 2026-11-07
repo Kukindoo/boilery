@@ -36,7 +36,7 @@ readonly class GenerateQuoteSummaryPdf
 
             $generatedAt = new DateTimeImmutable('now', new DateTimeZone('Europe/Prague'))->format('d. m. Y H:i:s T');
 
-            $content = Pdf::view('quotes.pdfs.summary', [
+            $content = Pdf::view('pdfs.quote-summary-pdf', [
                 'quote' => $quote,
                 'attachments' => $attachments,
                 'generatedAt' => $generatedAt,

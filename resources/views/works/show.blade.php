@@ -49,7 +49,7 @@
             <x-works.work-boiler-info :work="$work"/>
             <x-works.work-repair-info :work="$work"/>
             <x-works.work-transport-info :work="$work"/>
-            <x-files.attachment-card :model="$work" />
+            <x-files.attachment-card :model="$work"/>
 
         </x-stellaris.container.index-card>
 
@@ -62,7 +62,7 @@
                         title="Náhled servisního protokolu {{ $work->order_id }}"
                         class="h-[75vh] w-full rounded-lg border border-zinc-200 bg-white dark:border-zinc-700"
                         sandbox=""
-                        srcdoc="{{ view('works.pdfs.service-protocol', [
+                        srcdoc="{{ view('pdfs.service-protocol-pdf', [
                         'work' => $work,
                         'customer' => [
                             'name' => $work->user?->name,
