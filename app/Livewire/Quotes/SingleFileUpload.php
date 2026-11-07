@@ -3,7 +3,7 @@
 namespace App\Livewire\Quotes;
 
 use App\Actions\Files\UploadFile;
-use App\Livewire\Forms\SingleFileUploadForm;
+use App\Livewire\Forms\Files\SingleFileUploadForm;
 use App\Models\Quote;
 use Flux\Flux;
 use Livewire\Attributes\Locked;

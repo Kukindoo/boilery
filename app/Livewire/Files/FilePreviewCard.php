@@ -7,6 +7,8 @@ use App\Actions\Files\DetachFile;
 use App\Contracts\OwnsFiles;
 use App\Enums\FileTypes;
 use App\Models\File;
+use App\Models\Quote;
+use App\Models\Work;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -76,7 +78,11 @@ class FilePreviewCard extends Component
         $model = $this->authorizedModel();
         $file = $model->files()->findOrFail($this->file->getKey());
         $detachFile->handle($model, $file);
-        $this->redirect(route('quotes.show', $model));
+        $route = match (true) {
+            $model instanceof Quote => 'quotes.show',
+            $model instanceof Work => 'works.show',
+        };
+        $this->redirect(route($route, $model));
     }
 
     private function authorizedModel(): Model&OwnsFiles

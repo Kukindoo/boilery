@@ -2,11 +2,13 @@
 
 namespace App\Actions\Files;
 
+use App\Contracts\OwnsFiles;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Quote;
 use App\Models\Work;
 use App\Traits\LogsActionActivity;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -22,7 +24,7 @@ readonly class UploadFile
     public function __construct(private GenerateFileLabel $generateFileLabel) {}
 
     /** @throws Throwable */
-    public function handle(UploadedFile $file, Quote|Work $parent, FileTypes $fileType): File
+    public function handle(UploadedFile $file, Model&OwnsFiles $parent, FileTypes $fileType): File
     {
         return $this->store($file, $parent, $fileType, authorize: true);
     }
@@ -38,7 +40,7 @@ readonly class UploadFile
     }
 
     /** @throws Throwable */
-    private function store(UploadedFile $file, Quote|Work $parent, FileTypes $fileType, bool $authorize): File
+    private function store(UploadedFile $file, Model&OwnsFiles $parent, FileTypes $fileType, bool $authorize): File
     {
         $path = null;
         $disk = Storage::disk();

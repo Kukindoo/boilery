@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Livewire\Forms;
+namespace App\Livewire\Forms\Files;
 
 use App\Actions\Files\UploadFile;
+use App\Contracts\OwnsFiles;
 use App\Enums\FileTypes;
-use App\Models\Quote;
-use App\Models\Work;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -33,7 +33,7 @@ class SingleFileUploadForm extends Form
     /**
      * @throws Throwable
      */
-    public function submit(Quote|Work $parent, UploadFile $uploadFile): void
+    public function submit(Model&OwnsFiles $parent, UploadFile $uploadFile): void
     {
         Gate::authorize('uploadFile', $parent);
         $this->validate();

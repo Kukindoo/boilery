@@ -3,7 +3,7 @@
 namespace App\Livewire\Works;
 
 use App\Actions\Files\UploadFile;
-use App\Livewire\Forms\SingleFileUploadForm;
+use App\Livewire\Forms\Files\SingleFileUploadForm;
 use App\Models\Work;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
