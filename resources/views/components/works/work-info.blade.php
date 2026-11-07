@@ -3,9 +3,9 @@
 @php
     $fields = [
         'Poptávka' => ($work->quote && auth()->user()->can('view', $work->quote)) ? $work->quote_id : '—',
-        'Datum přijetí' => $work->work_accepted_at?->format('d.m.Y') ?? '—',
-        'Datum zahájení' => $work->work_started_at?->format('d.m.Y') ?? '—',
-        'Datum dokončení' => $work->work_completed_at?->format('d.m.Y') ?? '—',
+        'Datum přijetí' => $work->work_accepted_at?->format('d-m-Y') ?? '—',
+        'Datum zahájení' => $work->work_started_at?->format('d-m-Y') ?? '—',
+        'Datum dokončení' => $work->work_completed_at?->format('d-m-Y') ?? '—',
         'Jméno technika' => $work->mechanic_name ?? '—',
     ];
 @endphp
