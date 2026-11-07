@@ -18,19 +18,7 @@
         </div>
     </div>
     <div class="mt-6">
-        @if ( str_starts_with($file->mime_type, 'image/') )
-            <img
-                    src="{{ route('works.files.preview', [$work, $file]) }}"
-                    alt="{{ $file->file_type->label() }}"
-                    class="max-h-[75vh] w-full object-contain"
-            >
-        @elseif ($file->mime_type === 'application/pdf')
-            <iframe
-                    title="{{ $file->label }}"
-                    src="{{ route('works.files.preview', [$work, $file]) }}"
-                    class="h-[75vh] w-full rounded-lg border"
-            ></iframe>
-        @endif
+        <x-files.file-preview :file="$file" :model="$work" />
     </div>
 
 </li>

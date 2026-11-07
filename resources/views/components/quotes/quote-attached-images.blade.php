@@ -25,7 +25,7 @@
                                             {{ $file_type->label()  }}
                                         </flux:heading>
                                         <img
-                                                src="{{ route('quotes.files.preview', [$quote, $file]) }}"
+                                                src="{{ route('files.preview', ['quote', $quote, $file]) }}"
                                                 alt="{{ $file_type->label() }}"
                                                 class="max-h-[75vh] w-full object-contain"
                                         >

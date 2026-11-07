@@ -73,9 +73,9 @@ class WorkFileUploadTest extends FeatureTestCase
         $this->assertCount(1, Storage::allFiles(config('app.files.attachments_save_directory')));
         Storage::disk()->assertExists($file->path);
         $this->get(route('quotes.show', $quote))->assertOk()
-            ->assertSee(route('quotes.files.preview', [$quote, $file]), false);
+            ->assertSee(route('files.preview', ['quote', $quote, $file]), false);
         $this->get(route('works.show', $work))->assertOk()
-            ->assertSee(route('works.files.preview', [$work, $file]), false);
+            ->assertSee(route('files.preview', ['work', $work, $file]), false);
     }
 
     public function test_standalone_work_has_an_upload_control_before_any_attachment_exists(): void

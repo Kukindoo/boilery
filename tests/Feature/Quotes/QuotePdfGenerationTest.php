@@ -102,7 +102,7 @@ class QuotePdfGenerationTest extends FeatureTestCase
         $this->get(route('quotes.show', $quote))
             ->assertSee('PDF je připraveno ke stažení v přílohách.')
             ->assertSeeLivewire(QuoteDownloadCard::class)
-            ->assertSee(route('quotes.files.preview', [$quote, $summary]), false)
+            ->assertSee(route('files.preview', ['quote', $quote, $summary]), false)
             ->assertDontSee('wire:poll.2s', false);
     }
 

@@ -17,43 +17,6 @@
         </div>
     </div>
     <div class="mt-6">
-        @if ( str_starts_with($file->mime_type, 'image/') )
-            <img
-                    src="{{ route('quotes.files.preview', [$quote, $file]) }}"
-                    alt="{{ $file_type->label() }}"
-                    class="max-h-[75vh] w-full object-contain"
-            >
-        @elseif ($file->mime_type === 'application/pdf')
-            <iframe
-                    src="{{ route('quotes.files.preview', [$quote, $file]) }}"
-                    class="h-[75vh] w-full rounded-lg border"
-            ></iframe>
-        @endif
+        <x-files.file-preview :file="$file" :model="$quote" />
     </div>
-    @can('detach', [$file, $quote])
-        <flux:modal name="delete-attachment" class="min-w-[22rem]">
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="lg">
-                        Odebrat přílohu?
-                    </flux:heading>
-                    <flux:text class="mt-2">
-                        Příloha bude odebrána z této poptávky.<br>
-                        Pokud soubor nemá jiné přílohy, bude odstraněn.
-                    </flux:text>
-                </div>
-                <div class="flex gap-2">
-                    <flux:spacer/>
-                    <flux:modal.close>
-                        <flux:button variant="ghost">
-                            Zrušit
-                        </flux:button>
-                    </flux:modal.close>
-                    <flux:button type="submit" variant="danger" wire:click="deleteFile">
-                        Odebrat přílohu
-                    </flux:button>
-                </div>
-            </div>
-        </flux:modal>
-    @endcan
 </li>
