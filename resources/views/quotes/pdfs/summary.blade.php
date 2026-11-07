@@ -14,7 +14,8 @@
         table { width: 100%; border-collapse: collapse; }
         tr { border-bottom: 1px solid #e4e4e7; }
         .message { white-space: pre-wrap; overflow-wrap: anywhere; }
-        .attachment { margin-bottom: 18pt; overflow-wrap: anywhere; }
+        .attachment { page-break-before: always; break-before: page; overflow-wrap: anywhere; }
+        .attachment h2, .attachment h3 { margin-top: 0; }
         .attachment img { display: block; max-width: 100%; max-height: 220mm; margin-top: 8pt; object-fit: contain; }
     </style>
 </head>
@@ -38,10 +39,9 @@
     <h2>Zpráva</h2>
     <div class="message">{{ $quote->message }}</div>
     @if ($attachments->isNotEmpty())
-        <h2>Přílohy</h2>
         @foreach ($attachments as $attachment)
             <div class="attachment">
-                <h3>{{ $attachment['type'] }}</h3>
+                <h3>Příloha: {{ $attachment['type'] }}</h3>
                 <p>{{ $attachment['label'] }} ({{ $attachment['mime_type'] }})</p>
                 @if ($attachment['image'] !== null)
                     <img src="{{ $attachment['image'] }}" alt="{{ $attachment['label'] }}">
