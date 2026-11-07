@@ -2,7 +2,6 @@
 
 @php
     $fields = [
-        'Poptávka' => ($work->quote && auth()->user()->can('view', $work->quote)) ? $work->quote_id : '—',
         'Datum přijetí' => $work->work_accepted_at?->format('d-m-Y') ?? '—',
         'Datum zahájení' => $work->work_started_at?->format('d-m-Y') ?? '—',
         'Datum dokončení' => $work->work_completed_at?->format('d-m-Y') ?? '—',
@@ -27,6 +26,16 @@
 
     <x-stellaris.container.show-row title="Zákazník">
         <x-customers.customer-name :customer="$work->user" />
+    </x-stellaris.container.show-row>
+
+    <x-stellaris.container.show-row title="Poptávka">
+        @if ($work->quote && auth()->user()->can('view', $work->quote))
+            <flux:link :href="route('quotes.show', $work->quote)" wire:navigate>
+                {{ $work->quote_id }}
+            </flux:link>
+        @else
+            —
+        @endif
     </x-stellaris.container.show-row>
 
     @foreach ($fields as $label => $value)
