@@ -22,6 +22,14 @@
                         Stáhnout
                     </flux:menu.item>
                     <flux:menu.separator/>
+                    @can('detach', [$file, $work])
+                        <flux:modal.trigger name="delete-work-attachment-{{ $file->id }}">
+                            <flux:menu.item variant="danger" icon="trash">
+                                Odebrat
+                            </flux:menu.item>
+                        </flux:modal.trigger>
+                    @endcan
+                    <flux:menu.separator/>
                     @can('update', $work)
                         @can('update', $file)
                             <flux:menu.submenu heading="Změnit typ">
@@ -32,14 +40,6 @@
                                 @endforeach
                             </flux:menu.submenu>
                         @endcan
-                    @endcan
-                    <flux:menu.separator/>
-                    @can('detach', [$file, $work])
-                        <flux:modal.trigger name="delete-work-attachment-{{ $file->id }}">
-                            <flux:menu.item variant="danger" icon="trash">
-                                Odebrat
-                            </flux:menu.item>
-                        </flux:modal.trigger>
                     @endcan
                 </flux:menu>
             </flux:dropdown>
