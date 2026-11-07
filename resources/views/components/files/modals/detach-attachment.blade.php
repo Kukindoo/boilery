@@ -1,3 +1,8 @@
+@php
+    use App\Contracts\OwnsFiles;
+    use Illuminate\Database\Eloquent\Model;
+@endphp
+
 @props([
     'file',
     'model',
@@ -5,6 +10,7 @@
 
 @php
     /** @var \App\Models\File $file */
+    /** @var Model&OwnsFiles $model */
 @endphp
 
 @can('detach', [$file, $model])

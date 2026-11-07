@@ -1,4 +1,6 @@
 @php
+    use App\Contracts\OwnsFiles;
+    use Illuminate\Database\Eloquent\Model;
     use App\Models\Quote;
     use App\Models\Work;
     use App\Models\File;
@@ -8,7 +10,7 @@
 
 @php
     /** @var File $file */
-    /** @var Quote|Work $model */
+    /** @var Model&OwnsFiles $model */
 
     $modelType = match (true) {
         $model instanceof Quote => 'quote',
