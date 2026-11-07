@@ -49,7 +49,7 @@
             <x-works.work-boiler-info :work="$work"/>
             <x-works.work-repair-info :work="$work"/>
             <x-works.work-transport-info :work="$work"/>
-            <x-works.work-attached-images :work="$work"/>
+            <x-files.attachment-card :model="$work" />
 
         </x-stellaris.container.index-card>
 

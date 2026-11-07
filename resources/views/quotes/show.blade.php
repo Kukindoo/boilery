@@ -17,6 +17,6 @@
 
         <x-quotes.quote-person-info :quote="$quote" />
         <x-quotes.quote-boiler-info :quote="$quote" />
-        <x-quotes.quote-attachments :quote="$quote" />
+        <x-files.attachment-card :model="$quote" />
     </x-stellaris.container.index-card>
 </x-layouts::app>

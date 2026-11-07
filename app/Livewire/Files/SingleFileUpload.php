@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Livewire\Quotes;
+namespace App\Livewire\Files;
 
 use App\Actions\Files\UploadFile;
+use App\Contracts\OwnsFiles;
 use App\Livewire\Forms\Files\SingleFileUploadForm;
 use App\Models\Quote;
 use Flux\Flux;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -18,16 +20,16 @@ class SingleFileUpload extends Component
     public SingleFileUploadForm $form;
 
     #[Locked]
-    public Quote $quote;
+    public Model&OwnsFiles $model;
 
-    public function mount(Quote $quote): void
+    public function mount(Model&OwnsFiles $model): void
     {
-        $this->quote = $quote;
+        $this->model = $model;
     }
 
     public function render()
     {
-        return view('livewire.quotes.single-file-upload');
+        return view('livewire.files.single-file-upload');
     }
 
     /**
@@ -35,10 +37,15 @@ class SingleFileUpload extends Component
      */
     public function submit(UploadFile $uploadFile): void
     {
-
-        $this->form->submit($this->quote, $uploadFile);
+        $this->form->submit($this->model, $uploadFile);
         Flux::modal('upload-file')->close();
         $this->form->reset();
-        $this->redirect(route('quotes.show', $this->quote));
+
+        $route = match (true) {
+            $this->model instanceof Quote => 'quotes.show',
+            $this->model instanceof OwnsFiles => 'works.show',
+        };
+
+        $this->redirect(route($route, $this->model));
     }
 }

@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\Roles;
-use App\Livewire\Quotes\SingleFileUpload;
+use App\Livewire\Files\SingleFileUpload;
 use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;

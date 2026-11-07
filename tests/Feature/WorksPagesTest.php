@@ -63,7 +63,7 @@ class WorksPagesTest extends FeatureTestCase
         $this->actingAs($user)->get(route('works.show', $work))
             ->assertDontSeeLivewire(\App\Livewire\Files\FilePreviewCard::class)
             ->assertDontSee(route('files.preview', ['quote', $quote, $file]))
-            ->assertDontSeeLivewire(\App\Livewire\Quotes\SingleFileUpload::class);
+            ->assertDontSeeLivewire(\App\Livewire\Files\SingleFileUpload::class);
     }
 
     public function test_show_hides_quote_details_without_quote_view_permission(): void

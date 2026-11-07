@@ -4,7 +4,7 @@ namespace Tests\Feature\Works;
 
 use App\Enums\Permissions;
 use App\Enums\Roles;
-use App\Livewire\Quotes\SingleFileUpload as QuoteUpload;
+use App\Livewire\Files\SingleFileUpload as QuoteUpload;
 use App\Livewire\Works\SingleFileUpload as WorkUpload;
 use App\Models\File;
 use App\Models\Quote;

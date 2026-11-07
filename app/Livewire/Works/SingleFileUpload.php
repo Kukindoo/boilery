@@ -39,6 +39,6 @@ class SingleFileUpload extends Component
 
     public function render(): View
     {
-        return view('livewire.quotes.single-file-upload');
+        return view('livewire.files.single-file-upload');
     }
 }
