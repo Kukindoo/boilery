@@ -9,7 +9,10 @@ use App\Dtos\NamePlate;
 use App\Dtos\Quotes\QuoteDto;
 use App\Enums\BoilerManufacturers;
 use App\Models\Quote;
+use App\Models\User;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Form;
 use Throwable;
 
@@ -74,6 +77,7 @@ class QuoteForm extends Form
             'email.required' => 'Prosím zadejte svou e-mailovou adresu.',
             'message.required' => 'Prosím zadejte zprávu.',
             'email.email' => 'Prosím zdejte platnou e-mailovou adresu.',
+            'email.unique' => CreateCustomer::EMAIL_ALREADY_EXISTS_MESSAGE,
             'fileLabel.mimes' => 'Dokument musí být typu: ' . implode(', ', config('app.files.mimes')) . '.',
             'fileLabel.max' => 'Dokument nesmí být větší jak ' . (config('app.files.max_size') / 1024) . ' MB.',
             'fileReceipt.mimes' => 'Dokument musí být typu: ' . implode(', ', config('app.files.mimes')) . '.',
@@ -88,10 +92,18 @@ class QuoteForm extends Form
      */
     public function submit(): Quote
     {
-        $this->validate();
-        $namePlate = new NamePlate($this->firstName, $this->lastName, $this->email);
+        $rules = $this->rules();
+        $rules['email'][] = Rule::unique(User::class, 'email')->ignore(auth()->id());
+        $this->validate($rules);
+        $namePlate = new NamePlate($this->firstName, $this->lastName, $this->email, $this->phone, $this->address);
 
-        $user = app(CreateCustomer::class)->handle($namePlate);
+        try {
+            $user = app(CreateCustomer::class)->handle($namePlate);
+        } catch (ValidationException $exception) {
+            throw ValidationException::withMessages(
+                Arr::prependKeysWith($exception->errors(), $this->getPropertyName() . '.'),
+            );
+        }
 
         $quote = app(CreateQuote::class)->handle($this, $user);
 

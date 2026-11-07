@@ -5,7 +5,7 @@
                 <label for="file-type" class="block text-sm/6 font-semibold text-heading-text dark:text-primary-dark-text">
                     Typ souborů
                 </label>
-                <flux:select wire:model="form.fileType" variant="listbox" placeholder="Zvolte výrobce bojlerů...">
+                <flux:select wire:model="form.fileType" variant="listbox" placeholder="Zvolte typ souboru...">
                     @foreach(App\Enums\FileTypes::cases() as $fileType)
                         <flux:select.option value="{{ $fileType->value }}">
                             {{ $fileType->label() }}

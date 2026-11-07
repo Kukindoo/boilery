@@ -28,6 +28,8 @@ class ProfileUpdateTest extends FeatureTestCase
         $response = Livewire::test(Profile::class)
             ->set('name', 'Test User')
             ->set('email', 'test@example.com')
+            ->set('phone', '+420 604 123 456')
+            ->set('address', 'Dlouhá 1, Praha')
             ->call('updateProfileInformation');
 
         $response->assertHasNoErrors();
@@ -36,6 +38,8 @@ class ProfileUpdateTest extends FeatureTestCase
 
         $this->assertEquals('Test User', $user->name);
         $this->assertEquals('test@example.com', $user->email);
+        $this->assertSame('+420 604 123 456', $user->phone);
+        $this->assertSame('Dlouhá 1, Praha', $user->address);
         $this->assertNull($user->email_verified_at);
     }
 
@@ -53,6 +57,36 @@ class ProfileUpdateTest extends FeatureTestCase
         $response->assertHasNoErrors();
 
         $this->assertNotNull($user->refresh()->email_verified_at);
+    }
+
+    public function test_contact_details_are_loaded_and_address_can_be_cleared(): void
+    {
+        $user = User::factory()->create(['phone' => '+420 604 123 456', 'address' => 'Praha']);
+
+        Livewire::actingAs($user)->test(Profile::class)
+            ->assertSet('phone', $user->phone)
+            ->assertSet('address', 'Praha')
+            ->set('address', '')
+            ->call('updateProfileInformation')
+            ->assertHasNoErrors();
+
+        $this->assertNull($user->refresh()->address);
+        $this->assertSame('+420 604 123 456', $user->phone);
+    }
+
+    public function test_contact_details_are_validated_before_saving(): void
+    {
+        $user = User::factory()->create(['address' => 'Praha']);
+        $phone = $user->phone;
+
+        Livewire::actingAs($user)->test(Profile::class)
+            ->set('phone', '')
+            ->set('address', str_repeat('a', 501))
+            ->call('updateProfileInformation')
+            ->assertHasErrors(['phone' => 'required', 'address' => 'max']);
+
+        $this->assertSame($phone, $user->refresh()->phone);
+        $this->assertSame('Praha', $user->address);
     }
 
     public function test_user_can_delete_their_account(): void

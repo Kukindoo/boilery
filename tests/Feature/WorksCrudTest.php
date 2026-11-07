@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Actions\Works\ForceDeleteWork;
 use App\Actions\Works\RestoreWork;
+use App\Enums\BoilerManufacturers;
 use App\Enums\Permissions;
 use App\Livewire\Works\WorkCreate;
 use App\Livewire\Works\WorkEdit;
@@ -15,6 +16,47 @@ use Livewire\Livewire;
 
 class WorksCrudTest extends FeatureTestCase
 {
+    public function test_create_keeps_manufacturer_separate_from_product_type(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permissions::WORK_CREATE_OWN);
+
+        Livewire::actingAs($user)->test(WorkCreate::class)
+            ->set('form.orderId', 'MANUFACTURER-TEST')
+            ->set('form.typeOfProduct', 'Ohřívač vody')
+            ->set('form.boilerManufacturer', BoilerManufacturers::DRAZICE->value)
+            ->call('submit')->assertHasNoErrors();
+
+        $work = Work::query()->sole();
+        $this->assertSame('Ohřívač vody', $work->type_of_product);
+        $this->assertSame(BoilerManufacturers::DRAZICE, $work->boiler_manufacturer);
+    }
+
+    public function test_manufacturer_can_be_edited_validated_and_cleared(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo([Permissions::WORK_EDIT_OWN, Permissions::WORK_VIEW_OWN]);
+        $work = Work::factory()->for($user)->create([
+            'type_of_product' => 'Ohřívač vody',
+            'boiler_manufacturer' => BoilerManufacturers::DRAZICE,
+        ]);
+
+        $component = Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
+            ->assertSet('form.boilerManufacturer', 'drazice');
+        $component->set('form.boilerManufacturer', 'invalid')->call('submit')
+            ->assertHasErrors(['form.boilerManufacturer']);
+        $this->assertSame(BoilerManufacturers::DRAZICE, $work->refresh()->boiler_manufacturer);
+
+        $component->set('form.boilerManufacturer', 'ariston')->call('submit')->assertHasNoErrors();
+        $this->assertSame(BoilerManufacturers::ARISTON, $work->refresh()->boiler_manufacturer);
+        $this->get(route('works.show', $work))->assertOk()->assertSee('Ariston');
+
+        Livewire::test(WorkEdit::class, ['work' => $work])
+            ->set('form.boilerManufacturer', '')->call('submit')->assertHasNoErrors();
+        $this->assertNull($work->refresh()->boiler_manufacturer);
+        $this->assertSame('Ohřívač vody', $work->type_of_product);
+    }
+
     public function test_edit_loads_and_saves_work_status(): void
     {
         $user = User::factory()->create();

@@ -1,7 +1,7 @@
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name, email address and contact details')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
@@ -26,6 +26,10 @@
                     </div>
                 @endif
             </div>
+
+            <flux:input wire:model="phone" label="Telefon" type="tel" required autocomplete="tel" />
+
+            <flux:textarea wire:model="address" label="Adresa" rows="3" autocomplete="street-address" />
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">

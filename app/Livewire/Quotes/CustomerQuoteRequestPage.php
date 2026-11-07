@@ -29,7 +29,8 @@ class CustomerQuoteRequestPage extends Component
             $this->form->firstName = $firstName;
             $this->form->lastName = $lastName;
             $this->form->email = auth()->user()->email;
-            $this->form->phone = auth()->user()->quotes()->latest()->first()?->phone ?? '';
+            $this->form->phone = auth()->user()->phone;
+            $this->form->address = auth()->user()->address;
         }
     }
 

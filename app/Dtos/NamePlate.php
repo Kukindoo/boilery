@@ -10,10 +10,16 @@ class NamePlate
 
     public string $email;
 
-    public function __construct(string $firstName, string $lastName, string $email)
+    public string $phone;
+
+    public ?string $address;
+
+    public function __construct(string $firstName, string $lastName, string $email, string $phone, ?string $address = null)
     {
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->email = $email;
+        $this->phone = $phone;
+        $this->address = $address;
     }
 }

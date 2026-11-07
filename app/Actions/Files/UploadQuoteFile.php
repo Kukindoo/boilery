@@ -5,42 +5,20 @@ namespace App\Actions\Files;
 use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Quote;
-use Exception;
+use Illuminate\Http\UploadedFile;
+use Throwable;
 
 class UploadQuoteFile
 {
+    public function __construct(private readonly UploadFile $uploadFile) {}
+
     /**
-     * @throws Exception
+     * Uploads performed during trusted public quote creation.
+     *
+     * @throws Throwable
      */
-    public function handle($file,
-                           Quote $quote,
-                           FileTypes $fileType)
+    public function handle(UploadedFile $file, Quote $quote, FileTypes $fileType): File
     {
-        $directory = str_replace(
-            '{quote_id}',
-            $quote->id,
-            config('app.files.quote_save_directory')
-        );
-
-        $path = $file->store($directory);
-
-        $extension = $file->getClientOriginalExtension();
-
-        $fileLabel = app(GenerateFileLabel::class)->handle(
-            $quote,
-            $fileType,
-            $extension,
-        );
-
-        return File::create([
-            'path' => $path,
-            'quote_id' => $quote->id,
-            'original_name' => $file->getClientOriginalName(),
-            'extension' => $extension,
-            'mime_type' => $file->getMimeType(),
-            'file_type' => $fileType->value,
-            'size' => $file->getSize(),
-            'label' => $fileLabel,
-        ]);
+        return $this->uploadFile->forPublicQuote($file, $quote, $fileType);
     }
 }

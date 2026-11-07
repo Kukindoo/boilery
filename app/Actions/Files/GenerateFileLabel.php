@@ -3,35 +3,25 @@
 namespace App\Actions\Files;
 
 use App\Enums\FileTypes;
-use App\Models\Quote;
+use App\Models\User;
 use Illuminate\Support\Str;
 
 class GenerateFileLabel
 {
-    public function handle(Quote $quote,
+    public function handle(User $user,
+        int $id,
         FileTypes $fileType,
         ?string $extension = null
     ): string {
 
+        $clean_name = Str::ascii(Str::replace([' ', '-'], '_', $user->name));
+
         $fileLabelDirty = implode('_', [
-            $quote->first_name,
-            $quote->last_name,
-            $quote->id,
+            $clean_name,
+            $id,
             $fileType->snake(),
         ]);
 
-        $fileLabel = Str::ascii($fileLabelDirty);
-
-        $extensionSuffix = is_null($extension) ? '' : '.' . $extension;
-        $existingLabels = $quote->files()->pluck('label');
-        $candidate = $fileLabel . $extensionSuffix;
-        $number = 1;
-
-        while ($existingLabels->contains($candidate)) {
-            $candidate = $fileLabel . '_' . $number . $extensionSuffix;
-            $number++;
-        }
-
-        return $candidate;
+        return Str::ascii($fileLabelDirty) . ($extension ? '.' . $extension : '');
     }
 }

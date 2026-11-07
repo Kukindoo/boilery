@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Contracts\OwnsFiles;
+use App\Traits\HasFiles;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,13 +17,17 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @property string $name
  * @property string $email
+ * @property string $phone
+ * @property string|null $address
  * @property string|null $remember_token
  * @property Carbon|null $email_verified_at
  */
-class User extends Authenticatable
+class User extends Authenticatable implements OwnsFiles
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
+
+    use HasFiles;
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +37,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
+        'address',
         'password',
     ];
 
@@ -65,6 +73,11 @@ class User extends Authenticatable
     public function works(): HasMany
     {
         return $this->hasMany(Work::class, 'user_id');
+    }
+
+    public function isFileOwner(self $user): bool
+    {
+        return $this->is($user);
     }
 
     /**

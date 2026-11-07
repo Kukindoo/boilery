@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use App\Contracts\OwnsFiles;
 use App\Enums\FileTypes;
+use Database\Factories\FileFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property ?int $quote_id
- * @property ?int $work_id
  * @property string $original_name
  * @property FileTypes $file_type
  * @property string $extension
@@ -23,6 +25,9 @@ use Illuminate\Support\Carbon;
  */
 class File extends Model
 {
+    /** @use HasFactory<FileFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'original_name',
         'file_type',
@@ -30,27 +35,62 @@ class File extends Model
         'mime_type',
         'path',
         'label',
-        'quote_id',
-        'work_id',
         'size',
     ];
 
-    /** @return BelongsTo<Quote, $this> */
-    public function quote(): BelongsTo
+    /** @return HasMany<FileAttachment, $this> */
+    public function attachments(): HasMany
     {
-        return $this->belongsTo(Quote::class, 'quote_id', 'id');
+        return $this->hasMany(FileAttachment::class);
     }
 
-    /** @return BelongsTo<Work, $this> */
-    public function work(): BelongsTo
+    /** @return MorphToMany<Quote, $this, FileAttachment> */
+    public function quotes(): MorphToMany
     {
-        return $this->belongsTo(Work::class, 'work_id');
+        return $this->morphedByMany(Quote::class, 'fileable')->using(FileAttachment::class)->withTimestamps();
+    }
+
+    /** @return MorphToMany<Work, $this, FileAttachment> */
+    public function works(): MorphToMany
+    {
+        return $this->morphedByMany(Work::class, 'fileable')->using(FileAttachment::class)->withTimestamps();
+    }
+
+    /** @return MorphToMany<User, $this, FileAttachment> */
+    public function users(): MorphToMany
+    {
+        return $this->morphedByMany(User::class, 'fileable')->using(FileAttachment::class)->withTimestamps();
     }
 
     public function isOwnedBy(User $user): bool
     {
-        return $this->quote?->user_id === $user->id
-            || $this->work?->user_id === $user->id;
+        return $this->attachments()->with('fileable')->get()->contains(
+            fn (FileAttachment $attachment): bool => $attachment->fileable instanceof OwnsFiles
+                && $attachment->fileable->isFileOwner($user),
+        );
+    }
+
+    /**
+     * Determine whether the user owns every model attached to this shared file.
+     *
+     * Requires at least one attachment. Returns false if any attached model
+     * is missing, does not implement OwnsFiles, or belongs to another user.
+     * Used to authorize global changes that affect all attachments.
+     */
+    public function isExclusivelyOwnedBy(User $user): bool
+    {
+        $attachments = $this->attachments()->with('fileable')->get();
+
+        return $attachments->isNotEmpty() && $attachments->every(
+            fn (FileAttachment $attachment): bool => $attachment->fileable instanceof OwnsFiles
+                && $attachment->fileable->isFileOwner($user),
+        );
+    }
+
+    public function isAttachedTo(Model $model): bool
+    {
+        return $this->attachments()->where('fileable_type', $model->getMorphClass())
+            ->where('fileable_id', $model->getKey())->exists();
     }
 
     protected function casts(): array

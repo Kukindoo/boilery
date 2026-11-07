@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum QuotePdfStatus: string
+enum PdfGenerationStatus: string
 {
     case QUEUED = 'queued';
 

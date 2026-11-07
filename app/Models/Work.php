@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\OwnsFiles;
+use App\Enums\BoilerManufacturers;
+use App\Enums\FileTypes;
+use App\Enums\PdfGenerationStatus;
 use App\Enums\WorkStatus;
+use App\Traits\HasFiles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -17,8 +21,11 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property int $user_id
  * @property ?int $quote_id
  * @property string $order_id
+ * @property ?PdfGenerationStatus $pdf_generation_status
+ * @property ?string $pdf_generation_id
  * @property WorkStatus $status
  * @property ?string $type_of_product
+ * @property ?BoilerManufacturers $boiler_manufacturer
  * @property ?string $type_number
  * @property ?string $serial_number
  * @property bool $warranty_accepted
@@ -40,9 +47,10 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property ?Carbon $deleted_at
  * @property ?Carbon $updated_at
  */
-class Work extends Model
+class Work extends Model implements OwnsFiles
 {
     use HasFactory, LogsActivity, SoftDeletes;
+    use HasFiles;
 
     protected $fillable = [
         'user_id',
@@ -50,6 +58,7 @@ class Work extends Model
         'order_id',
         'status',
         'type_of_product',
+        'boiler_manufacturer',
         'type_number',
         'serial_number',
         'warranty_accepted',
@@ -72,6 +81,7 @@ class Work extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
+            ->useLogName('works')
             ->logAll()
             ->logOnlyDirty();
     }
@@ -92,10 +102,14 @@ class Work extends Model
         return $this->belongsTo(Quote::class, 'quote_id');
     }
 
-    /** @return HasMany<File, $this> */
-    public function files(): HasMany
+    public function hasServiceProtocol(): bool
     {
-        return $this->hasMany(File::class, 'work_id');
+        return $this->files()->where('file_type', FileTypes::SERVICE_PROTOCOL->value)->exists();
+    }
+
+    public function pdfGenerationInProgress(): bool
+    {
+        return in_array($this->pdf_generation_status, [PdfGenerationStatus::QUEUED, PdfGenerationStatus::PROCESSING], true);
     }
 
     public function start(): void
@@ -118,10 +132,17 @@ class Work extends Model
         $this->save();
     }
 
+    public function isFileOwner(User $user): bool
+    {
+        return $this->user_id === $user->id;
+    }
+
     protected function casts(): array
     {
         return [
             'status' => WorkStatus::class,
+            'pdf_generation_status' => PdfGenerationStatus::class,
+            'boiler_manufacturer' => BoilerManufacturers::class,
             'warranty_accepted' => 'boolean',
             'day_of_purchase' => 'date',
             'work_accepted_at' => 'date',

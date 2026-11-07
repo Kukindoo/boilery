@@ -5,6 +5,7 @@ namespace App\Livewire\Forms\Work;
 use App\Actions\Works\CreateWork;
 use App\Actions\Works\UpdateWork;
 use App\Dtos\Works\WorkDto;
+use App\Enums\BoilerManufacturers;
 use App\Enums\Permissions;
 use App\Enums\WorkStatus;
 use App\Models\Quote;
@@ -40,6 +41,8 @@ class WorkForm extends Form
     public string $status = WorkStatus::NEW->value;
 
     public ?string $typeOfProduct = null;
+
+    public ?string $boilerManufacturer = null;
 
     public ?string $typeNumber = null;
 
@@ -88,6 +91,7 @@ class WorkForm extends Form
         $this->orderId = $work->order_id;
         $this->status = $work->status->value;
         $this->typeOfProduct = $work->type_of_product;
+        $this->boilerManufacturer = $work->boiler_manufacturer?->value;
         $this->typeNumber = $work->type_number;
         $this->serialNumber = $work->serial_number;
         $this->warrantyAccepted = $work->warranty_accepted;
@@ -115,6 +119,7 @@ class WorkForm extends Form
             'quoteId' => ['nullable', 'integer', Rule::exists('quotes', 'id')->whereNull('deleted_at'), Rule::unique('works', 'quote_id')->ignore($this->work)],
             'orderId' => ['required', 'string', 'max:255', Rule::unique('works', 'order_id')->ignore($this->work)],
             'typeOfProduct' => ['nullable', 'string', 'max:255'],
+            'boilerManufacturer' => ['nullable', Rule::enum(BoilerManufacturers::class)],
             'typeNumber' => ['nullable', 'string', 'max:255'],
             'serialNumber' => ['nullable', 'string', 'max:255'],
             'warrantyAccepted' => ['boolean'],
@@ -147,7 +152,7 @@ class WorkForm extends Form
     public function update(): Work
     {
         abort_if($this->work === null, 404);
-        $work = Work::query()->lockForUpdate()->findOrFail($this->work->id);
+        $work = Work::query()->findOrFail($this->work->id);
         Gate::authorize('update', $work);
         $this->validate();
         $this->authorizeAssignments(false);
@@ -174,6 +179,7 @@ class WorkForm extends Form
             quoteId: $this->quoteId,
             orderId: $this->orderId,
             typeOfProduct: ($this->typeOfProduct === '' ? null : $this->typeOfProduct),
+            boilerManufacturer: ($this->boilerManufacturer === null || $this->boilerManufacturer === '' ? null : BoilerManufacturers::from($this->boilerManufacturer)),
             typeNumber: ($this->typeNumber === '' ? null : $this->typeNumber),
             serialNumber: ($this->serialNumber === '' ? null : $this->serialNumber),
             warrantyAccepted: $this->warrantyAccepted,

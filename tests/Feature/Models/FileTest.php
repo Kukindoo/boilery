@@ -2,47 +2,95 @@
 
 namespace Tests\Feature\Models;
 
-use App\Enums\FileTypes;
+use App\Contracts\OwnsFiles;
+use App\Models\File;
 use App\Models\Quote;
+use App\Models\User;
 use App\Models\Work;
+use App\Traits\HasFiles;
+use Illuminate\Database\Eloquent\Model;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Feature\FeatureTestCase;
 
 class FileTest extends FeatureTestCase
 {
-    /** @return array<string, array{class-string<Quote>|class-string<Work>, string}> */
     public static function parents(): array
     {
-        return [
-            'quote' => [Quote::class, 'quote'],
-            'work' => [Work::class, 'work'],
-        ];
+        return ['quote' => [Quote::class, 'quotes'], 'work' => [Work::class, 'works'], 'user' => [User::class, 'users']];
     }
 
-    /** @param class-string<Quote>|class-string<Work> $model */
     #[DataProvider('parents')]
-    public function test_files_can_belong_to_quotes_or_standalone_works(string $model, string $relationship): void
+    public function test_models_can_share_files_and_have_multiple_files(string $model, string $relationship): void
     {
         $parent = $model::factory()->create();
-        $otherParent = $model::factory()->create();
+        $other = $model::factory()->create();
+        $file = File::factory()->make();
+        $parent->files()->save($file);
+        $parent->files()->attach(File::factory()->create()->id);
+        $other->files()->syncWithoutDetaching([$file->id]);
+        $other->files()->syncWithoutDetaching([$file->id]);
 
-        $file = $parent->files()->create([
-            'original_name' => 'receipt.jpg',
-            'file_type' => FileTypes::RECEIPT,
-            'extension' => 'jpg',
-            'size' => 16,
-            'mime_type' => 'image/jpeg',
-            'path' => 'files/receipt.jpg',
-            'label' => 'Receipt',
-        ])->fresh();
+        $this->assertCount(2, $parent->files);
+        $this->assertCount(2, $file->{$relationship});
+        $this->assertTrue($file->isAttachedTo($parent));
+        $this->assertTrue($file->isAttachedTo($other));
+        $this->assertSame(2, $file->attachments()->count());
+        $this->assertDatabaseCount('files', 2);
+    }
 
-        $this->assertTrue($file->{$relationship}->is($parent));
-        $this->assertTrue($parent->files()->sole()->is($file));
-        $this->assertTrue($otherParent->files()->doesntExist());
-        $this->assertNull($file->{$relationship === 'quote' ? 'work' : 'quote'});
-        $this->assertDatabaseHas('files', [
-            'id' => $file->id,
-            $relationship . '_id' => $parent->id,
-        ]);
+    public function test_one_file_can_belong_to_several_different_model_types(): void
+    {
+        $file = File::factory()->create();
+        $parents = [Quote::factory()->create(), Work::factory()->create(), User::factory()->create()];
+        foreach ($parents as $parent) {
+            $parent->files()->attach($file->id);
+            $this->assertTrue($file->isAttachedTo($parent));
+        }
+
+        $this->assertSame(3, $file->attachments()->with('fileable')->get()->count());
+        $this->assertDatabaseCount('files', 1);
+    }
+
+    public function test_an_additional_model_can_use_files_without_registering_an_inverse_relationship(): void
+    {
+        $user = User::factory()->create();
+        $parent = AdditionalFileOwner::findOrFail($user->id);
+        $file = $parent->files()->save(File::factory()->make());
+
+        $this->assertTrue($file->isAttachedTo($parent));
+        $this->assertTrue($file->attachments()->with('fileable')->sole()->fileable->is($parent));
+        $this->assertTrue($file->isOwnedBy($user));
+        $this->assertTrue($file->isExclusivelyOwnedBy($user));
+    }
+
+    public function test_archiving_preserves_links_but_force_deleting_a_parent_only_detaches_it(): void
+    {
+        $quote = Quote::factory()->create();
+        $work = Work::factory()->create();
+        $file = $quote->files()->save(File::factory()->make());
+        $work->files()->attach($file->id);
+        $quote->delete();
+        $this->assertTrue($file->isAttachedTo($quote));
+        $quote->restore();
+        $this->assertTrue($quote->files()->sole()->is($file));
+        $quote->forceDelete();
+
+        $this->assertFalse($file->isAttachedTo($quote));
+        $this->assertTrue($file->isAttachedTo($work));
+        $this->assertModelExists($file);
+        $file->delete();
+        $this->assertDatabaseMissing('fileables', ['file_id' => $file->id]);
+    }
+}
+
+class AdditionalFileOwner extends Model implements OwnsFiles
+{
+    use HasFiles;
+
+    protected $table = 'users';
+
+    public function isFileOwner(User $user): bool
+    {
+        return $this->getKey() === $user->id;
     }
 }

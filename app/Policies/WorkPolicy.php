@@ -24,10 +24,25 @@ class WorkPolicy
                 && $work->user_id === $user->id);
     }
 
+    public function generatePdf(User $user, Work $work): bool
+    {
+        return $this->viewAny($user)
+            && $user->can(Permissions::GENERATE_PDF->label())
+            && ! $work->hasServiceProtocol();
+    }
+
     public function create(User $user): bool
     {
         return $user->can(Permissions::WORK_CREATE_ALL->label())
             || $user->can(Permissions::WORK_CREATE_OWN->label());
+    }
+
+    public function uploadFile(User $user, Work $work): bool
+    {
+        return ! $work->trashed()
+            && $this->update($user, $work)
+            && ($user->can(Permissions::FILE_CREATE_ALL->label())
+                || ($user->can(Permissions::FILE_CREATE_OWN->label()) && $work->user_id === $user->id));
     }
 
     public function update(User $user, Work $work): bool

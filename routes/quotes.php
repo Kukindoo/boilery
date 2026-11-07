@@ -16,10 +16,6 @@ Route::get(
     RequestedQuoteFilePreviewController::class
 )->name('files.preview');
 
-Route::controller(QuotePrintController::class)->group(function () {
-    Route::get('/{quote}/print', 'show')->name('print');
-});
-
 Route::post('/{quote}/accept', QuoteAcceptController::class)->name('accept');
 
 Route::post('/{quote}/generate-pdf', QuotePdfController::class)->name('generate-pdf');

@@ -133,7 +133,7 @@ return [
     */
 
     'files' => [
-        'quote_save_directory' => 'files/quotes/{quote_id}',
+        'attachments_save_directory' => 'files/attachments',
         'mimes' => ['jpg', 'png', 'jpeg'],
         'max_size' => 10240, // in KB
     ],

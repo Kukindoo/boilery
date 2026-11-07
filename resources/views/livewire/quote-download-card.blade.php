@@ -21,19 +21,25 @@
                         Stáhnout
                     </flux:menu.item>
                     <flux:menu.separator/>
-                    <flux:menu.submenu heading="Změnit typ">
-                        @foreach(App\Enums\FileTypes::cases() as $_fileType)
-                            <flux:menu.item wire:click="changeFileType('{{ $_fileType->value }}')">
-                                {{ $_fileType->label() }}
+                    @can('detach', [$file, $quote])
+                        <flux:modal.trigger name="delete-attachment">
+                            <flux:menu.item variant="danger" icon="trash">
+                                Odebrat
                             </flux:menu.item>
-                        @endforeach
-                    </flux:menu.submenu>
+                        </flux:modal.trigger>
+                    @endcan
                     <flux:menu.separator/>
-                    <flux:modal.trigger name="delete-attachment">
-                        <flux:menu.item variant="danger" icon="trash">
-                            Smazat
-                        </flux:menu.item>
-                    </flux:modal.trigger>
+                    @can('update', $quote)
+                        @can('update', $file)
+                            <flux:menu.submenu heading="Změnit typ">
+                                @foreach(App\Enums\FileTypes::cases() as $_fileType)
+                                    <flux:menu.item wire:click="changeFileType('{{ $_fileType->value }}')">
+                                        {{ $_fileType->label() }}
+                                    </flux:menu.item>
+                                @endforeach
+                            </flux:menu.submenu>
+                        @endcan
+                    @endcan
                 </flux:menu>
             </flux:dropdown>
         </div>
@@ -52,28 +58,30 @@
             ></iframe>
         @endif
     </div>
-    <flux:modal name="delete-attachment" class="min-w-[22rem]">
-        <div class="space-y-6">
-            <div>
-                <flux:heading size="lg">
-                    Smazat přílohu?
-                </flux:heading>
-                <flux:text class="mt-2">
-                    Chystáte se smazat tuto přílohu.<br>
-                    Tuto akci nelze vrátit zpět.
-                </flux:text>
-            </div>
-            <div class="flex gap-2">
-                <flux:spacer/>
-                <flux:modal.close>
-                    <flux:button variant="ghost">
-                        Zrušit
+    @can('detach', [$file, $quote])
+        <flux:modal name="delete-attachment" class="min-w-[22rem]">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg">
+                        Odebrat přílohu?
+                    </flux:heading>
+                    <flux:text class="mt-2">
+                        Příloha bude odebrána z této poptávky.<br>
+                        Pokud soubor nemá jiné přílohy, bude odstraněn.
+                    </flux:text>
+                </div>
+                <div class="flex gap-2">
+                    <flux:spacer/>
+                    <flux:modal.close>
+                        <flux:button variant="ghost">
+                            Zrušit
+                        </flux:button>
+                    </flux:modal.close>
+                    <flux:button type="submit" variant="danger" wire:click="deleteFile">
+                        Odebrat přílohu
                     </flux:button>
-                </flux:modal.close>
-                <flux:button type="submit" variant="danger" wire:click="deleteFile({{ $file }})">
-                    Smazat přílohu
-                </flux:button>
+                </div>
             </div>
-        </div>
-    </flux:modal>
+        </flux:modal>
+    @endcan
 </li>

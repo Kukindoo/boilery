@@ -2,15 +2,15 @@
     @if ($quote->pdfGenerationInProgress())
         <div wire:poll.2s="checkProgress" role="status" aria-live="polite" aria-busy="true" class="w-64 max-w-full space-y-2">
             <flux:button disabled icon="clock" size="sm">
-                {{ $quote->pdf_generation_status === \App\Enums\QuotePdfStatus::QUEUED ? 'PDF čeká na zpracování.' : 'PDF se generuje.' }}
+                {{ $quote->pdf_generation_status === \App\Enums\PdfGenerationStatus::QUEUED ? 'PDF čeká na zpracování.' : 'PDF se generuje.' }}
             </flux:button>
         </div>
     @else
-        @if ($quote->pdf_generation_status === \App\Enums\QuotePdfStatus::FAILED)
+        @if ($quote->pdf_generation_status === \App\Enums\PdfGenerationStatus::FAILED)
             <flux:button role="alert"  size="sm" icon="x-mark" color="red" disabled>
                 PDF se nepodařilo vygenerovat. Zkuste to prosím znovu.
             </flux:button>
-        @elseif ($quote->pdf_generation_status === \App\Enums\QuotePdfStatus::COMPLETED && $quote->hasQuoteSummary())
+        @elseif ($quote->pdf_generation_status === \App\Enums\PdfGenerationStatus::COMPLETED && $quote->hasQuoteSummary())
             <flux:button role="status" size="sm" icon="check" color="green" disabled>
                 PDF je připraveno ke stažení v přílohách.
             </flux:button>

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Works;
 
 use App\Http\Controllers\Controller;
 use App\Models\File;
-use App\Models\Quote;
 use App\Models\Work;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -23,7 +22,7 @@ class RequestedWorkFilePreviewController extends Controller
             abort(403);
         }
 
-        abort_unless($file->work_id === $work->id, 404);
+        abort_unless($file->isAttachedTo($work), 404);
 
         abort_unless(
             Storage::disk(config('filesystems.default'))->exists($file->path),

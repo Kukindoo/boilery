@@ -82,9 +82,49 @@ enum Permissions: int
 
     case GENERATE_PDF = 39;
 
+    case USER_VIEW_ALL = 40;
+
+    case USER_EDIT_ALL = 41;
+
+    case USER_VIEW_OWN = 42;
+
+    case USER_VIEW_INDEX = 43;
+
+    case USER_EDIT_OWN = 46;
+
+    case USER_DELETE_ALL = 47;
+
+    case USER_DELETE_OWN = 48;
+
+    case USER_CREATE_ALL = 49;
+
+    case USER_CREATE_OWN = 50;
+
+    case USER_RESTORE_ALL = 51;
+
+    case USER_RESTORE_OWN = 52;
+
+    case USER_FORCE_DELETE_ALL = 53;
+
+    case USER_FORCE_DELETE_OWN = 54;
+
     public function label(): string
     {
         return match ($this) {
+            self::USER_VIEW_ALL => 'View all users',
+            self::USER_EDIT_ALL => 'Edit all users',
+            self::USER_VIEW_OWN => 'View own users',
+            self::USER_VIEW_INDEX => 'View index users',
+            self::USER_EDIT_OWN => 'Edit own users',
+            self::USER_DELETE_ALL => 'Delete all users',
+            self::USER_DELETE_OWN => 'Delete own users',
+            self::USER_CREATE_ALL => 'Create all users',
+            self::USER_CREATE_OWN => 'Create own users',
+            self::USER_RESTORE_ALL => 'Restore all users',
+            self::USER_RESTORE_OWN => 'Restore own users',
+            self::USER_FORCE_DELETE_ALL => 'Force delete all users',
+            self::USER_FORCE_DELETE_OWN => 'Force delete own users',
+
             self::GENERATE_PDF => 'Generate PDF',
 
             self::FILE_VIEW_ALL => 'View all files',

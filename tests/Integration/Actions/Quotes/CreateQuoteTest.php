@@ -16,12 +16,13 @@ use Tests\Integration\IntegrationTestCase;
 
 class CreateQuoteTest extends IntegrationTestCase
 {
+    /** @return array<string, array{string, FileTypes, string}> */
     public static function attachmentTypes(): array
     {
         return [
-            'label' => ['fileLabel', FileTypes::BOILER_LABEL],
-            'receipt' => ['fileReceipt', FileTypes::RECEIPT],
-            'warranty' => ['fileWarrantyDocument', FileTypes::WARRANTY],
+            'label' => ['fileLabel', FileTypes::BOILER_LABEL, 'stitek'],
+            'receipt' => ['fileReceipt', FileTypes::RECEIPT, 'kupni_smlouva'],
+            'warranty' => ['fileWarrantyDocument', FileTypes::WARRANTY, 'zaruka'],
         ];
     }
 
@@ -46,10 +47,10 @@ class CreateQuoteTest extends IntegrationTestCase
     }
 
     #[DataProvider('attachmentTypes')]
-    public function test_stores_attachment_with_correct_quote_and_type(string $field, FileTypes $type): void
+    public function test_stores_attachment_with_correct_quote_and_type(string $field, FileTypes $type, string $labelType): void
     {
         Storage::fake(config('filesystems.default'));
-        $customer = User::factory()->customer()->create();
+        $customer = User::factory()->customer()->create(['name' => 'Jiří Novák-Svoboda']);
         $form = $this->form();
         $form->boilerUnderWarranty = 'yes';
         $form->address = 'Prague';
@@ -61,9 +62,18 @@ class CreateQuoteTest extends IntegrationTestCase
 
         $file = $quote->files()->sole();
         $this->assertSame($type, $file->file_type);
+        $this->assertTrue($file->isAttachedTo($quote));
+        $this->assertDatabaseHas('files', [
+            'id' => $file->id,
+            'label' => "Jiri_Novak_Svoboda_{$quote->id}_{$labelType}.pdf",
+            'original_name' => 'document.pdf',
+            'extension' => 'pdf',
+            'mime_type' => 'application/pdf',
+            'size' => 10240,
+        ]);
         Storage::disk(config('filesystems.default'))->assertExists($file->path);
         $this->assertDatabaseHas('quotes', [
-            'id' => $quote->id, 'under_warranty' => true,
+            'id' => $quote->id, 'user_id' => $customer->id, 'under_warranty' => true,
             'address' => 'Prague', 'boiler_serial_number' => 'SERIAL-1', 'boiler_type' => 'OKCE 125',
         ]);
     }

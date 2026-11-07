@@ -25,6 +25,7 @@ class QuotesTable extends Component
     public $selectedStatuses = [
         QuoteStatus::NEW,
         QuoteStatus::CONTACTED,
+        QuoteStatus::PROCESSING,
     ];
 
     #[Locked]

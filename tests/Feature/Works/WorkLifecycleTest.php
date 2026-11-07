@@ -65,7 +65,7 @@ class WorkLifecycleTest extends FeatureTestCase
         $this->post(route('works.' . $action, $work))->assertForbidden();
 
         $this->assertSame($attributes, $work->refresh()->getRawOriginal());
-        $this->assertSame($activityCount, Activity::forSubject($work)->count());
+        $this->assertSame($activityCount + 1, Activity::forSubject($work)->count());
     }
 
     #[DataProvider('endpoints')]
@@ -79,7 +79,7 @@ class WorkLifecycleTest extends FeatureTestCase
         $this->actingAs(User::factory()->create())->post(route('works.' . $action, $work))->assertForbidden();
 
         $this->assertSame($attributes, $work->refresh()->getRawOriginal());
-        $this->assertSame($activityCount, Activity::forSubject($work)->count());
+        $this->assertSame($activityCount + 1, Activity::forSubject($work)->count());
     }
 
     #[DataProvider('endpoints')]

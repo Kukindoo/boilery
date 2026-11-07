@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Tests\Integration\IntegrationTestCase;
+use Throwable;
 
 class AcceptQuoteTest extends IntegrationTestCase
 {
@@ -79,7 +80,8 @@ class AcceptQuoteTest extends IntegrationTestCase
             'quote_id' => $quote->id,
             'user_id' => $quote->user_id,
             'order_id' => 'QUOTE-' . $quote->id,
-            'type_of_product' => 'drazice',
+            'type_of_product' => null,
+            'boiler_manufacturer' => 'drazice',
             'type_number' => 'OKCE 125',
             'serial_number' => 'SERIAL-123',
             'reported_problem' => 'Water does not heat up.',
@@ -87,6 +89,17 @@ class AcceptQuoteTest extends IntegrationTestCase
             'work_accepted_at' => now()->toDateString(),
         ]);
         $this->assertDatabaseCount('works', 1);
+    }
+
+    public function test_acceptance_keeps_unknown_manufacturer_and_product_type_nullable(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+        $quote = Quote::factory()->for(User::factory()->customer())->create(['boiler_manufacturer' => null]);
+
+        $accepted = app(AcceptQuote::class)->handle($quote);
+
+        $this->assertNull($accepted->work->boiler_manufacturer);
+        $this->assertNull($accepted->work->type_of_product);
     }
 
     public function test_acceptance_links_all_quote_files_to_its_work_and_preserves_other_quote_files(): void
@@ -109,19 +122,13 @@ class AcceptQuoteTest extends IntegrationTestCase
         $acceptedQuote = app(AcceptQuote::class)->handle($quote);
 
         foreach ($files as $file) {
-            $this->assertDatabaseHas('files', [
-                'id' => $file->id,
-                'quote_id' => $quote->id,
-                'work_id' => $acceptedQuote->work->id,
-                'path' => $attributes['path'],
-            ]);
+            $this->assertTrue($file->isAttachedTo($quote));
+            $this->assertTrue($file->isAttachedTo($acceptedQuote->work));
+            $this->assertSame($attributes['path'], $file->fresh()->path);
         }
         $this->assertSame(2, $acceptedQuote->work->files()->count());
-        $this->assertDatabaseHas('files', [
-            'id' => $otherFile->id,
-            'quote_id' => $otherQuote->id,
-            'work_id' => null,
-        ]);
+        $this->assertTrue($otherFile->isAttachedTo($otherQuote));
+        $this->assertFalse($otherFile->isAttachedTo($acceptedQuote->work));
         $this->assertDatabaseCount('files', 3);
     }
 
