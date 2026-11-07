@@ -21,7 +21,6 @@
                 <flux:button type="submit" size="sm" icon="printer" wire:loading.attr="disabled" wire:target="generate">
                     Generovat PDF
                 </flux:button>
-                <flux:text wire:loading wire:target="generate" role="status">Zařazuji PDF ke zpracování…</flux:text>
             </form>
         @endcan
     @endif

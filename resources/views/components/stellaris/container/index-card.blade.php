@@ -4,7 +4,9 @@
             {{ $heading }}
             <flux:text>{{ $subheading ?? '' }}</flux:text>
         </flux:heading>
-        {{ $actions ?? '' }}
+        <div class="flex space-x-2">
+            {{ $actions ?? '' }}
+        </div>
     </div>
     {{ $slot }}
 </div>

@@ -3,7 +3,7 @@
         <x-slot:subheading>
             <x-customers.customer-name :customer="$quote->user" />
         </x-slot>
-        <x-slot:action>
+        <x-slot:actions>
                 <livewire:quotes.quote-pdf-generation :quote="$quote" />
                 @if( auth()->user()->can('accept', $quote) )
                     <form method="POST" action="{{ route('quotes.accept', $quote) }}" class="inline-block">
@@ -13,7 +13,7 @@
                         </flux:button>
                     </form>
                 @endif
-        </x-slot:action>
+        </x-slot:actions>
 
         <x-quotes.quote-person-info :quote="$quote" />
         <x-quotes.quote-boiler-info :quote="$quote" />
