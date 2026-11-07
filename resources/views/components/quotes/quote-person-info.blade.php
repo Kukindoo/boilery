@@ -22,7 +22,7 @@
     </x-slot:action>
 
     <x-stellaris.container.show-row title="Zákazník">
-        <x-customers.customer-name :customer="$quote->user" />
+        <x-customers.customer-name :customer="$quote->user" :name="$quote->user?->name ?? $quote->first_name . ' ' . $quote->last_name" />
     </x-stellaris.container.show-row>
 
     @foreach ($fields as $label => $value)

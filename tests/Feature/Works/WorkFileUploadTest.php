@@ -4,8 +4,7 @@ namespace Tests\Feature\Works;
 
 use App\Enums\Permissions;
 use App\Enums\Roles;
-use App\Livewire\Files\SingleFileUpload as QuoteUpload;
-use App\Livewire\Works\SingleFileUpload as WorkUpload;
+use App\Livewire\Files\SingleFileUpload;
 use App\Models\File;
 use App\Models\Quote;
 use App\Models\User;
@@ -58,10 +57,9 @@ class WorkFileUploadTest extends FeatureTestCase
         }
         $quote = Quote::factory()->accepted()->for($customer)->create();
         $work = Work::factory()->for($customer)->for($quote)->create();
-        $class = $origin === 'quote' ? QuoteUpload::class : WorkUpload::class;
         $parent = $origin === 'quote' ? $quote : $work;
 
-        Livewire::actingAs($actor)->test($class, [$origin => $parent])
+        Livewire::actingAs($actor)->test(SingleFileUpload::class, ['model' => $parent])
             ->set('form.file', UploadedFile::fake()->image('receipt.jpg'))
             ->call('submit')->assertHasNoErrors()
             ->assertRedirect(route($origin === 'quote' ? 'quotes.show' : 'works.show', $parent));
@@ -84,9 +82,9 @@ class WorkFileUploadTest extends FeatureTestCase
         $actor = User::factory()->admin()->create();
         $work = Work::factory()->create();
         $this->actingAs($actor)->get(route('works.show', $work))->assertOk()
-            ->assertSeeLivewire(WorkUpload::class)->assertSee('upload-work-file', false);
+            ->assertSeeLivewire(SingleFileUpload::class)->assertSee('Nahrát soubor');
 
-        Livewire::actingAs($actor)->test(WorkUpload::class, ['work' => $work])
+        Livewire::actingAs($actor)->test(SingleFileUpload::class, ['model' => $work])
             ->set('form.file', UploadedFile::fake()->image('receipt.jpg'))
             ->call('submit')->assertHasNoErrors();
 
@@ -103,7 +101,7 @@ class WorkFileUploadTest extends FeatureTestCase
         $actor->givePermissionTo($permissions);
         $work = Work::factory()->for($anotherOwner ? User::factory() : $actor)->create();
 
-        Livewire::actingAs($actor)->test(WorkUpload::class, ['work' => $work])
+        Livewire::actingAs($actor)->test(SingleFileUpload::class, ['model' => $work])
             ->set('form.file', UploadedFile::fake()->image('receipt.jpg'))
             ->call('submit')->assertForbidden();
 
@@ -118,7 +116,7 @@ class WorkFileUploadTest extends FeatureTestCase
         $actor = User::factory()->create();
         $actor->givePermissionTo([Permissions::WORK_VIEW_OWN, Permissions::WORK_EDIT_OWN, Permissions::FILE_CREATE_OWN]);
         $work = Work::factory()->for($actor)->create();
-        $component = Livewire::actingAs($actor)->test(WorkUpload::class, ['work' => $work]);
+        $component = Livewire::actingAs($actor)->test(SingleFileUpload::class, ['model' => $work]);
         $actor->revokePermissionTo(Permissions::FILE_CREATE_OWN);
 
         $component->set('form.file', UploadedFile::fake()->image('receipt.jpg'))->call('submit')->assertForbidden();
@@ -131,7 +129,7 @@ class WorkFileUploadTest extends FeatureTestCase
         $actor = User::factory()->admin()->create();
         $work = Work::factory()->create();
 
-        Livewire::actingAs($actor)->test(WorkUpload::class, ['work' => $work])
+        Livewire::actingAs($actor)->test(SingleFileUpload::class, ['model' => $work])
             ->call('submit')->assertHasErrors(['form.file' => 'required']);
 
         $this->assertDatabaseCount('files', 0);

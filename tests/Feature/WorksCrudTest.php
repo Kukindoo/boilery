@@ -89,7 +89,7 @@ class WorksCrudTest extends FeatureTestCase
 
         $component->set('form.workStartedAt', '2026-10-21')->call('submit')->assertHasNoErrors();
         $this->assertSame('2026-10-21', $work->refresh()->work_started_at->toDateString());
-        $this->get(route('works.show', $work))->assertSee('Datum zahájení')->assertSee('21.10.2026');
+        $this->get(route('works.show', $work))->assertSee('Datum zahájení')->assertSee('21-10-2026');
 
         Livewire::test(WorkEdit::class, ['work' => $work])
             ->set('form.workStartedAt', '')->call('submit')->assertHasNoErrors();

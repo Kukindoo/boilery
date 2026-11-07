@@ -1,7 +1,7 @@
 <x-layouts::app :title="__('Poptávky')">
     <x-stellaris.container.index-card :heading="__('Poptávka :quote_id', ['quote_id' => $quote->id])">
         <x-slot:subheading>
-            <x-customers.customer-name :customer="$quote->user" />
+            <x-customers.customer-name :customer="$quote->user" :name="$quote->user?->name ?? $quote->first_name . ' ' . $quote->last_name" />
         </x-slot>
         <x-slot:actions>
             <x-pdfs.pdf-modal-preview :model="$quote"

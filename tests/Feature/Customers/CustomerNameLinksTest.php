@@ -46,20 +46,24 @@ class CustomerNameLinksTest extends FeatureTestCase
         $record = $resource === 'quotes'
             ? Quote::factory()->for($customer, 'user')->create()
             : Work::factory()->for($customer, 'user')->create();
-        $name = $resource === 'quotes' ? $record->first_name . ' ' . $record->last_name : $customer->name;
+        $name = $customer->name;
 
         $this->actingAs($viewer)->get(route($resource . '.show', $record))
-            ->assertOk()->assertSee($name)
+            ->assertOk()->assertSeeText($name)
             ->assertDontSee('href="' . route('customers.show', $customer) . '"', false);
     }
 
     public function test_quote_without_customer_displays_name_without_customer_link(): void
     {
         $viewer = User::factory()->admin()->create();
-        $quote = Quote::factory()->create(['user_id' => null]);
+        $quote = Quote::factory()->create([
+            'user_id' => null,
+            'first_name' => 'Adolphus',
+            'last_name' => "O'Connell",
+        ]);
 
         $this->actingAs($viewer)->get(route('quotes.show', $quote))
-            ->assertOk()->assertSee($quote->first_name . ' ' . $quote->last_name)
+            ->assertOk()->assertSeeText("Adolphus O'Connell")
             ->assertDontSee('href="' . url('customers') . '/', false);
     }
 }
