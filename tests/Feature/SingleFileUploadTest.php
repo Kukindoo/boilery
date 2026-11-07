@@ -32,7 +32,7 @@ class SingleFileUploadTest extends FeatureTestCase
         $user->assignRole($role);
         $quote = Quote::factory()->accepted()->for($ownsQuote ? $user : User::factory())->create();
 
-        Livewire::actingAs($user)->test(SingleFileUpload::class, ['quote' => $quote])
+        Livewire::actingAs($user)->test(SingleFileUpload::class, ['model' => $quote])
             ->set('form.file', UploadedFile::fake()->image('receipt.jpg'))
             ->call('submit')
             ->assertHasNoErrors()
@@ -51,7 +51,7 @@ class SingleFileUploadTest extends FeatureTestCase
         $user->assignRole(Roles::CUSTOMER);
         $quote = Quote::factory()->for(User::factory())->create();
 
-        Livewire::actingAs($user)->test(SingleFileUpload::class, ['quote' => $quote])
+        Livewire::actingAs($user)->test(SingleFileUpload::class, ['model' => $quote])
             ->set('form.file', UploadedFile::fake()->image('receipt.jpg'))
             ->call('submit')
             ->assertForbidden();
@@ -65,7 +65,7 @@ class SingleFileUploadTest extends FeatureTestCase
         $user = User::factory()->create();
         $quote = Quote::factory()->for($user)->create();
 
-        Livewire::actingAs($user)->test(SingleFileUpload::class, ['quote' => $quote])
+        Livewire::actingAs($user)->test(SingleFileUpload::class, ['model' => $quote])
             ->call('submit')
             ->assertForbidden();
 
@@ -78,7 +78,7 @@ class SingleFileUploadTest extends FeatureTestCase
         $user->assignRole(Roles::CUSTOMER);
         $quote = Quote::factory()->for($user)->create();
 
-        Livewire::actingAs($user)->test(SingleFileUpload::class, ['quote' => $quote])
+        Livewire::actingAs($user)->test(SingleFileUpload::class, ['model' => $quote])
             ->call('submit')
             ->assertHasErrors(['form.file' => 'required']);
 
