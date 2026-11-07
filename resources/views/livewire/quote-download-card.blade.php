@@ -13,35 +13,7 @@
             </div>
         </div>
         <div class="ml-4 shrink-0">
-            <flux:dropdown>
-                <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal">
-                </flux:button>
-                <flux:menu>
-                    <flux:menu.item icon="arrow-down-tray" wire:click="downloadFile()">
-                        Stáhnout
-                    </flux:menu.item>
-                    <flux:menu.separator/>
-                    @can('detach', [$file, $quote])
-                        <flux:modal.trigger name="delete-attachment">
-                            <flux:menu.item variant="danger" icon="trash">
-                                Odebrat
-                            </flux:menu.item>
-                        </flux:modal.trigger>
-                    @endcan
-                    <flux:menu.separator/>
-                    @can('update', $quote)
-                        @can('update', $file)
-                            <flux:menu.submenu heading="Změnit typ">
-                                @foreach(App\Enums\FileTypes::cases() as $_fileType)
-                                    <flux:menu.item wire:click="changeFileType('{{ $_fileType->value }}')">
-                                        {{ $_fileType->label() }}
-                                    </flux:menu.item>
-                                @endforeach
-                            </flux:menu.submenu>
-                        @endcan
-                    @endcan
-                </flux:menu>
-            </flux:dropdown>
+            <x-files.files-action-dropdown :file="$file" :model="$quote"/>
         </div>
     </div>
     <div class="mt-6">
