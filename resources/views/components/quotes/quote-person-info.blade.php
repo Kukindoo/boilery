@@ -2,9 +2,9 @@
 
 @php
     $fields = [
-        'Telefon' => $quote->phone ?? '—',
-        'E-mail' => $quote->email ?? '—',
-        'Adresa' => $quote->address ?? 'Neznámá',
+        'Telefon' => $quote->user->phone ?? '—',
+        'E-mail' => $quote->user->email ?? '—',
+        'Adresa' => $quote->user->address ?? 'Neznámá',
         'Zpráva' => $quote->message ?? '—',
         'Nahlášeno' => $quote->created_at?->format('d.m.Y') ?? '—',
     ];
@@ -22,7 +22,7 @@
     </x-slot:action>
 
     <x-stellaris.container.show-row title="Zákazník">
-        <x-customers.customer-name :customer="$quote->user" :name="trim($quote->first_name.' '.$quote->last_name)" />
+        <x-customers.customer-name :customer="$quote->user" />
     </x-stellaris.container.show-row>
 
     @foreach ($fields as $label => $value)
