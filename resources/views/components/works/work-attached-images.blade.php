@@ -20,7 +20,7 @@
             <div class="px-4 py-6 sm:px-6">
             <ul role="list" class="divide-y space-y-4 divide-subtle-border rounded-md border border-primary-border dark:divide-primary-dark-border/5 dark:border-primary-dark-border/10">
                 @foreach ($work->files as $file)
-                    <livewire:works.work-file-card :work="$work" :file="$file" :key="'work-file-'.$file->id" />
+                    <livewire:files.file-preview-card :model="$work" :file="$file" :key="'work-file-'.$file->id" />
                 @endforeach
             </ul>
             </div>

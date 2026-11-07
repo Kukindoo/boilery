@@ -20,10 +20,7 @@
             <ul role="list"
                 class="divide-y space-y-4 divide-subtle-border rounded-md border border-primary-border dark:divide-primary-dark-border/5 dark:border-primary-dark-border/10">
                 @foreach($quote->files as $file)
-                    <livewire:quotes.quote-download-card
-                            :quote="$quote"
-                            :file="$file"
-                    />
+                    <livewire:files.file-preview-card :model="$quote" :file="$file" :key="'quote-file-'.$file->id" />
                 @endforeach
             </ul>
         @endif
