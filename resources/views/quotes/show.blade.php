@@ -1,13 +1,9 @@
 <x-layouts::app :title="__('Poptávky')">
-    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
-        <div class="flex items-center justify-between gap-4">
-            <flux:heading>
-                Poptávka {{ $quote->id }}
-                <flux:text>
-                    <x-customers.customer-name :customer="$quote->user" :name="trim($quote->first_name.' '.$quote->last_name)" />
-                </flux:text>
-            </flux:heading>
-            <div class="flex flex-wrap items-start justify-end gap-2">
+    <x-stellaris.container.index-card :heading="__('Poptávka :quote_id', ['quote_id' => $quote->id])">
+        <x-slot:subheading>
+            <x-customers.customer-name :customer="$quote->user" />
+        </x-slot>
+        <x-slot:action>
                 <livewire:quotes.quote-pdf-generation :quote="$quote" />
                 @if( auth()->user()->can('accept', $quote) )
                     <form method="POST" action="{{ route('quotes.accept', $quote) }}" class="inline-block">
@@ -17,11 +13,10 @@
                         </flux:button>
                     </form>
                 @endif
-            </div>
-        </div>
+        </x-slot:action>
+
         <x-quotes.quote-person-info :quote="$quote" />
         <x-quotes.quote-boiler-info :quote="$quote" />
         <x-quotes.quote-attachments :quote="$quote" />
-
-    </div>
+    </x-stellaris.container.index-card>
 </x-layouts::app>
