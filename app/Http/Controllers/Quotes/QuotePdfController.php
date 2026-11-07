@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Quotes;
 
-use App\Actions\Quotes\QueuePdf;
+use App\Actions\Pdf\QueuePdf;
 use App\Http\Controllers\Controller;
 use App\Models\Quote;
 use Illuminate\Http\RedirectResponse;

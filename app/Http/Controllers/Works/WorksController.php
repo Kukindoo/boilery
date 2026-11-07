@@ -9,6 +9,7 @@ use App\Http\Requests\Works\WorkIndexRequest;
 use App\Http\Requests\Works\WorkShowRequest;
 use App\Models\Work;
 use Illuminate\Contracts\View\View;
+use Throwable;
 
 class WorksController extends Controller
 {
@@ -17,11 +18,23 @@ class WorksController extends Controller
         return view('works.index');
     }
 
+    /**
+     * @throws Throwable
+     */
     public function show(WorkShowRequest $request, Work $work): View
     {
         $work->load(['user', 'files']);
 
-        return view('works.show', compact('work'));
+        $pdfContent = view('pdfs.service-protocol-pdf', [
+            'work' => $work,
+            'customer' => [
+                'name' => $work->user?->name,
+                'address' => $work->quote?->address,
+                'phone' => $work->quote?->phone,
+            ],
+        ])->render();
+
+        return view('works.show', compact('work', 'pdfContent'));
     }
 
     public function create(WorkCreateRequest $request): View

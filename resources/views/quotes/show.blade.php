@@ -4,8 +4,11 @@
             <x-customers.customer-name :customer="$quote->user" />
         </x-slot>
         <x-slot:actions>
-                <livewire:quotes.quote-pdf-generation :quote="$quote" />
-                @if( auth()->user()->can('accept', $quote) )
+            <x-pdfs.pdf-modal-preview :model="$quote"
+                                      :pdf-content="$pdfContent"
+                                      :file-type="\App\Enums\FileTypes::QUOTE_SUMMARY->value"/>
+
+        @if( auth()->user()->can('accept', $quote) )
                     <form method="POST" action="{{ route('quotes.accept', $quote) }}" class="inline-block">
                         @csrf
                         <flux:button type="submit" icon="check" size="sm">

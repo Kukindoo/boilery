@@ -4,8 +4,8 @@ namespace Tests\Feature\Works;
 
 use App\Enums\FileTypes;
 use App\Enums\PdfGenerationStatus;
-use App\Jobs\Works\GenerateServiceProtocolPdf;
-use App\Livewire\Works\WorkPdfGeneration;
+use App\Jobs\Pdf\GeneratePdf;
+use App\Livewire\Pdf\PdfGeneration;
 use App\Models\User;
 use App\Models\Work;
 use Illuminate\Support\Facades\Http;
@@ -17,12 +17,12 @@ class WorkPdfGenerationTest extends FeatureTestCase
 {
     public function test_button_queues_generation_and_shows_queued_status_without_rendering_a_pdf(): void
     {
-        Queue::fake([GenerateServiceProtocolPdf::class]);
+        Queue::fake([GeneratePdf::class]);
         Http::preventStrayRequests();
         $user = User::factory()->admin()->create();
         $work = Work::factory()->create();
 
-        $component = Livewire::actingAs($user)->test(WorkPdfGeneration::class, ['work' => $work])
+        $component = Livewire::actingAs($user)->test(PdfGeneration::class, ['model' => $work])
             ->call('generate')
             ->assertSee('PDF čeká na zpracování.')
             ->assertSee('wire:poll.2s', false)
@@ -33,21 +33,21 @@ class WorkPdfGenerationTest extends FeatureTestCase
         $this->assertNotNull($generationId);
         $component->call('generate');
         $this->assertSame($generationId, $work->fresh()->pdf_generation_id);
-        Queue::assertPushed(GenerateServiceProtocolPdf::class, fn (GenerateServiceProtocolPdf $job): bool => $job->workId === $work->id
+        Queue::assertPushed(GeneratePdf::class, fn (GeneratePdf $job): bool => $job->modelType === 'work' && $job->modelId === $work->id
             && $job->generationId === $generationId && $job->queue === 'default' && $job->afterCommit === true);
-        Queue::assertPushed(GenerateServiceProtocolPdf::class, 1);
+        Queue::assertPushed(GeneratePdf::class, 1);
         Http::assertNothingSent();
         $this->assertTrue($work->files()->doesntExist());
     }
 
     public function test_customer_cannot_queue_a_pdf_for_their_work(): void
     {
-        Queue::fake([GenerateServiceProtocolPdf::class]);
+        Queue::fake([GeneratePdf::class]);
         $user = User::factory()->customer()->create();
         $user->givePermissionTo(\App\Enums\Permissions::WORK_VIEW_OWN->label());
         $work = Work::factory()->for($user)->create();
 
-        Livewire::actingAs($user)->test(WorkPdfGeneration::class, ['work' => $work])
+        Livewire::actingAs($user)->test(PdfGeneration::class, ['model' => $work])
             ->assertDontSee('Generovat PDF')
             ->call('generate')->assertForbidden();
 
@@ -60,7 +60,7 @@ class WorkPdfGenerationTest extends FeatureTestCase
         $work = Work::factory()->for(User::factory())->create();
 
         Livewire::actingAs(User::factory()->customer()->create())
-            ->test(WorkPdfGeneration::class, ['work' => $work])->assertForbidden();
+            ->test(PdfGeneration::class, ['model' => $work])->assertForbidden();
     }
 
     public function test_reloading_the_component_preserves_the_processing_indicator(): void
@@ -68,7 +68,7 @@ class WorkPdfGenerationTest extends FeatureTestCase
         $work = Work::factory()->create(['pdf_generation_status' => PdfGenerationStatus::PROCESSING]);
 
         Livewire::actingAs(User::factory()->admin()->create())
-            ->test(WorkPdfGeneration::class, ['work' => $work])
+            ->test(PdfGeneration::class, ['model' => $work])
             ->assertSee('PDF se generuje.')
             ->assertSee('wire:poll.2s', false)
             ->assertDontSee('Generovat PDF');
@@ -78,7 +78,7 @@ class WorkPdfGenerationTest extends FeatureTestCase
     {
         $user = User::factory()->admin()->create();
         $work = Work::factory()->create(['pdf_generation_status' => PdfGenerationStatus::PROCESSING]);
-        $component = Livewire::actingAs($user)->test(WorkPdfGeneration::class, ['work' => $work]);
+        $component = Livewire::actingAs($user)->test(PdfGeneration::class, ['model' => $work]);
         $this->addSummary($work);
         $work->forceFill(['pdf_generation_status' => PdfGenerationStatus::COMPLETED])->save();
 
@@ -92,13 +92,13 @@ class WorkPdfGenerationTest extends FeatureTestCase
 
     public function test_failure_stops_polling_and_allows_retry_with_a_new_generation_id(): void
     {
-        Queue::fake([GenerateServiceProtocolPdf::class]);
+        Queue::fake([GeneratePdf::class]);
         $work = Work::factory()->create([
             'pdf_generation_status' => PdfGenerationStatus::PROCESSING,
             'pdf_generation_id' => '00000000-0000-4000-8000-000000000001',
         ]);
         $component = Livewire::actingAs(User::factory()->admin()->create())
-            ->test(WorkPdfGeneration::class, ['work' => $work]);
+            ->test(PdfGeneration::class, ['model' => $work]);
         $work->forceFill(['pdf_generation_status' => PdfGenerationStatus::FAILED])->save();
 
         $component->call('checkProgress')
@@ -109,17 +109,17 @@ class WorkPdfGenerationTest extends FeatureTestCase
             ->assertSee('PDF čeká na zpracování.');
 
         $this->assertNotSame('00000000-0000-4000-8000-000000000001', $work->fresh()->pdf_generation_id);
-        Queue::assertPushed(GenerateServiceProtocolPdf::class, 1);
+        Queue::assertPushed(GeneratePdf::class, 1);
     }
 
     public function test_an_existing_summary_prevents_another_generation(): void
     {
-        Queue::fake([GenerateServiceProtocolPdf::class]);
+        Queue::fake([GeneratePdf::class]);
         $work = Work::factory()->create();
         $this->addSummary($work);
 
         Livewire::actingAs(User::factory()->admin()->create())
-            ->test(WorkPdfGeneration::class, ['work' => $work])
+            ->test(PdfGeneration::class, ['model' => $work])
             ->assertDontSee('Generovat PDF')->call('generate')->assertForbidden();
 
         Queue::assertNothingPushed();
