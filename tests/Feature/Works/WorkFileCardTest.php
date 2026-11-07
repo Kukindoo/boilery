@@ -4,7 +4,7 @@ namespace Tests\Feature\Works;
 
 use App\Enums\FileTypes;
 use App\Enums\Permissions;
-use App\Livewire\Works\WorkFileCard;
+use App\Livewire\Files\FilePreviewCard;
 use App\Models\File;
 use App\Models\Quote;
 use App\Models\User;
@@ -24,7 +24,7 @@ class WorkFileCardTest extends FeatureTestCase
         $quote->files()->attach($file->id);
 
         Livewire::actingAs(User::factory()->admin()->create())
-            ->test(WorkFileCard::class, compact('work', 'file'))
+            ->test(FilePreviewCard::class, ['model' => $work, 'file' => $file])
             ->assertSee('Odebrat přílohu')
             ->call('deleteFile')
             ->assertRedirect(route('works.show', $work));
@@ -44,7 +44,7 @@ class WorkFileCardTest extends FeatureTestCase
         $work = Work::factory()->for($user)->create();
         $file = $this->attachment($work);
 
-        Livewire::actingAs($user)->test(WorkFileCard::class, compact('work', 'file'))
+        Livewire::actingAs($user)->test(FilePreviewCard::class, ['model' => $work, 'file' => $file])
             ->assertDontSee('Odebrat přílohu')
             ->call('deleteFile')->assertForbidden();
 
@@ -59,7 +59,7 @@ class WorkFileCardTest extends FeatureTestCase
         $file = $this->attachment(Work::factory()->create());
 
         Livewire::actingAs(User::factory()->admin()->create())
-            ->test(WorkFileCard::class, compact('work', 'file'))->assertNotFound();
+            ->test(FilePreviewCard::class, ['model' => $work, 'file' => $file])->assertNotFound();
 
         $this->assertModelExists($file);
     }
@@ -71,9 +71,9 @@ class WorkFileCardTest extends FeatureTestCase
         $file = $this->attachment($work);
 
         Livewire::actingAs(User::factory()->admin()->create())
-            ->test(WorkFileCard::class, compact('work', 'file'))
+            ->test(FilePreviewCard::class, ['model' => $work, 'file' => $file])
             ->assertSee('Změnit typ')
-            ->assertSee('delete-work-attachment-' . $file->id)
+            ->assertSee('delete-attachment-' . $file->id)
             ->call('downloadFile')->assertFileDownloaded('protocol.pdf')
             ->call('changeFileType', FileTypes::RECEIPT->value)
             ->call('downloadFile')->assertFileDownloaded('protocol.pdf');
@@ -90,7 +90,7 @@ class WorkFileCardTest extends FeatureTestCase
         $work = Work::factory()->for($user)->create();
         $file = $this->attachment($work);
 
-        Livewire::actingAs($user)->test(WorkFileCard::class, compact('work', 'file'))
+        Livewire::actingAs($user)->test(FilePreviewCard::class, ['model' => $work, 'file' => $file])
             ->assertDontSee('Změnit typ')
             ->call('changeFileType', FileTypes::RECEIPT->value)->assertForbidden();
 

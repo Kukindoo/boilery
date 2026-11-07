@@ -5,7 +5,7 @@ namespace Tests\Feature\Quotes;
 use App\Enums\FileTypes;
 use App\Enums\PdfGenerationStatus;
 use App\Jobs\Quotes\GenerateQuoteSummaryPdf;
-use App\Livewire\Quotes\QuoteDownloadCard;
+use App\Livewire\Files\FilePreviewCard;
 use App\Livewire\Quotes\QuotePdfGeneration;
 use App\Models\File;
 use App\Models\Quote;
@@ -101,7 +101,7 @@ class QuotePdfGenerationTest extends FeatureTestCase
 
         $this->get(route('quotes.show', $quote))
             ->assertSee('PDF je připraveno ke stažení v přílohách.')
-            ->assertSeeLivewire(QuoteDownloadCard::class)
+            ->assertSeeLivewire(FilePreviewCard::class)
             ->assertSee(route('files.preview', ['quote', $quote, $summary]), false)
             ->assertDontSee('wire:poll.2s', false);
     }

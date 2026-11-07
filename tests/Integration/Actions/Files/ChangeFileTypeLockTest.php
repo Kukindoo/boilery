@@ -5,8 +5,7 @@ namespace Tests\Integration\Actions\Files;
 use App\Actions\Files\ChangeFileType;
 use App\Enums\FileTypes;
 use App\Enums\Permissions;
-use App\Livewire\Quotes\QuoteDownloadCard;
-use App\Livewire\Works\WorkFileCard;
+use App\Livewire\Files\FilePreviewCard;
 use App\Models\File;
 use App\Models\Quote;
 use App\Models\User;
@@ -60,8 +59,8 @@ class ChangeFileTypeLockTest extends TestCase
         ]);
         $parent?->files()->attach($file->id);
         $component = match ($context) {
-            'quote' => Livewire::test(QuoteDownloadCard::class, ['quote' => $parent, 'file' => $file]),
-            'work' => Livewire::test(WorkFileCard::class, ['work' => $parent, 'file' => $file]),
+            'quote' => Livewire::test(FilePreviewCard::class, ['model' => $parent, 'file' => $file]),
+            'work' => Livewire::test(FilePreviewCard::class, ['model' => $parent, 'file' => $file]),
             default => null,
         };
         $resources = [['files', $file->id, ['file_type' => FileTypes::BOILER_LABEL->value]]];

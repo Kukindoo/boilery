@@ -61,7 +61,7 @@ class WorksPagesTest extends FeatureTestCase
         $work = Work::factory()->for($quote)->create();
 
         $this->actingAs($user)->get(route('works.show', $work))
-            ->assertDontSeeLivewire(\App\Livewire\Quotes\QuoteDownloadCard::class)
+            ->assertDontSeeLivewire(\App\Livewire\Files\FilePreviewCard::class)
             ->assertDontSee(route('files.preview', ['quote', $quote, $file]))
             ->assertDontSeeLivewire(\App\Livewire\Quotes\SingleFileUpload::class);
     }
