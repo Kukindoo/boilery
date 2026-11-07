@@ -2,15 +2,7 @@
 
 <x-stellaris.container.show-card :title="__('Přílohy')">
     <x-slot:action>
-        @can('uploadFile', $model)
-            <div class="ml-4 shrink-0 print:hidden">
-                <flux:modal.trigger name="upload-file">
-                    <flux:button icon="arrow-up-tray">
-                        Nahrát
-                    </flux:button>
-                </flux:modal.trigger>
-            </div>
-        @endcan
+        <livewire:files.upload-file-button :model="$model" />
     </x-slot:action>
 
     <div class="min-w-0 sm:col-span-3">
@@ -26,15 +18,3 @@
         @endif
     </div>
 </x-stellaris.container.show-card>
-
-@can('uploadFile', $model)
-    <flux:modal name="upload-file" class="w-full max-w-5xl">
-        <div class="space-y-6">
-            <flux:heading size="lg">
-                Nahrát soubor
-            </flux:heading>
-
-            <livewire:files.single-file-upload :model="$model"/>
-        </div>
-    </flux:modal>
-@endcan

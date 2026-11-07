@@ -22,9 +22,13 @@ class SingleFileUpload extends Component
     #[Locked]
     public Model&OwnsFiles $model;
 
-    public function mount(Model&OwnsFiles $model): void
+    #[Locked]
+    public string $modalName = 'upload-file';
+
+    public function mount(Model&OwnsFiles $model, string $modalName = 'upload-file'): void
     {
         $this->model = $model;
+        $this->modalName = $modalName;
     }
 
     public function render()
@@ -38,7 +42,7 @@ class SingleFileUpload extends Component
     public function submit(UploadFile $uploadFile): void
     {
         $this->form->submit($this->model, $uploadFile);
-        Flux::modal('upload-file')->close();
+        Flux::modal($this->modalName)->close();
         $this->form->reset();
 
         $route = match (true) {
