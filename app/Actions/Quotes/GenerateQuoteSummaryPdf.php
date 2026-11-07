@@ -7,6 +7,8 @@ use App\Enums\FileTypes;
 use App\Models\File;
 use App\Models\Quote;
 use App\Traits\LogsActionActivity;
+use DateTimeImmutable;
+use DateTimeZone;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -32,9 +34,12 @@ readonly class GenerateQuoteSummaryPdf
 
             $attachments = $this->getAttachments($quote);
 
+            $generatedAt = new DateTimeImmutable('now', new DateTimeZone('Europe/Prague'))->format('d. m. Y H:i:s T');
+
             $content = Pdf::view('quotes.pdfs.summary', [
                 'quote' => $quote,
                 'attachments' => $attachments,
+                'generatedAt' => $generatedAt,
             ])->format('a4')
                 ->generatePdfContent();
 

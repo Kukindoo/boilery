@@ -21,7 +21,7 @@
 </head>
 <body>
     <h1>Shrnutí poptávky {{ $quote->id }}</h1>
-    <p class="generated-at">Vygenerováno: {{ date('d. m. Y H:i:s T') }}</p>
+    <p class="generated-at">Vygenerováno: {{ $generatedAt }}</p>
     <h2>Kontaktní údaje</h2>
     <table>
         <tr><th>Jméno</th><td>{{ $quote->first_name }} {{ $quote->last_name }}</td></tr>
