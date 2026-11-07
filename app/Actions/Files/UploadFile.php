@@ -63,9 +63,9 @@ readonly class UploadFile
                     $lockedParent = $quote;
                 } else {
                     // Discover the quote first so both upload directions use the same lock order.
-                    $snapshot = Work::query()->findOrFail($parent->id);
+                    $snapshot = Work::query()->findOrFail($parent->getKey());
                     $quote = $snapshot->quote_id === null ? null : Quote::withTrashed()->lockForUpdate()->findOrFail($snapshot->quote_id);
-                    $work = Work::query()->lockForUpdate()->findOrFail($parent->id);
+                    $work = Work::query()->lockForUpdate()->findOrFail($parent->getKey());
                     if ($work->quote_id !== $quote?->id) {
                         throw ValidationException::withMessages(['file' => 'Přiřazená poptávka se změnila. Zkuste soubor nahrát znovu.']);
                     }
