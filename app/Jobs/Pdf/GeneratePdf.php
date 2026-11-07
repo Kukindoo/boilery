@@ -12,6 +12,7 @@ use App\Models\Work;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Queue\Queueable;
+use InvalidArgumentException;
 use Throwable;
 
 class GeneratePdf implements ShouldQueue
@@ -49,6 +50,7 @@ class GeneratePdf implements ShouldQueue
             match (true) {
                 $model instanceof Quote => $generateQuotePdf->handle($model),
                 $model instanceof Work => $generateWorkPdf->handle($model),
+                default => throw new InvalidArgumentException("Invalid model type: {$this->modelType}"),
             };
         }
 
@@ -77,6 +79,7 @@ class GeneratePdf implements ShouldQueue
         return match ($this->modelType) {
             'quote' => Quote::class,
             'work' => Work::class,
+            default => throw new InvalidArgumentException("Invalid model type: {$this->modelType}"),
         };
     }
 
