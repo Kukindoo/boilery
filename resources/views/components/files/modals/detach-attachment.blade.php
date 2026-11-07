@@ -3,6 +3,10 @@
     'model',
 ])
 
+@php
+    /** @var \App\Models\File $file */
+@endphp
+
 @can('detach', [$file, $model])
     <flux:modal name="delete-attachment-{{ $file->id }}" class="min-w-[22rem]">
         <div class="space-y-6">
