@@ -166,7 +166,7 @@ class WorkForm extends Form
         abort_unless(auth()->user()->can($permission->label())
             || (int) $this->userId === auth()->id(), 403);
 
-        if ($this->quoteId !== null && $this->quoteId !== '') {
+        if ($this->quoteId !== null) {
             $quote = Quote::query()->findOrFail($this->quoteId);
             Gate::authorize('view', $quote);
         }
