@@ -109,7 +109,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
         $this->assertSame(2, $quote->files()->count());
         Storage::disk()->assertExists([$first->path, $second->path]);
         Http::assertSent(fn (Request $request): bool => str_contains($request['html'], 'Neuvedeno')
-            && ! str_contains($request['html'], 'Přílohy'));
+            && str_contains($request['html'], 'Bez příloh.'));
     }
 
     public function test_includes_quote_attachments_and_embeds_images_but_excludes_existing_summaries(): void
@@ -128,7 +128,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
 
         app(GenerateQuoteSummaryPdf::class)->handle($quote);
 
-        Http::assertSent(fn (Request $request): bool => str_contains($request['html'], 'Přílohy')
+        Http::assertSent(fn (Request $request): bool => str_contains($request['html'], 'Příloha:')
             && str_contains($request['html'], $imageSource)
             && str_contains($request['html'], '&lt;script&gt;attachment&lt;/script&gt;.png')
             && ! str_contains($request['html'], '<script>attachment</script>')
