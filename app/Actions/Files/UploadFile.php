@@ -107,7 +107,7 @@ readonly class UploadFile
                 $disk->delete($path);
             }
             $this->logActionAttempt('files', null, $exception, [
-                'fileable_type' => $parent->getMorphClass(), 'fileable_id' => $parent->id,
+                'fileable_type' => $parent->getMorphClass(), 'fileable_id' => $parent->getKey(),
             ]);
 
             throw $exception;
