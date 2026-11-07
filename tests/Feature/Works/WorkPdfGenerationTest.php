@@ -82,7 +82,9 @@ class WorkPdfGenerationTest extends FeatureTestCase
         $this->addSummary($work);
         $work->forceFill(['pdf_generation_status' => PdfGenerationStatus::COMPLETED])->save();
 
-        $component->call('checkProgress')->assertRedirect(route('works.show', $work));
+        $component->call('checkProgress')
+            ->assertDispatched('toast-show', slots: ['text' => 'PDF bylo úspěšně vygenerováno. Najdete ho v přílohách.'], dataset: ['variant' => 'success'])
+            ->assertRedirect(route('works.show', $work));
 
         $this->get(route('works.show', $work))
             ->assertSee('PDF je připraveno ke stažení v přílohách.')

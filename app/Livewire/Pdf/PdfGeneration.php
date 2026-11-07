@@ -7,6 +7,7 @@ use App\Contracts\OwnsFiles;
 use App\Enums\PdfGenerationStatus;
 use App\Models\Quote;
 use App\Models\Work;
+use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
@@ -42,8 +43,17 @@ class PdfGeneration extends Component
             $route = match (true) {
                 $this->model instanceof Quote => 'quotes.show',
                 $this->model instanceof Work => 'works.show',
-                default => abort(404),
+                default => null,
             };
+
+            if (is_null($route)) {
+                abort(404);
+            }
+
+            Flux::toast(
+                text: 'PDF bylo úspěšně vygenerováno. Najdete ho v přílohách.',
+                variant: 'success',
+            );
             $this->redirect(route($route, $this->model), navigate: true);
         }
     }

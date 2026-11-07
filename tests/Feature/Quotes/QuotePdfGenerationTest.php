@@ -26,7 +26,8 @@ class QuotePdfGenerationTest extends FeatureTestCase
         $this->actingAs(User::factory()->admin()->create())
             ->get(route('quotes.show', $quote))
             ->assertOk()
-            ->assertSeeInOrder(['<iframe', '</iframe>', 'Generovat PDF'], false)
+            ->assertSeeInOrder(['<iframe', '</iframe>'], false)
+            ->assertSee('Generovat PDF')
             ->assertSee('sandbox=""', false)
             ->assertSee('Bez příloh.')
             ->assertSeeLivewire(PdfGeneration::class);
@@ -143,7 +144,9 @@ class QuotePdfGenerationTest extends FeatureTestCase
         $summary = $this->addSummary($quote);
         $quote->forceFill(['pdf_generation_status' => PdfGenerationStatus::COMPLETED])->save();
 
-        $component->call('checkProgress')->assertRedirect(route('quotes.show', $quote));
+        $component->call('checkProgress')
+            ->assertDispatched('toast-show', slots: ['text' => 'PDF bylo úspěšně vygenerováno. Najdete ho v přílohách.'], dataset: ['variant' => 'success'])
+            ->assertRedirect(route('quotes.show', $quote));
 
         $this->get(route('quotes.show', $quote))
             ->assertSee('PDF je připraveno ke stažení v přílohách.')
