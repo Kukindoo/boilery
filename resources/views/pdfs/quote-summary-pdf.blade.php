@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <title>Shrnutí poptávky {{ $quote->id }}</title>
     <style>
-        @page { margin: 10mm; }
-        body { margin: 0; font-family: "DejaVu Sans", sans-serif; font-size: 11pt; color: #18181b; }
+        @page { size: A4 portrait; margin: 10mm; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #e5e5e5; font-family: "DejaVu Sans", sans-serif; font-size: 11pt; color: #18181b; }
+        .page { width: 210mm; min-height: 297mm; margin: 8mm auto; padding: 10mm; background: #fff; }
         h1 { margin-top: 0; font-size: 20pt; }
         .generated-at { font-size: 9pt; color: #71717a; }
         h2 { margin-top: 24pt; font-size: 14pt; }
@@ -17,9 +19,14 @@
         .attachment { page-break-before: always; break-before: page; overflow-wrap: anywhere; }
         .attachment h2, .attachment h3 { margin-top: 0; }
         .attachment img { display: block; max-width: 100%; max-height: 220mm; margin-top: 8pt; object-fit: contain; }
+        @media print {
+            body { background: #fff; }
+            .page { width: auto; min-height: 0; margin: 0; padding: 0; }
+        }
     </style>
 </head>
 <body>
+<main class="page">
     <h1>Shrnutí poptávky {{ $quote->id }}</h1>
     <p class="generated-at">Vygenerováno: {{ $generatedAt }}</p>
     <h2>Kontaktní údaje</h2>
@@ -38,9 +45,14 @@
     </table>
     <h2>Zpráva</h2>
     <div class="message">{{ $quote->message }}</div>
+    @if ($attachments->isEmpty())
+        <h2>Přílohy</h2>
+        <p>Bez příloh.</p>
+    @endif
+</main>
     @if ($attachments->isNotEmpty())
         @foreach ($attachments as $attachment)
-            <div class="attachment">
+            <div class="page attachment">
                 <h3>Příloha: {{ $attachment['type'] }}</h3>
                 <p>{{ $attachment['label'] }} ({{ $attachment['mime_type'] }})</p>
                 @if ($attachment['image'] !== null)
