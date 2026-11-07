@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <title>Shrnutí poptávky {{ $quote->id }}</title>
     <style>
-        @page { margin: 20mm; }
-        body { font-family: "DejaVu Sans", sans-serif; font-size: 11pt; color: #18181b; }
-        h1 { font-size: 20pt; }
+        @page { margin: 10mm; }
+        body { margin: 0; font-family: "DejaVu Sans", sans-serif; font-size: 11pt; color: #18181b; }
+        h1 { margin-top: 0; font-size: 20pt; }
+        .generated-at { font-size: 9pt; color: #71717a; }
         h2 { margin-top: 24pt; font-size: 14pt; }
         th, td { padding: 6pt; text-align: left; vertical-align: top; }
         th { width: 35%; }
@@ -19,6 +20,7 @@
 </head>
 <body>
     <h1>Shrnutí poptávky {{ $quote->id }}</h1>
+    <p class="generated-at">Vygenerováno: {{ date('d. m. Y H:i:s T') }}</p>
     <h2>Kontaktní údaje</h2>
     <table>
         <tr><th>Jméno</th><td>{{ $quote->first_name }} {{ $quote->last_name }}</td></tr>
