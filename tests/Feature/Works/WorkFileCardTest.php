@@ -6,6 +6,7 @@ use App\Enums\FileTypes;
 use App\Enums\Permissions;
 use App\Livewire\Works\WorkFileCard;
 use App\Models\File;
+use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
 use Illuminate\Support\Facades\Storage;
@@ -14,20 +15,24 @@ use Tests\Feature\FeatureTestCase;
 
 class WorkFileCardTest extends FeatureTestCase
 {
-    public function test_deleting_an_attachment_removes_the_record_and_stored_file(): void
+    public function test_deleting_an_attachment_detaches_it_and_preserves_the_shared_file(): void
     {
         Storage::fake();
         $work = Work::factory()->create();
         $file = $this->attachment($work);
+        $quote = Quote::factory()->create();
+        $quote->files()->attach($file->id);
 
         Livewire::actingAs(User::factory()->admin()->create())
             ->test(WorkFileCard::class, compact('work', 'file'))
-            ->assertSee('Smazat přílohu')
+            ->assertSee('Odebrat přílohu')
             ->call('deleteFile')
             ->assertRedirect(route('works.show', $work));
 
-        $this->assertModelMissing($file);
-        Storage::disk()->assertMissing($file->path);
+        $this->assertModelExists($file);
+        $this->assertFalse($file->isAttachedTo($work));
+        $this->assertTrue($file->isAttachedTo($quote));
+        Storage::disk()->assertExists($file->path);
         $this->assertFalse($work->hasServiceProtocol());
     }
 
@@ -40,7 +45,7 @@ class WorkFileCardTest extends FeatureTestCase
         $file = $this->attachment($work);
 
         Livewire::actingAs($user)->test(WorkFileCard::class, compact('work', 'file'))
-            ->assertDontSee('Smazat přílohu')
+            ->assertDontSee('Odebrat přílohu')
             ->call('deleteFile')->assertForbidden();
 
         $this->assertModelExists($file);
@@ -70,9 +75,11 @@ class WorkFileCardTest extends FeatureTestCase
             ->assertSee('Změnit typ')
             ->assertSee('delete-work-attachment-' . $file->id)
             ->call('downloadFile')->assertFileDownloaded('protocol.pdf')
-            ->call('changeFileType', FileTypes::RECEIPT->value);
+            ->call('changeFileType', FileTypes::RECEIPT->value)
+            ->call('downloadFile')->assertFileDownloaded('protocol.pdf');
 
         $this->assertSame(FileTypes::RECEIPT, $file->fresh()->file_type);
+        $this->assertSame('protocol.pdf', $file->fresh()->label);
     }
 
     public function test_read_only_customer_cannot_change_attachment_type(): void

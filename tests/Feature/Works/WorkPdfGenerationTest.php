@@ -37,7 +37,7 @@ class WorkPdfGenerationTest extends FeatureTestCase
             && $job->generationId === $generationId && $job->queue === 'default' && $job->afterCommit === true);
         Queue::assertPushed(GenerateServiceProtocolPdf::class, 1);
         Http::assertNothingSent();
-        $this->assertDatabaseMissing('files', ['work_id' => $work->id]);
+        $this->assertTrue($work->files()->doesntExist());
     }
 
     public function test_customer_cannot_queue_a_pdf_for_their_work(): void

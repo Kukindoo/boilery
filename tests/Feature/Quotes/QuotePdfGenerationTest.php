@@ -39,7 +39,7 @@ class QuotePdfGenerationTest extends FeatureTestCase
             && $job->generationId === $generationId && $job->queue === 'default' && $job->afterCommit === true);
         Queue::assertPushed(GenerateQuoteSummaryPdf::class, 1);
         Http::assertNothingSent();
-        $this->assertDatabaseMissing('files', ['quote_id' => $quote->id]);
+        $this->assertTrue($quote->files()->doesntExist());
     }
 
     public function test_post_endpoint_queues_the_job_and_get_cannot_generate_a_pdf(): void

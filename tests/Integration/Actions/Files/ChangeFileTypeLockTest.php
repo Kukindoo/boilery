@@ -57,9 +57,8 @@ class ChangeFileTypeLockTest extends TestCase
             'path' => 'receipt.pdf', 'label' => 'receipt.pdf', 'original_name' => 'receipt.pdf',
             'extension' => 'pdf', 'mime_type' => 'application/pdf', 'size' => 13,
             'file_type' => FileTypes::RECEIPT,
-            'quote_id' => $context === 'quote' ? $parent->id : null,
-            'work_id' => $context === 'work' ? $parent->id : null,
         ]);
+        $parent?->files()->attach($file->id);
         $component = match ($context) {
             'quote' => Livewire::test(QuoteDownloadCard::class, ['quote' => $parent, 'file' => $file]),
             'work' => Livewire::test(WorkFileCard::class, ['work' => $parent, 'file' => $file]),

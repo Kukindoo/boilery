@@ -57,11 +57,10 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
         $file = app(GenerateServiceProtocolPdf::class)->handle($work);
 
         $this->assertModelExists($file);
+        $this->assertTrue($file->isAttachedTo($work));
         $this->assertTrue($work->files()->sole()->is($file));
         $this->assertDatabaseHas('files', [
             'id' => $file->id,
-            'work_id' => $work->id,
-            'quote_id' => null,
             'original_name' => "Jiri_Novak_{$work->id}_servisni_protokol.pdf",
             'label' => "Jiri_Novak_{$work->id}_servisni_protokol.pdf",
             'extension' => 'pdf',
@@ -95,7 +94,7 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
         try {
             app(GenerateServiceProtocolPdf::class)->handle($work);
         } finally {
-            $this->assertDatabaseMissing('files', ['work_id' => $work->id]);
+            $this->assertTrue($work->files()->doesntExist());
             Storage::disk()->assertEmpty();
         }
     }
@@ -114,7 +113,27 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
         try {
             app(GenerateServiceProtocolPdf::class)->handle($work);
         } finally {
-            $this->assertDatabaseMissing('files', ['work_id' => $work->id]);
+            $this->assertTrue($work->files()->doesntExist());
+        }
+    }
+
+    public function test_attachment_link_failure_rolls_back_the_record_and_removes_the_pdf(): void
+    {
+        Storage::fake('local');
+        Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
+        $work = Work::factory()->create();
+        \App\Models\FileAttachment::creating(function (): void {
+            throw new RuntimeException('Cannot attach PDF');
+        });
+
+        try {
+            app(GenerateServiceProtocolPdf::class)->handle($work);
+            $this->fail('Attachment failure must propagate.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('Cannot attach PDF', $exception->getMessage());
+            $this->assertDatabaseCount('files', 0);
+            $this->assertDatabaseCount('fileables', 0);
+            Storage::disk()->assertEmpty();
         }
     }
 
@@ -133,7 +152,7 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
         try {
             app(GenerateServiceProtocolPdf::class)->handle($work);
         } finally {
-            $this->assertDatabaseMissing('files', ['work_id' => $work->id]);
+            $this->assertTrue($work->files()->doesntExist());
             Storage::disk()->assertEmpty();
         }
     }

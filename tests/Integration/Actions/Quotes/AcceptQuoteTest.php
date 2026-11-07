@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Tests\Integration\IntegrationTestCase;
+use Throwable;
 
 class AcceptQuoteTest extends IntegrationTestCase
 {
@@ -121,19 +122,13 @@ class AcceptQuoteTest extends IntegrationTestCase
         $acceptedQuote = app(AcceptQuote::class)->handle($quote);
 
         foreach ($files as $file) {
-            $this->assertDatabaseHas('files', [
-                'id' => $file->id,
-                'quote_id' => $quote->id,
-                'work_id' => $acceptedQuote->work->id,
-                'path' => $attributes['path'],
-            ]);
+            $this->assertTrue($file->isAttachedTo($quote));
+            $this->assertTrue($file->isAttachedTo($acceptedQuote->work));
+            $this->assertSame($attributes['path'], $file->fresh()->path);
         }
         $this->assertSame(2, $acceptedQuote->work->files()->count());
-        $this->assertDatabaseHas('files', [
-            'id' => $otherFile->id,
-            'quote_id' => $otherQuote->id,
-            'work_id' => null,
-        ]);
+        $this->assertTrue($otherFile->isAttachedTo($otherQuote));
+        $this->assertFalse($otherFile->isAttachedTo($acceptedQuote->work));
         $this->assertDatabaseCount('files', 3);
     }
 

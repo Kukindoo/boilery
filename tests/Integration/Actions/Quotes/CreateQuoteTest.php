@@ -62,10 +62,9 @@ class CreateQuoteTest extends IntegrationTestCase
 
         $file = $quote->files()->sole();
         $this->assertSame($type, $file->file_type);
+        $this->assertTrue($file->isAttachedTo($quote));
         $this->assertDatabaseHas('files', [
             'id' => $file->id,
-            'quote_id' => $quote->id,
-            'work_id' => null,
             'label' => "Jiri_Novak_Svoboda_{$quote->id}_{$labelType}.pdf",
             'original_name' => 'document.pdf',
             'extension' => 'pdf',

@@ -39,9 +39,11 @@ class ChangeFileTypeTest extends IntegrationTestCase
 
         $this->assertTrue($updated->is($file));
         $this->assertSame(FileTypes::WARRANTY, $updated->file_type);
+        $this->assertSame('receipt.pdf', $updated->label);
+        $this->assertSame($file->original_name, $updated->original_name);
+        $this->assertSame('receipt.pdf', $other->fresh()->label);
         $this->assertSame(FileTypes::RECEIPT, $other->fresh()->file_type);
-        $this->assertSame($file->quote_id, $updated->quote_id);
-        $this->assertSame($file->work_id, $updated->work_id);
+        $this->assertEquals($file->attachments()->get()->toArray(), $updated->attachments()->get()->toArray());
         $this->assertSame($file->path, $updated->path);
         $activity = Activity::inLog('files')->where('event', 'action_completed')->sole();
         $this->assertTrue($activity->subject->is($file));
@@ -93,9 +95,9 @@ class ChangeFileTypeTest extends IntegrationTestCase
     public function test_uses_the_current_file_and_discards_stale_loaded_relations(): void
     {
         $actor = $this->actor(Permissions::FILE_EDIT_OWN);
-        $file = $this->attachment('quote', $actor)->load('quote');
+        $file = $this->attachment('quote', $actor)->load('quotes');
         $otherQuote = Quote::factory()->for(User::factory())->create();
-        File::whereKey($file->id)->update(['quote_id' => $otherQuote->id]);
+        $file->quotes()->sync([$otherQuote->id]);
 
         $this->expectException(AuthorizationException::class);
 
@@ -103,7 +105,7 @@ class ChangeFileTypeTest extends IntegrationTestCase
             app(ChangeFileType::class)->handle($file, FileTypes::WARRANTY);
         } finally {
             $this->assertSame(FileTypes::RECEIPT, $file->fresh()->file_type);
-            $this->assertSame($otherQuote->id, $file->fresh()->quote_id);
+            $this->assertTrue($file->isAttachedTo($otherQuote));
         }
     }
 
@@ -116,6 +118,23 @@ class ChangeFileTypeTest extends IntegrationTestCase
         $this->expectException(ModelNotFoundException::class);
 
         app(ChangeFileType::class)->handle($file, FileTypes::WARRANTY);
+    }
+
+    public function test_shared_file_type_changes_for_all_attachments_without_renaming(): void
+    {
+        $actor = $this->actor(Permissions::FILE_EDIT_ALL);
+        $file = $this->attachment('quote', $actor);
+        $file->update(['label' => 'Jan_Novak_42_kupni_smlouva.pdf']);
+        $work = Work::factory()->create();
+        $work->files()->attach($file);
+
+        app(ChangeFileType::class)->handle($file, FileTypes::WARRANTY);
+
+        $this->assertSame('Jan_Novak_42_kupni_smlouva.pdf', $file->quotes()->sole()->files()->sole()->label);
+        $this->assertSame('Jan_Novak_42_kupni_smlouva.pdf', $work->files()->sole()->label);
+        $this->assertSame(FileTypes::WARRANTY, $file->quotes()->sole()->files()->sole()->file_type);
+        $this->assertSame(FileTypes::WARRANTY, $work->files()->sole()->file_type);
+        $this->assertSame(2, $file->attachments()->count());
     }
 
     public function test_success_log_failure_rolls_back_the_type_change_and_preserves_an_attempt(): void
@@ -135,6 +154,7 @@ class ChangeFileTypeTest extends IntegrationTestCase
         } catch (RuntimeException $exception) {
             $this->assertSame($failure, $exception);
             $this->assertSame(FileTypes::RECEIPT, $file->fresh()->file_type);
+            $this->assertSame('receipt.pdf', $file->fresh()->label);
             $this->assertDatabaseMissing('activity_log', ['event' => 'action_completed']);
             $attempt = Activity::inLog('files')->where('event', 'action_attempted')->sole();
             $this->assertSame(ChangeFileType::class, $attempt->getProperty('action'));
@@ -152,12 +172,14 @@ class ChangeFileTypeTest extends IntegrationTestCase
 
     private function attachment(string $context, User $owner): File
     {
-        return File::create([
-            'path' => 'receipt.pdf', 'label' => 'receipt.pdf', 'original_name' => 'receipt.pdf',
-            'extension' => 'pdf', 'mime_type' => 'application/pdf', 'size' => 13,
-            'file_type' => FileTypes::RECEIPT,
-            'quote_id' => $context === 'quote' ? Quote::factory()->for($owner)->create()->id : null,
-            'work_id' => $context === 'work' ? Work::factory()->for($owner)->create()->id : null,
-        ]);
+        $file = File::factory()->create();
+        $parent = match ($context) {
+            'quote' => Quote::factory()->for($owner)->create(),
+            'work' => Work::factory()->for($owner)->create(),
+            default => null,
+        };
+        $parent?->files()->attach($file->id);
+
+        return $file;
     }
 }

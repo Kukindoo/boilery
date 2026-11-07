@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Enums\FileTypes;
 use App\Enums\Permissions;
 use App\Enums\Roles;
+use App\Jobs\Files\DeleteStoredFile;
 use App\Livewire\Quotes\QuoteDownloadCard;
 use App\Models\File;
 use App\Models\Quote;
 use App\Models\User;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -64,6 +66,23 @@ class QuoteDownloadCardTest extends FeatureTestCase
             ->assertHasNoErrors();
 
         $this->assertSame(FileTypes::RECEIPT, $file->refresh()->file_type);
+        $this->assertSame('Receipt', $file->label);
+    }
+
+    public function test_changing_type_preserves_the_download_label(): void
+    {
+        Storage::fake();
+        $viewer = $this->viewer();
+        $quote = Quote::factory()->for($viewer)->create();
+        $file = $this->attachment($quote);
+
+        Livewire::actingAs($viewer)->test(QuoteDownloadCard::class, compact('quote', 'file'))
+            ->call('changeFileType', FileTypes::WARRANTY->value)
+            ->call('downloadFile')->assertFileDownloaded('receipt.pdf');
+
+        $this->assertSame('receipt.pdf', $file->fresh()->label);
+        $this->assertSame('receipt.pdf', $file->fresh()->original_name);
+        Storage::disk()->assertExists($file->path);
     }
 
     public function test_mount_requires_quote_view_permission(): void
@@ -90,6 +109,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     public function test_authorized_customer_can_download_and_delete_the_card_file(): void
     {
         Storage::fake();
+        Queue::fake([DeleteStoredFile::class]);
         $viewer = $this->viewer();
         $quote = Quote::factory()->for($viewer)->create();
         $file = $this->attachment($quote);
@@ -100,6 +120,8 @@ class QuoteDownloadCardTest extends FeatureTestCase
             ->call('deleteFile')->assertRedirect(route('quotes.show', $quote));
 
         $this->assertModelMissing($file);
+        Queue::assertPushed(DeleteStoredFile::class, fn (DeleteStoredFile $job): bool => $job->path === $file->path && $job->afterCommit === true);
+        (new DeleteStoredFile($file->path, config('filesystems.default')))->handle();
         Storage::disk()->assertMissing($file->path);
         $this->assertModelExists($otherFile);
         Storage::disk()->assertExists($otherFile->path);
@@ -131,12 +153,13 @@ class QuoteDownloadCardTest extends FeatureTestCase
         $file = $this->attachment($quote);
         $component = Livewire::actingAs($viewer)->test(QuoteDownloadCard::class, compact('quote', 'file'));
         $otherQuote = Quote::factory()->for($viewer)->create();
-        $file->update(['quote_id' => $otherQuote->id]);
+        $quote->files()->detach($file->id);
+        $otherQuote->files()->attach($file->id);
 
         $component->call($action, ...($action === 'changeFileType' ? [FileTypes::WARRANTY->value] : []))->assertNotFound();
 
         $this->assertModelExists($file);
-        $this->assertSame($otherQuote->id, $file->fresh()->quote_id);
+        $this->assertTrue($file->isAttachedTo($otherQuote));
         $this->assertSame(FileTypes::RECEIPT, $file->fresh()->file_type);
         Storage::disk()->assertExists($file->path);
     }

@@ -3,6 +3,7 @@
 namespace Tests\Integration\Actions;
 
 use App\Actions\Files\DeleteFile;
+use App\Actions\Files\UploadFile;
 use App\Actions\Files\UploadQuoteFile;
 use App\Actions\Quotes\UpdateQuote;
 use App\Actions\Users\CreateCustomer;
@@ -58,7 +59,7 @@ class ActionActivityTest extends IntegrationTestCase
 
         $entries = Activity::inLog('files')->where('event', 'action_completed')->orderBy('id')->get();
         $this->assertCount(2, $entries);
-        $this->assertSame([UploadQuoteFile::class, DeleteFile::class], $entries->map(fn (Activity $activity) => $activity->getProperty('action'))->all());
+        $this->assertSame([UploadFile::class, DeleteFile::class], $entries->map(fn (Activity $activity) => $activity->getProperty('action'))->all());
         foreach ($entries as $entry) {
             $this->assertSame($file->id, $entry->subject_id);
             $this->assertSame($file->getMorphClass(), $entry->subject_type);

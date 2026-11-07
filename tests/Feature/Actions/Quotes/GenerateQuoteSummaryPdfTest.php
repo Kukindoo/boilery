@@ -72,11 +72,10 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
         $file = app(GenerateQuoteSummaryPdf::class)->handle($quote);
 
         $this->assertModelExists($file);
+        $this->assertTrue($file->isAttachedTo($quote));
         $this->assertTrue($quote->files()->sole()->is($file));
         $this->assertDatabaseHas('files', [
             'id' => $file->id,
-            'quote_id' => $quote->id,
-            'work_id' => null,
             'original_name' => "Jiri_Novak_{$quote->id}_shrnuti_poptavky.pdf",
             'label' => "Jiri_Novak_{$quote->id}_shrnuti_poptavky.pdf",
             'extension' => 'pdf',
@@ -154,7 +153,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
             app(GenerateQuoteSummaryPdf::class)->handle($quote);
         } finally {
             Http::assertNothingSent();
-            $this->assertDatabaseMissing('files', ['quote_id' => $quote->id, 'file_type' => 'quote-summary']);
+            $this->assertFalse($quote->hasQuoteSummary());
             Storage::disk()->assertEmpty();
         }
     }
@@ -170,7 +169,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
         try {
             app(GenerateQuoteSummaryPdf::class)->handle($quote);
         } finally {
-            $this->assertDatabaseMissing('files', ['quote_id' => $quote->id]);
+            $this->assertTrue($quote->files()->doesntExist());
             Storage::disk()->assertEmpty();
         }
     }
@@ -189,7 +188,27 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
         try {
             app(GenerateQuoteSummaryPdf::class)->handle($quote);
         } finally {
-            $this->assertDatabaseMissing('files', ['quote_id' => $quote->id]);
+            $this->assertTrue($quote->files()->doesntExist());
+        }
+    }
+
+    public function test_attachment_link_failure_rolls_back_the_record_and_removes_the_pdf(): void
+    {
+        Storage::fake('local');
+        Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
+        $quote = Quote::factory()->for(User::factory())->create();
+        \App\Models\FileAttachment::creating(function (): void {
+            throw new RuntimeException('Cannot attach PDF');
+        });
+
+        try {
+            app(GenerateQuoteSummaryPdf::class)->handle($quote);
+            $this->fail('Attachment failure must propagate.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('Cannot attach PDF', $exception->getMessage());
+            $this->assertDatabaseCount('files', 0);
+            $this->assertDatabaseCount('fileables', 0);
+            Storage::disk()->assertEmpty();
         }
     }
 
@@ -208,7 +227,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
         try {
             app(GenerateQuoteSummaryPdf::class)->handle($quote);
         } finally {
-            $this->assertDatabaseMissing('files', ['quote_id' => $quote->id]);
+            $this->assertTrue($quote->files()->doesntExist());
             Storage::disk()->assertEmpty();
         }
     }

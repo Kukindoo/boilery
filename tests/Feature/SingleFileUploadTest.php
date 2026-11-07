@@ -38,7 +38,7 @@ class SingleFileUploadTest extends FeatureTestCase
             ->assertHasNoErrors()
             ->assertRedirect(route('quotes.show', $quote));
 
-        $this->assertDatabaseHas('files', ['quote_id' => $quote->id, 'original_name' => 'receipt.jpg']);
+        $this->assertSame('receipt.jpg', $quote->files()->sole()->original_name);
         $this->assertStringStartsWith('files/attachments/', $quote->files()->sole()->path);
         Storage::disk('local')->assertExists($quote->files()->sole()->path);
     }
@@ -56,7 +56,7 @@ class SingleFileUploadTest extends FeatureTestCase
             ->call('submit')
             ->assertForbidden();
 
-        $this->assertDatabaseMissing('files', ['quote_id' => $quote->id]);
+        $this->assertTrue($quote->files()->doesntExist());
         Storage::disk('local')->assertDirectoryEmpty('files');
     }
 
@@ -69,7 +69,7 @@ class SingleFileUploadTest extends FeatureTestCase
             ->call('submit')
             ->assertForbidden();
 
-        $this->assertDatabaseMissing('files', ['quote_id' => $quote->id]);
+        $this->assertTrue($quote->files()->doesntExist());
     }
 
     public function test_upload_still_requires_a_valid_file(): void
@@ -82,6 +82,6 @@ class SingleFileUploadTest extends FeatureTestCase
             ->call('submit')
             ->assertHasErrors(['form.file' => 'required']);
 
-        $this->assertDatabaseMissing('files', ['quote_id' => $quote->id]);
+        $this->assertTrue($quote->files()->doesntExist());
     }
 }
