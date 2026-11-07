@@ -49,10 +49,7 @@ readonly class UploadFile
             if ($authorize) {
                 Gate::authorize('uploadFile', $parent);
             }
-            $customer = $parent->user;
-            if ($customer === null) {
-                throw ValidationException::withMessages(['file' => 'Nejprve přiřaďte zákazníka.']);
-            }
+
             $extension = $file->getClientOriginalExtension();
             $path = $file->store(config('app.files.attachments_save_directory'));
             if ($path === false) {
