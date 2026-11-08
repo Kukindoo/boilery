@@ -18,7 +18,14 @@ class CustomersController extends Controller
 
     public function show(CustomerShowRequest $request, User $customer): View
     {
-        return view('customers.show', compact('customer'));
+        $quotes = $customer->quotes()->latest('id')
+            ->paginate(10, pageName: 'quotes_page')
+            ->withQueryString();
+        $works = $customer->works()->latest('id')
+            ->paginate(10, pageName: 'works_page')
+            ->withQueryString();
+
+        return view('customers.show', compact('customer', 'quotes', 'works'));
     }
 
     public function edit(CustomerEditRequest $request, User $customer): View

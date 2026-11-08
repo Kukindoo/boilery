@@ -16,5 +16,9 @@
 
             <x-customers.customer-info :customer="$customer" />
         </x-stellaris.container.index-card>
+
+        <x-customers.tables.quotes-table :quotes="$quotes" />
+
+        <x-customers.tables.works-table :works="$works" />
     </div>
 </x-layouts::app>
