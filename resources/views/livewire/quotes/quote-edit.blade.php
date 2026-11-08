@@ -6,9 +6,9 @@
                 <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
                     Uložit Poptávku
                 </flux:button>
-                <flux:button :href="route('quotes.index')">
-                    Zrušit
-                </flux:button>
+                <flux:modal.close>
+                    <flux:button variant="ghost">Cancel</flux:button>
+                </flux:modal.close>
             </x-stellaris.livewire.forms.submit-strip>
     </form>
 </x-stellaris.livewire.forms.wrapper>
