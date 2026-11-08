@@ -108,9 +108,31 @@ enum Permissions: int
 
     case USER_FORCE_DELETE_OWN = 54;
 
+    case SPARE_PART_VIEW_ALL = 55;
+
+    case SPARE_PART_VIEW_INDEX = 56;
+
+    case SPARE_PART_CREATE_ALL = 57;
+
+    case SPARE_PART_EDIT_ALL = 58;
+
+    case SPARE_PART_DELETE_ALL = 59;
+
+    case SPARE_PART_RESTORE_ALL = 60;
+
+    case SPARE_PART_FORCE_DELETE_ALL = 61;
+
     public function label(): string
     {
         return match ($this) {
+            self::SPARE_PART_VIEW_ALL => 'View all spare parts',
+            self::SPARE_PART_VIEW_INDEX => 'View index spare parts',
+            self::SPARE_PART_CREATE_ALL => 'Create all spare parts',
+            self::SPARE_PART_EDIT_ALL => 'Edit all spare parts',
+            self::SPARE_PART_DELETE_ALL => 'Delete all spare parts',
+            self::SPARE_PART_RESTORE_ALL => 'Restore all spare parts',
+            self::SPARE_PART_FORCE_DELETE_ALL => 'Force delete all spare parts',
+
             self::USER_VIEW_ALL => 'View all users',
             self::USER_EDIT_ALL => 'Edit all users',
             self::USER_VIEW_OWN => 'View own users',
