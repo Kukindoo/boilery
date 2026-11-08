@@ -35,13 +35,25 @@ class DeleteStoredFileTest extends FeatureTestCase
         Storage::disk('documents')->assertExists($file->path);
     }
 
-    public function test_storage_failure_throws_so_the_queue_can_retry(): void
+    public function test_storage_failure_throws_and_a_later_retry_removes_the_file(): void
     {
+        $storage = Storage::fake('documents');
+        $storage->put('orphan.pdf', 'content');
         $disk = Mockery::mock(FilesystemAdapter::class);
         $disk->shouldReceive('delete')->once()->with('orphan.pdf')->andReturnFalse();
-        Storage::shouldReceive('disk')->once()->with('documents')->andReturn($disk);
-        $this->expectException(RuntimeException::class);
+        Storage::shouldReceive('disk')->twice()->with('documents')->andReturn($disk, $storage);
+        $job = new DeleteStoredFile('orphan.pdf', 'documents');
 
-        (new DeleteStoredFile('orphan.pdf', 'documents'))->handle();
+        try {
+            $job->handle();
+            $this->fail('Storage failure must propagate so the queue can retry.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('Could not delete the orphaned stored file.', $exception->getMessage());
+            $storage->assertExists('orphan.pdf');
+        }
+
+        $job->handle();
+
+        $storage->assertMissing('orphan.pdf');
     }
 }
