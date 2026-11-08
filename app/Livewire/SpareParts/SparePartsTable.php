@@ -4,14 +4,18 @@ namespace App\Livewire\SpareParts;
 
 use App\Actions\SpareParts\DeleteSparePart;
 use App\Models\SparePart;
-use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Throwable;
 
 class SparePartsTable extends Component
 {
@@ -25,12 +29,20 @@ class SparePartsTable extends Component
 
     public ?int $deleteId = null;
 
+    /**
+     * @throws AuthorizationException
+     */
     public function mount(): void
     {
         Gate::authorize('viewAny', SparePart::class);
     }
 
-    /** @return LengthAwarePaginator<int, SparePart> */
+    /**
+     * @return LengthAwarePaginator<int, SparePart>
+     *
+     * @throws AuthorizationException
+     * @throws QueryException
+     */
     #[Computed]
     public function spareParts(): LengthAwarePaginator
     {
@@ -45,6 +57,9 @@ class SparePartsTable extends Component
         })->orderBy($column, $direction)->orderBy('id')->paginate(15);
     }
 
+    /**
+     * @throws HttpException
+     */
     public function sort(string $column): void
     {
         abort_unless(in_array($column, ['name', 'part_number', 'created_at'], true), 422);
@@ -58,6 +73,11 @@ class SparePartsTable extends Component
         $this->resetPage();
     }
 
+    /**
+     * @throws AuthorizationException
+     * @throws ModelNotFoundException
+     * @throws QueryException
+     */
     public function confirmDelete(int $id): void
     {
         Gate::authorize('delete', SparePart::findOrFail($id));
@@ -66,7 +86,7 @@ class SparePartsTable extends Component
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function delete(): void
     {
