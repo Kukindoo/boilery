@@ -9,6 +9,7 @@ use App\Notifications\Quotes\QuoteSubmittedCustomer;
 use App\Traits\PublicRateLimiter;
 use DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -25,7 +26,7 @@ class CustomerQuoteRequestPage extends Component
     public function mount(): void
     {
         if (auth()->check()) {
-            [$firstName, $lastName] = explode(' ', auth()->user()->name, 2);
+            [$firstName, $lastName] = array_pad(explode(' ', Str::squish(auth()->user()->name), 2), 2, '');
             $this->form->firstName = $firstName;
             $this->form->lastName = $lastName;
             $this->form->email = auth()->user()->email;
