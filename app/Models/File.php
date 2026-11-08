@@ -19,7 +19,7 @@ use Illuminate\Support\Carbon;
  * @property int $size
  * @property string $mime_type
  * @property string $path
- * @property string $label
+ * @property ?string $label
  * @property ?Carbon $created_at
  * @property ?Carbon $updated_at
  */
