@@ -7,6 +7,7 @@ use App\Enums\FileTypes;
 use App\Enums\QuoteStatus;
 use App\Models\Quote;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Spatie\Activitylog\Enums\ActivityEvent;
 use Spatie\Activitylog\Models\Activity;
 use Tests\Feature\FeatureTestCase;
@@ -118,10 +119,9 @@ class QuoteTest extends FeatureTestCase
         $this->assertSame([$file->id], $quote->fresh()->files->modelKeys());
     }
 
-    public function test_supports_nullable_customer_and_boiler_details(): void
+    public function test_supports_nullable_contact_and_boiler_details(): void
     {
         $quote = Quote::factory()->create([
-            'user_id' => null,
             'address' => null,
             'under_warranty' => false,
             'boiler_manufacturer' => null,
@@ -129,12 +129,27 @@ class QuoteTest extends FeatureTestCase
             'boiler_type' => null,
         ])->fresh();
 
-        $this->assertNull($quote->user);
         $this->assertNull($quote->address);
         $this->assertFalse($quote->under_warranty);
         $this->assertNull($quote->boiler_manufacturer);
         $this->assertNull($quote->boiler_serial_number);
         $this->assertNull($quote->boiler_type);
+    }
+
+    public function test_cannot_create_a_quote_without_a_user(): void
+    {
+        $this->expectException(QueryException::class);
+
+        Quote::factory()->create(['user_id' => null]);
+    }
+
+    public function test_cannot_remove_a_quotes_user(): void
+    {
+        $quote = Quote::factory()->create();
+
+        $this->expectException(QueryException::class);
+
+        $quote->update(['user_id' => null]);
     }
 
     public function test_processing_quote_is_not_closed(): void

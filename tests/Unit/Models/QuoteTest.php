@@ -9,28 +9,28 @@ class QuoteTest extends UnitTestCase
 {
     public function test_new_quote_is_not_closed(): void
     {
-        $quote = Quote::factory()->make();
+        $quote = Quote::factory()->make(['user_id' => 1]);
 
         static::assertFalse($quote->isClosed());
     }
 
     public function test_contacted_quote_is_not_closed(): void
     {
-        $quote = Quote::factory()->contacted()->make();
+        $quote = Quote::factory()->contacted()->make(['user_id' => 1]);
 
         static::assertFalse($quote->isClosed());
     }
 
     public function test_accepted_quote_is_closed(): void
     {
-        $quote = Quote::factory()->accepted()->make();
+        $quote = Quote::factory()->accepted()->make(['user_id' => 1]);
 
         static::assertTrue($quote->isClosed());
     }
 
     public function test_declined_quote_is_closed(): void
     {
-        $quote = Quote::factory()->rejected()->make();
+        $quote = Quote::factory()->rejected()->make(['user_id' => 1]);
 
         static::assertTrue($quote->isClosed());
     }

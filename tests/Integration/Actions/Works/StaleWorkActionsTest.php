@@ -3,6 +3,7 @@
 namespace Tests\Integration\Actions\Works;
 
 use App\Actions\Works\CancelWork;
+use App\Actions\Works\CreateWork;
 use App\Actions\Works\DeleteWork;
 use App\Actions\Works\EndWork;
 use App\Actions\Works\ForceDeleteWork;
@@ -16,6 +17,7 @@ use App\Models\User;
 use App\Models\Work;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Spatie\Activitylog\Models\Activity;
@@ -23,6 +25,18 @@ use Tests\Integration\IntegrationTestCase;
 
 class StaleWorkActionsTest extends IntegrationTestCase
 {
+    public static function invalidDateWrites(): array
+    {
+        return [
+            'create without acceptance' => [true, null, '2026-10-20', null, 'work_accepted_at'],
+            'update without acceptance' => [false, null, '2026-10-20', null, 'work_accepted_at'],
+            'create without start' => [true, '2026-10-19', null, '2026-10-21', 'work_started_at'],
+            'update without start' => [false, '2026-10-19', null, '2026-10-21', 'work_started_at'],
+            'start before acceptance' => [false, '2026-10-21', '2026-10-20', null, 'work_started_at'],
+            'completion before start' => [false, '2026-10-19', '2026-10-21', '2026-10-20', 'work_completed_at'],
+        ];
+    }
+
     /** @return array<string, array{class-string, WorkStatus, bool, array<string, mixed>}> */
     public static function invalidatedStates(): array
     {
@@ -48,6 +62,32 @@ class StaleWorkActionsTest extends IntegrationTestCase
             'end' => [EndWork::class, WorkStatus::PROCESSING, 'Work finished'],
             'cancel' => [CancelWork::class, WorkStatus::PROCESSING, 'Work cancelled'],
         ];
+    }
+
+    #[DataProvider('invalidDateWrites')]
+    public function test_actions_reject_invalid_date_sequences(bool $creating, ?string $accepted, ?string $started, ?string $completed, string $error): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+        $work = Work::factory()->create();
+        $before = $work->refresh()->getRawOriginal();
+        $count = Work::count();
+        $data = $this->data($work);
+        $data->workAcceptedAt = $accepted;
+        $data->workStartedAt = $started;
+        $data->workCompletedAt = $completed;
+
+        try {
+            if ($creating) {
+                app(CreateWork::class)->handle($data);
+            } else {
+                app(UpdateWork::class)->handle($work, $data);
+            }
+            $this->fail('Invalid date sequence must be rejected.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey($error, $exception->errors());
+            $this->assertSame($before, $work->fresh()->getRawOriginal());
+            $this->assertSame($count, Work::count());
+        }
     }
 
     #[DataProvider('invalidatedStates')]

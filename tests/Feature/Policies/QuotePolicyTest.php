@@ -42,7 +42,7 @@ class QuotePolicyTest extends FeatureTestCase
 
         foreach ($abilities as $ability => [$all, $own]) {
             foreach (self::permissions() as $permissionName => [$permission]) {
-                foreach (['own', 'another', 'none'] as $ownership) {
+                foreach (['own', 'another'] as $ownership) {
                     foreach ([false, true] as $trashed) {
                         foreach (QuoteStatus::cases() as $status) {
                             $allowed = $permission === $all
@@ -80,7 +80,7 @@ class QuotePolicyTest extends FeatureTestCase
         $cases = [];
 
         foreach (QuoteStatus::cases() as $status) {
-            foreach (['own', 'another', 'none'] as $ownership) {
+            foreach (['own', 'another'] as $ownership) {
                 foreach ([false, true] as $trashed) {
                     $key = implode(', ', [$status->value, $ownership, $trashed ? 'trashed' : 'active']);
                     $cases[$key] = [
@@ -122,7 +122,6 @@ class QuotePolicyTest extends FeatureTestCase
         $ownerId = match ($ownership) {
             'own' => $user->id,
             'another' => $user->id + 1,
-            'none' => null,
         };
         $quote = Quote::factory()->make([
             'user_id' => $ownerId,
@@ -153,7 +152,6 @@ class QuotePolicyTest extends FeatureTestCase
         $ownerId = match ($ownership) {
             'own' => $user->id,
             'another' => $user->id + 1,
-            'none' => null,
         };
         $quote = Quote::factory()->make([
             'user_id' => $ownerId,

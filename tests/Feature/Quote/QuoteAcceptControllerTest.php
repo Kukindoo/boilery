@@ -79,16 +79,4 @@ class QuoteAcceptControllerTest extends FeatureTestCase
         $this->assertSame(QuoteStatus::NEW, $quote->fresh()->status);
         $this->assertDatabaseCount('works', 0);
     }
-
-    public function test_quote_without_customer_returns_a_validation_error(): void
-    {
-        $quote = Quote::factory()->create();
-
-        $this->actingAs(User::factory()->admin()->create())
-            ->post(route('quotes.accept', $quote))
-            ->assertInvalid(['quote' => 'A quote must have a customer before it can be accepted.']);
-
-        $this->assertSame(QuoteStatus::NEW, $quote->fresh()->status);
-        $this->assertDatabaseCount('works', 0);
-    }
 }

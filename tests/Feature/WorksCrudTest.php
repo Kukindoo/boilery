@@ -12,10 +12,93 @@ use App\Livewire\Works\WorksTable;
 use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
+use DOMDocument;
+use DOMElement;
+use DOMXPath;
 use Livewire\Livewire;
 
 class WorksCrudTest extends FeatureTestCase
 {
+    public function test_edit_date_controls_unlock_in_sequence_after_setting_each_date(): void
+    {
+        $this->freezeTime();
+        $user = User::factory()->admin()->create();
+        $work = Work::factory()->for($user)->create([
+            'work_accepted_at' => null, 'work_started_at' => null, 'work_completed_at' => null,
+        ]);
+        $today = now()->format('Y-m-d');
+        $component = Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work]);
+        $assertButtonDisabled = function (string $field, bool $disabled) use ($component): void {
+            $document = new DOMDocument();
+            @$document->loadHTML('<?xml encoding="UTF-8">' . $component->html());
+            $button = new DOMXPath($document)->query('//*[@data-testid="set-' . $field . '"]')->item(0);
+            $this->assertInstanceOf(DOMElement::class, $button);
+            $this->assertSame($disabled, $button->hasAttribute('disabled'));
+        };
+
+        $assertButtonDisabled('workAcceptedAt', false);
+        $assertButtonDisabled('workStartedAt', true);
+        $assertButtonDisabled('workCompletedAt', true);
+        $component->assertDontSee('wire:model.live.self="form.workAcceptedAt"', false);
+
+        $component->call('$set', 'form.workAcceptedAt', $today)
+            ->assertSet('form.workAcceptedAt', $today)
+            ->assertSee('wire:model.live.self="form.workAcceptedAt"', false);
+        $assertButtonDisabled('workStartedAt', false);
+        $assertButtonDisabled('workCompletedAt', true);
+
+        $component->call('$set', 'form.workStartedAt', $today)
+            ->assertSee('wire:model.live.self="form.workStartedAt"', false);
+        $assertButtonDisabled('workCompletedAt', false);
+        $component->call('$set', 'form.workCompletedAt', $today)
+            ->assertSee('wire:model.live.self="form.workCompletedAt"', false)
+            ->call('submit')->assertHasNoErrors();
+
+        $this->assertSame($today, $work->fresh()->work_completed_at->format('Y-m-d'));
+    }
+
+    public function test_edit_requires_preceding_dates_and_preserves_the_work_on_failure(): void
+    {
+        $user = User::factory()->admin()->create();
+        $work = Work::factory()->for($user)->create([
+            'work_accepted_at' => '2026-10-19', 'work_started_at' => '2026-10-20',
+            'work_completed_at' => '2026-10-21',
+        ]);
+        $before = $work->refresh()->getRawOriginal();
+
+        Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
+            ->set('form.workAcceptedAt', null)->call('submit')
+            ->assertHasErrors(['form.workAcceptedAt' => 'required_with']);
+        Livewire::test(WorkEdit::class, ['work' => $work])
+            ->set('form.workStartedAt', null)->call('submit')
+            ->assertHasErrors(['form.workStartedAt' => 'required_with']);
+
+        $this->assertSame($before, $work->fresh()->getRawOriginal());
+
+        Livewire::test(WorkEdit::class, ['work' => $work])
+            ->set('form.workAcceptedAt', null)->set('form.workStartedAt', null)
+            ->set('form.workCompletedAt', null)->call('submit')->assertHasNoErrors();
+        $this->assertNull($work->fresh()->work_accepted_at);
+        $this->assertNull($work->fresh()->work_started_at);
+        $this->assertNull($work->fresh()->work_completed_at);
+    }
+
+    public function test_create_rejects_later_dates_without_their_predecessors(): void
+    {
+        $user = User::factory()->admin()->create();
+
+        Livewire::actingAs($user)->test(WorkCreate::class)
+            ->set('form.orderId', 'INVALID-DATES')->set('form.workStartedAt', '2026-10-20')
+            ->call('submit')->assertHasErrors(['form.workAcceptedAt' => 'required_with']);
+        Livewire::test(WorkCreate::class)
+            ->set('form.orderId', 'INVALID-DATES')->set('form.workCompletedAt', '2026-10-21')
+            ->call('submit')->assertHasErrors([
+                'form.workAcceptedAt' => 'required_with', 'form.workStartedAt' => 'required_with',
+            ]);
+
+        $this->assertDatabaseMissing('works', ['order_id' => 'INVALID-DATES']);
+    }
+
     public function test_create_keeps_manufacturer_separate_from_product_type(): void
     {
         $user = User::factory()->create();
@@ -78,7 +161,7 @@ class WorksCrudTest extends FeatureTestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::WORK_EDIT_OWN, Permissions::WORK_VIEW_OWN]);
-        $work = Work::factory()->for($user)->create(['work_started_at' => '2026-10-20']);
+        $work = Work::factory()->for($user)->create(['work_accepted_at' => '2026-10-19', 'work_started_at' => '2026-10-20']);
 
         $component = Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
             ->assertSet('form.workStartedAt', '2026-10-20')
@@ -120,6 +203,7 @@ class WorksCrudTest extends FeatureTestCase
             ->set('form.quoteId', $quote->id)
             ->set('form.transportDistanceInKm', '12.30')
             ->set('form.dayOfPurchase', '2026-01-02')
+            ->set('form.workAcceptedAt', '2026-10-19')
             ->set('form.workStartedAt', '2026-10-20')
             ->set('form.notes', '')
             ->call('submit')->assertHasNoErrors();

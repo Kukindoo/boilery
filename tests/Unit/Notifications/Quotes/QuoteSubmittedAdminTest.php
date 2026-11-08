@@ -25,7 +25,7 @@ class QuoteSubmittedAdminTest extends UnitTestCase
     #[DataProvider('manufacturers')]
     public function test_mail_displays_the_manufacturer_or_a_fallback(?BoilerManufacturers $manufacturer, string $expected): void
     {
-        $quote = Quote::factory()->make(['boiler_manufacturer' => $manufacturer]);
+        $quote = Quote::factory()->make(['user_id' => 1, 'boiler_manufacturer' => $manufacturer]);
         $quote->setRelation('files', new Collection);
 
         $mail = (new QuoteSubmittedAdmin($quote))->toMail(new stdClass);

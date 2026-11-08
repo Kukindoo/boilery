@@ -53,17 +53,19 @@ class CustomerNameLinksTest extends FeatureTestCase
             ->assertDontSee('href="' . route('customers.show', $customer) . '"', false);
     }
 
-    public function test_quote_without_customer_displays_name_without_customer_link(): void
+    public function test_quote_edit_permission_does_not_grant_customer_edit_link(): void
     {
-        $viewer = User::factory()->admin()->create();
-        $quote = Quote::factory()->create([
-            'user_id' => null,
-            'first_name' => 'Adolphus',
-            'last_name' => "O'Connell",
-        ]);
+        $viewer = User::factory()->create();
+        $viewer->givePermissionTo([Permissions::QUOTE_VIEW_ALL, Permissions::QUOTE_EDIT_ALL]);
+        $customer = User::factory()->customer()->create();
+        $quote = Quote::factory()->for($customer)->create();
+        $href = 'href="' . route('customers.edit', $customer) . '"';
 
         $this->actingAs($viewer)->get(route('quotes.show', $quote))
-            ->assertOk()->assertSeeText("Adolphus O'Connell")
-            ->assertDontSee('href="' . url('customers') . '/', false);
+            ->assertOk()->assertDontSee($href, false);
+
+        $viewer->givePermissionTo(Permissions::USER_EDIT_ALL);
+
+        $this->get(route('quotes.show', $quote))->assertOk()->assertSee($href, false);
     }
 }

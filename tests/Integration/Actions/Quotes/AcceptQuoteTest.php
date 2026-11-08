@@ -12,12 +12,10 @@ use App\Models\User;
 use App\Models\Work;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\QueryException;
-use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Tests\Integration\IntegrationTestCase;
-use Throwable;
 
 class AcceptQuoteTest extends IntegrationTestCase
 {
@@ -170,21 +168,6 @@ class AcceptQuoteTest extends IntegrationTestCase
         $this->assertDatabaseHas('works', ['id' => $work->id, 'notes' => 'Keep mechanic notes.']);
         $this->assertSoftDeleted($work);
         $this->assertSame(QuoteStatus::ACCEPTED, $quote->fresh()->status);
-    }
-
-    public function test_quote_without_customer_is_not_accepted(): void
-    {
-        $this->actingAs(User::factory()->admin()->create());
-        $quote = Quote::factory()->create();
-
-        try {
-            app(AcceptQuote::class)->handle($quote);
-            $this->fail('A customer should be required.');
-        } catch (ValidationException $exception) {
-            $this->assertArrayHasKey('quote', $exception->errors());
-            $this->assertSame(QuoteStatus::NEW, $quote->fresh()->status);
-            $this->assertDatabaseCount('works', 0);
-        }
     }
 
     public function test_work_creation_failure_rolls_back_quote_acceptance(): void
