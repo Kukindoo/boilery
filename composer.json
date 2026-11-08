@@ -72,7 +72,7 @@
             "@php artisan test"
         ],
         "worker": [
-            "php artisan queue:work database --queue=default --sleep=3 --tries=3 --timeout=120"
+            "php artisan queue:work database --queue=default --sleep=3 --tries=3 --timeout=60"
         ],
         "stan": [
             "php artisan config:clear --ansi",
