@@ -19,13 +19,11 @@ class GenerateFileLabel
             $fileType->snake(),
         ]);
 
-        $iterator = 0;
         do {
             $suffix = Str::lower(Str::random(4));
 
             $label = $prefix . '_' . $suffix . ($extension ? '.' . $extension : '');
-            $iterator++;
-        } while (File::query()->where('label', $label)->exists() || $iterator > 3);
+        } while (File::query()->where('label', $label)->exists());
 
         return $label;
     }

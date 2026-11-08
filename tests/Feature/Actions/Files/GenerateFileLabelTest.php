@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
+use RuntimeException;
 use Tests\Feature\FeatureTestCase;
 
 class GenerateFileLabelTest extends FeatureTestCase
@@ -18,7 +19,7 @@ class GenerateFileLabelTest extends FeatureTestCase
         parent::setUp();
 
         $this->travelTo(Carbon::create(2026, 11, 8, 9, 42, 0, 'UTC'));
-        Str::createRandomStringsUsingSequence(['ABCD']);
+        Str::createRandomStringsUsingSequence(['ABCD', 'ABCD', 'ABCD']);
         $this->beforeApplicationDestroyed(fn () => Str::createRandomStringsNormally());
     }
 
@@ -70,18 +71,29 @@ class GenerateFileLabelTest extends FeatureTestCase
     public function test_suffix_accepts_digits_and_lowercases_letters(): void
     {
         $user = User::factory()->make(['name' => 'Jan Novák']);
-        Str::createRandomStringsUsingSequence(['A1B2']);
+        Str::createRandomStringsUsingSequence(['A1B2', 'A1B2', 'A1B2']);
 
         $label = app(GenerateFileLabel::class)->handle($user, FileTypes::RECEIPT, new File(['extension' => 'pdf']));
 
         $this->assertSame('2026-11-08_10-42_Jan_Novak_kupni_smlouva_a1b2.pdf', $label);
     }
 
-    public function test_existing_filename_causes_a_new_suffix_to_be_generated(): void
+    public function test_returns_the_first_available_candidate_after_a_collision(): void
     {
         $user = User::factory()->make(['name' => 'Jan Novák']);
         File::factory()->create(['label' => '2026-11-08_10-42_Jan_Novak_kupni_smlouva_abcd.pdf']);
-        Str::createRandomStringsUsingSequence(['ABCD', 'WXYZ']);
+        Str::createRandomStringsUsingSequence(['ABCD', 'WXYZ'], fn () => throw new RuntimeException('Unexpected extra filename attempt'));
+
+        $label = app(GenerateFileLabel::class)->handle($user, FileTypes::RECEIPT, new File(['extension' => 'pdf']));
+
+        $this->assertSame('2026-11-08_10-42_Jan_Novak_kupni_smlouva_wxyz.pdf', $label);
+    }
+
+    public function test_three_collisions_return_the_available_fourth_filename(): void
+    {
+        $user = User::factory()->make(['name' => 'Jan Novák']);
+        File::factory()->create(['label' => '2026-11-08_10-42_Jan_Novak_kupni_smlouva_abcd.pdf']);
+        Str::createRandomStringsUsingSequence(['ABCD', 'ABCD', 'ABCD', 'WXYZ'], fn () => throw new RuntimeException('Unexpected extra filename attempt'));
 
         $label = app(GenerateFileLabel::class)->handle($user, FileTypes::RECEIPT, new File(['extension' => 'pdf']));
 
