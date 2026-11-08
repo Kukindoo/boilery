@@ -82,7 +82,7 @@ class Work extends Model implements OwnsFiles
     /** @return BelongsToMany<SparePart, $this> */
     public function spareParts(): BelongsToMany
     {
-        return $this->belongsToMany(SparePart::class)->withTimestamps();
+        return $this->belongsToMany(SparePart::class)->withPivot('amount')->withTimestamps();
     }
 
     public function getActivitylogOptions(): LogOptions

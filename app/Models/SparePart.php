@@ -7,11 +7,13 @@ use Database\Factories\SparePartFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 
 /**
+ * @property-read Pivot $pivot
  * @property int $id
  * @property int $price_in_cents
  * @property string $name
@@ -31,7 +33,7 @@ class SparePart extends Model
     /** @return BelongsToMany<Work, $this> */
     public function works(): BelongsToMany
     {
-        return $this->belongsToMany(Work::class)->withTimestamps();
+        return $this->belongsToMany(Work::class)->withPivot('amount')->withTimestamps();
     }
 
     /**
