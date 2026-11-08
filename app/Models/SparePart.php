@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\ValueObjects\Price;
 use Database\Factories\SparePartFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use InvalidArgumentException;
 
 /**
  * @property int $id
@@ -32,10 +34,12 @@ class SparePart extends Model
         return $this->belongsToMany(Work::class)->withTimestamps();
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function formattedPrice(): string
     {
-        return 'CZK ' . number_format(intdiv($this->price_in_cents, 100), 0, ',', ' ')
-            . ',' . mb_str_pad((string) ($this->price_in_cents % 100), 2, '0', STR_PAD_LEFT);
+        return Price::fromCents($this->price_in_cents)->format();
     }
 
     protected function casts(): array
