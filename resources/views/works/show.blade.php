@@ -45,6 +45,7 @@
             <x-works.work-info :work="$work"/>
             <x-works.work-boiler-info :work="$work"/>
             <x-works.work-repair-info :work="$work"/>
+            <livewire:spare-parts.work-spare-parts :work="$work" />
             <x-works.work-transport-info :work="$work"/>
             <x-files.attachment-card :model="$work"/>
 
