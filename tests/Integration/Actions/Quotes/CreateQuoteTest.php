@@ -9,6 +9,7 @@ use App\Enums\FileTypes;
 use App\Enums\QuoteStatus;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
@@ -49,6 +50,7 @@ class CreateQuoteTest extends IntegrationTestCase
     #[DataProvider('attachmentTypes')]
     public function test_stores_attachment_with_correct_quote_and_type(string $field, FileTypes $type, string $labelType): void
     {
+        $this->travelTo(Carbon::create(2026, 11, 8, 9, 42, 0, 'UTC'));
         Storage::fake(config('filesystems.default'));
         $customer = User::factory()->customer()->create(['name' => 'Jiří Novák-Svoboda']);
         $form = $this->form();
@@ -61,11 +63,12 @@ class CreateQuoteTest extends IntegrationTestCase
         $quote = app(CreateQuote::class)->handle($form, $customer);
 
         $file = $quote->files()->sole();
+        $this->assertMatchesRegularExpression('/^2026-11-08_10-42_Jiri_Novak_Svoboda_' . $labelType . '_[a-z0-9]{4}\.pdf$/', $file->label);
         $this->assertSame($type, $file->file_type);
         $this->assertTrue($file->isAttachedTo($quote));
         $this->assertDatabaseHas('files', [
             'id' => $file->id,
-            'label' => "Jiri_Novak_Svoboda_{$quote->id}_{$labelType}.pdf",
+            'label' => $file->label,
             'original_name' => 'document.pdf',
             'extension' => 'pdf',
             'mime_type' => 'application/pdf',

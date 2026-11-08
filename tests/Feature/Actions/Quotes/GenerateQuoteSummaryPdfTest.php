@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Client\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
@@ -27,6 +28,8 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->travelTo(Carbon::create(2026, 11, 8, 9, 42, 0, 'UTC'));
 
         config([
             'filesystems.default' => 'local',
@@ -50,7 +53,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
 
         $summary = app(GenerateQuoteSummaryPdf::class)->handle($quote);
 
-        $this->assertSame("Jiri_Novak_{$quote->id}_shrnuti_poptavky.pdf", $summary->label);
+        $this->assertMatchesRegularExpression('/^2026-11-08_10-42_Jiri_Novak_shrnuti_poptavky_[a-z0-9]{4}\.pdf$/', $summary->label);
         Storage::disk()->assertExists($summary->path);
     }
 
@@ -71,13 +74,14 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
 
         $file = app(GenerateQuoteSummaryPdf::class)->handle($quote);
 
+        $this->assertMatchesRegularExpression('/^2026-11-08_10-42_Jiri_Novak_shrnuti_poptavky_[a-z0-9]{4}\.pdf$/', $file->label);
         $this->assertModelExists($file);
         $this->assertTrue($file->isAttachedTo($quote));
         $this->assertTrue($quote->files()->sole()->is($file));
         $this->assertDatabaseHas('files', [
             'id' => $file->id,
-            'original_name' => "Jiri_Novak_{$quote->id}_shrnuti_poptavky.pdf",
-            'label' => "Jiri_Novak_{$quote->id}_shrnuti_poptavky.pdf",
+            'original_name' => $file->label,
+            'label' => $file->label,
             'extension' => 'pdf',
             'mime_type' => 'application/pdf',
             'file_type' => 'quote-summary',

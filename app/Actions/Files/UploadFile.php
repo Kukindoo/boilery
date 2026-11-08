@@ -80,7 +80,7 @@ readonly class UploadFile
                 if ($customer === null) {
                     throw ValidationException::withMessages(['file' => 'Nejprve přiřaďte zákazníka.']);
                 }
-                $label = $this->generateFileLabel->handle($customer, $lockedParent->id, $fileType, $extension);
+                $label = $this->generateFileLabel->handle($customer, $fileType, $extension);
                 $storedFile = $lockedParent->files()->create([
                     'path' => $path, 'label' => $label,
                     'original_name' => $file->getClientOriginalName(),

@@ -30,7 +30,7 @@ readonly class GenerateQuoteSummaryPdf
     {
         try {
             $fileType = FileTypes::QUOTE_SUMMARY;
-            $fileLabel = $this->generateFileLabel->handle($quote->user, $quote->id, $fileType, 'pdf');
+            $fileLabel = $this->generateFileLabel->handle($quote->user, $fileType, 'pdf');
 
             $attachments = $this->getAttachments($quote);
 

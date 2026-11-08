@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Work;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
@@ -25,6 +26,8 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->travelTo(Carbon::create(2026, 11, 8, 9, 42, 0, 'UTC'));
 
         config([
             'filesystems.default' => 'local',
@@ -56,13 +59,14 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
 
         $file = app(GenerateServiceProtocolPdf::class)->handle($work);
 
+        $this->assertMatchesRegularExpression('/^2026-11-08_10-42_Jiri_Novak_servisni_protokol_[a-z0-9]{4}\.pdf$/', $file->label);
         $this->assertModelExists($file);
         $this->assertTrue($file->isAttachedTo($work));
         $this->assertTrue($work->files()->sole()->is($file));
         $this->assertDatabaseHas('files', [
             'id' => $file->id,
-            'original_name' => "Jiri_Novak_{$work->id}_servisni_protokol.pdf",
-            'label' => "Jiri_Novak_{$work->id}_servisni_protokol.pdf",
+            'original_name' => $file->label,
+            'label' => $file->label,
             'extension' => 'pdf',
             'mime_type' => 'application/pdf',
             'file_type' => FileTypes::SERVICE_PROTOCOL->value,
