@@ -11,7 +11,7 @@
 
 <x-stellaris.container.show-card :title="__('Informace o zakazníkovi')">
     <x-slot:action>
-        @can('update', $quote)
+        @can('update', $quote->user)
             <flux:button size="sm" icon="pencil" :href="route('customers.edit', $quote->user)">
                 Upravit Zákazníka
             </flux:button>
@@ -19,7 +19,7 @@
     </x-slot:action>
 
     <x-stellaris.container.show-row title="Zákazník">
-        <x-customers.customer-name :customer="$quote->user" :name="$quote->user?->name ?? $quote->first_name . ' ' . $quote->last_name" />
+        <x-customers.customer-name :customer="$quote->user" :name="$quote->user->name" />
     </x-stellaris.container.show-row>
 
     @foreach ($fields as $label => $value)

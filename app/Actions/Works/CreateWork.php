@@ -7,6 +7,7 @@ use App\Enums\BoilerManufacturers;
 use App\Models\Work;
 use App\Traits\LogsActionActivity;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 readonly class CreateWork
@@ -23,6 +24,11 @@ readonly class CreateWork
         try {
             return DB::transaction(function () use ($data): Work {
                 $attributes = $data->toArray();
+                Validator::make($attributes, [
+                    'work_accepted_at' => ['required_with:work_started_at,work_completed_at', 'nullable', 'date_format:Y-m-d'],
+                    'work_started_at' => ['required_with:work_completed_at', 'nullable', 'date_format:Y-m-d', 'after_or_equal:work_accepted_at'],
+                    'work_completed_at' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:work_started_at'],
+                ])->validate();
 
                 if ($data->orderId === null || $data->orderId === '') {
                     $manufacturer = $data->boilerManufacturer ?? BoilerManufacturers::UNKNOWN;

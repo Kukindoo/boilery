@@ -22,7 +22,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property QuoteStatus $status
  * @property string $first_name
  * @property string $last_name
- * @property ?int $user_id
+ * @property int $user_id
  * @property string $email
  * @property string $phone
  * @property ?string $address

@@ -27,15 +27,36 @@
         @endif
 
         <x-stellaris.livewire.forms.side-to-side.field label="Datum přijetí">
-            <flux:date-picker wire:model="form.workAcceptedAt"/>
+            @if (filled($form->workAcceptedAt))
+                <flux:date-picker wire:model.live="form.workAcceptedAt" :disabled="false" />
+            @else
+                <flux:button type="button" wire:click="$set('form.workAcceptedAt', '{{ now()->format('Y-m-d') }}')" :disabled="false" data-testid="set-workAcceptedAt">
+                    Nastavit přijetí na dnešek
+                </flux:button>
+            @endif
+            <flux:error name="form.workAcceptedAt" />
         </x-stellaris.livewire.forms.side-to-side.field>
 
         <x-stellaris.livewire.forms.side-to-side.field label="Datum zahájení">
-            <flux:date-picker wire:model="form.workStartedAt"/>
+            @if (filled($form->workStartedAt))
+                <flux:date-picker wire:model.live="form.workStartedAt" :disabled="blank($form->workAcceptedAt)" />
+            @else
+                <flux:button type="button" wire:click="$set('form.workStartedAt', '{{ now()->format('Y-m-d') }}')" :disabled="blank($form->workAcceptedAt)" data-testid="set-workStartedAt">
+                    Nastavit zahájení na dnešek
+                </flux:button>
+            @endif
+            <flux:error name="form.workStartedAt" />
         </x-stellaris.livewire.forms.side-to-side.field>
 
         <x-stellaris.livewire.forms.side-to-side.field label="Datum dokončení">
-            <flux:date-picker wire:model="form.workCompletedAt"/>
+            @if (filled($form->workCompletedAt))
+                <flux:date-picker wire:model.live="form.workCompletedAt" :disabled="blank($form->workAcceptedAt) || blank($form->workStartedAt)" />
+            @else
+                <flux:button type="button" wire:click="$set('form.workCompletedAt', '{{ now()->format('Y-m-d') }}')" :disabled="blank($form->workAcceptedAt) || blank($form->workStartedAt)" data-testid="set-workCompletedAt">
+                    Nastavit dokončení na dnešek
+                </flux:button>
+            @endif
+            <flux:error name="form.workCompletedAt" />
         </x-stellaris.livewire.forms.side-to-side.field>
 
         <x-stellaris.livewire.forms.side-to-side.field label="Jméno technika">
