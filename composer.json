@@ -73,6 +73,10 @@
         ],
         "worker": [
             "php artisan queue:work database --queue=default --sleep=3 --tries=3 --timeout=120"
+        ],
+        "stan": [
+            "php artisan config:clear --ansi",
+            "vendor/bin/phpstan"
         ]
     },
     "extra": {
