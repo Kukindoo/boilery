@@ -3,13 +3,11 @@
 namespace App\Livewire\Pdf;
 
 use App\Actions\Pdf\QueuePdf;
-use App\Contracts\OwnsFiles;
 use App\Enums\PdfGenerationStatus;
 use App\Models\Quote;
 use App\Models\Work;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -18,11 +16,10 @@ use Throwable;
 class PdfGeneration extends Component
 {
     #[Locked]
-    public Model&OwnsFiles $model;
+    public Work|Quote $model;
 
-    public function mount(Model&OwnsFiles $model): void
+    public function mount(Work|Quote $model): void
     {
-        abort_unless($model instanceof Quote || $model instanceof Work, 404);
         Gate::authorize('view', $model);
         $this->model = $model;
     }
