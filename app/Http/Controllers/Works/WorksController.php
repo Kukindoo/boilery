@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Works;
 
+use App\Actions\Works\PrepareServiceProtocolData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Works\WorkCreateRequest;
 use App\Http\Requests\Works\WorkEditRequest;
@@ -21,18 +22,11 @@ class WorksController extends Controller
     /**
      * @throws Throwable
      */
-    public function show(WorkShowRequest $request, Work $work): View
+    public function show(WorkShowRequest $request, PrepareServiceProtocolData $prepareServiceProtocolData, Work $work): View
     {
         $work->load(['user', 'files']);
 
-        $pdfContent = view('pdfs.service-protocol-pdf', [
-            'work' => $work,
-            'customer' => [
-                'name' => $work->user?->name,
-                'address' => $work->quote?->address,
-                'phone' => $work->quote?->phone,
-            ],
-        ])->render();
+        $pdfContent = view('pdfs.service-protocol-pdf', $prepareServiceProtocolData->handle($work))->render();
 
         return view('works.show', compact('work', 'pdfContent'));
     }

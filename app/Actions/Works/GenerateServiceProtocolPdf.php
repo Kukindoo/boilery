@@ -18,7 +18,10 @@ readonly class GenerateServiceProtocolPdf
 {
     use LogsActionActivity;
 
-    public function __construct(private GenerateFileLabel $generateFileLabel) {}
+    public function __construct(
+        private GenerateFileLabel $generateFileLabel,
+        private PrepareServiceProtocolData $prepareServiceProtocolData,
+    ) {}
 
     /**
      * @throws Throwable
@@ -29,14 +32,7 @@ readonly class GenerateServiceProtocolPdf
             $fileType = FileTypes::SERVICE_PROTOCOL;
             $fileLabel = $this->generateFileLabel->handle($work->user, $fileType, new File(['extension' => 'pdf']));
 
-            $content = Pdf::view('pdfs.service-protocol-pdf', [
-                'work' => $work,
-                'customer' => [
-                    'name' => $work->user?->name,
-                    'address' => $work->user?->address,
-                    'phone' => $work->user?->phone,
-                ],
-            ])->format('a4')
+            $content = Pdf::view('pdfs.service-protocol-pdf', $this->prepareServiceProtocolData->handle($work))->format('a4')
                 ->generatePdfContent();
 
             $disk = Storage::disk();

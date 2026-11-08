@@ -5,6 +5,7 @@ namespace Tests\Feature\Actions\Works;
 use App\Actions\Works\GenerateServiceProtocolPdf;
 use App\Enums\FileTypes;
 use App\Models\File;
+use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -13,6 +14,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
+use PHPUnit\Framework\Attributes\TestWith;
 use RuntimeException;
 use Spatie\LaravelPdf\Exceptions\CouldNotGeneratePdf;
 use Tests\Feature\FeatureTestCase;
@@ -37,6 +39,33 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
             'laravel-pdf.cache.automatic' => false,
         ]);
         Http::preventStrayRequests();
+    }
+
+    #[TestWith([true])]
+    #[TestWith([false])]
+    public function test_preview_and_generated_pdf_use_the_same_current_customer_details(bool $linkedQuote): void
+    {
+        Storage::fake('local');
+        Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
+        $customer = User::factory()->customer()->create([
+            'name' => 'Current Customer', 'phone' => '+420111222333', 'address' => 'Current address 42',
+        ]);
+        $quote = $linkedQuote ? Quote::factory()->for($customer)->create([
+            'phone' => '+420999888777', 'address' => 'Old quote address 99',
+        ]) : null;
+        $work = Work::factory()->for($customer)->create(['quote_id' => $quote?->id]);
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->get(route('works.show', $work))->assertOk();
+        $preview = $response->viewData('pdfContent');
+        app(GenerateServiceProtocolPdf::class)->handle($work);
+
+        $this->assertStringContainsString('Current Customer', $preview);
+        $this->assertStringContainsString('+420111222333', $preview);
+        $this->assertStringContainsString('Current address 42', $preview);
+        $this->assertStringNotContainsString('+420999888777', $preview);
+        $this->assertStringNotContainsString('Old quote address 99', $preview);
+        Http::assertSent(fn (Request $request): bool => $request['html'] === $preview);
     }
 
     public function test_saves_the_service_protocol_with_customer_details_and_file_metadata(): void
