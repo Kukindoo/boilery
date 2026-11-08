@@ -41,7 +41,7 @@ class ChangeFileTypeLockTest extends TestCase
     #[DataProvider('contexts')]
     public function test_resources_remain_locked_during_authorization_and_are_released_after_commit(string $context): void
     {
-        $actor = User::factory()->create();
+        $actor = User::factory()->admin()->create();
         $actor->givePermissionTo([
             Permissions::QUOTE_VIEW_ALL, Permissions::QUOTE_EDIT_ALL,
             Permissions::WORK_VIEW_ALL, Permissions::WORK_EDIT_ALL, Permissions::FILE_EDIT_ALL,
@@ -72,7 +72,7 @@ class ChangeFileTypeLockTest extends TestCase
         $contender->statement('SET SESSION innodb_lock_wait_timeout = 1');
         $checked = false;
         Gate::before(function (User $user, string $ability, array $arguments) use ($resources, $contender, &$checked): void {
-            if ($checked || $ability !== 'update' || ! (($arguments[0] ?? null) instanceof File)) {
+            if ($checked || $ability !== 'changeType' || ! (($arguments[0] ?? null) instanceof File)) {
                 return;
             }
 

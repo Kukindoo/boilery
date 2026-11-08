@@ -1,5 +1,7 @@
 @php
     use App\Contracts\OwnsFiles;
+    use App\Enums\FileTypes;
+    use App\Models\File;
     use Illuminate\Database\Eloquent\Model;
 @endphp
 
@@ -9,7 +11,7 @@
 ])
 
 @php
-    /** @var \App\Models\File $file */
+    /** @var File $file */
     /** @var Model&OwnsFiles $model */
 @endphp
 
@@ -30,9 +32,9 @@
         @endcan
         <flux:menu.separator/>
         @can('update', $model)
-            @can('update', $file)
+            @can('changeType', $file)
                 <flux:menu.submenu heading="Změnit typ">
-                    @foreach(App\Enums\FileTypes::cases() as $_fileType)
+                    @foreach(FileTypes::cases() as $_fileType)
                         <flux:menu.item wire:click="changeFileType('{{ $_fileType->value }}')">
                             {{ $_fileType->label() }}
                         </flux:menu.item>

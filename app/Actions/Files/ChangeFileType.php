@@ -21,7 +21,7 @@ class ChangeFileType
         try {
             return DB::transaction(function () use ($file, $fileType): File {
                 $lockedFile = File::query()->lockForUpdate()->findOrFail($file->id);
-                Gate::authorize('update', $lockedFile);
+                Gate::authorize('changeType', $lockedFile);
 
                 $previousType = $lockedFile->file_type;
                 $lockedFile->update(['file_type' => $fileType]);

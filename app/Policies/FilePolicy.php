@@ -3,7 +3,9 @@
 namespace App\Policies;
 
 use App\Contracts\OwnsFiles;
+use App\Enums\FileTypes;
 use App\Enums\Permissions;
+use App\Enums\Roles;
 use App\Models\File;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -36,6 +38,18 @@ class FilePolicy
         return $user->can(Permissions::FILE_EDIT_ALL->label())
             || ($user->can(Permissions::FILE_EDIT_OWN->label())
                 && $file->isExclusivelyOwnedBy($user));
+    }
+
+    public function changeType(User $user, File $file): bool
+    {
+        return $user->hasAnyRole([Roles::ADMIN->value, Roles::STAKEHOLDER->value])
+            && $this->update($user, $file);
+    }
+
+    public function uploadType(?User $user, FileTypes $fileType): bool
+    {
+        return ! in_array($fileType, [FileTypes::QUOTE_SUMMARY, FileTypes::SERVICE_PROTOCOL], true)
+            || ($user?->hasAnyRole([Roles::ADMIN->value, Roles::STAKEHOLDER->value]) ?? false);
     }
 
     public function delete(User $user, File $file): bool

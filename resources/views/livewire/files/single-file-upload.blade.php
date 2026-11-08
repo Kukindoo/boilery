@@ -1,3 +1,8 @@
+@php
+    use App\Enums\FileTypes;
+    use App\Models\File;
+@endphp
+
 <div class="px-6">
     <form id="single-file-upload-form" wire:submit="submit">
         <div class="mx-auto max-w-xl lg:mr-0 lg:max-w-lg space-y-5">
@@ -6,10 +11,12 @@
                     Typ souborů
                 </label>
                 <flux:select wire:model="form.fileType" variant="listbox" placeholder="Zvolte typ souboru...">
-                    @foreach(App\Enums\FileTypes::cases() as $fileType)
-                        <flux:select.option value="{{ $fileType->value }}">
-                            {{ $fileType->label() }}
-                        </flux:select.option>
+                    @foreach(FileTypes::cases() as $fileType)
+                        @can('uploadType', [File::class, $fileType])
+                            <flux:select.option value="{{ $fileType->value }}">
+                                {{ $fileType->label() }}
+                            </flux:select.option>
+                        @endcan
                     @endforeach
                 </flux:select>
             </div>

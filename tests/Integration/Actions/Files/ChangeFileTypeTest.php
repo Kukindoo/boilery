@@ -5,6 +5,7 @@ namespace Tests\Integration\Actions\Files;
 use App\Actions\Files\ChangeFileType;
 use App\Enums\FileTypes;
 use App\Enums\Permissions;
+use App\Enums\Roles;
 use App\Models\File;
 use App\Models\Quote;
 use App\Models\User;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Role;
 use Tests\Integration\IntegrationTestCase;
 
 class ChangeFileTypeTest extends IntegrationTestCase
@@ -54,7 +56,7 @@ class ChangeFileTypeTest extends IntegrationTestCase
     }
 
     #[DataProvider('ownedContexts')]
-    public function test_own_file_permission_is_sufficient_for_the_generic_action(string $context): void
+    public function test_admin_with_own_file_permission_can_change_an_owned_file(string $context): void
     {
         $actor = $this->actor(Permissions::FILE_EDIT_OWN);
         $file = $this->attachment($context, $actor);
@@ -164,7 +166,9 @@ class ChangeFileTypeTest extends IntegrationTestCase
     private function actor(Permissions $permission): User
     {
         $actor = User::factory()->create();
-        $actor->givePermissionTo($permission);
+        $role = Role::findById(Roles::ADMIN->value, 'web');
+        $role->syncPermissions([$permission]);
+        $actor->assignRole($role);
         $this->actingAs($actor);
 
         return $actor;

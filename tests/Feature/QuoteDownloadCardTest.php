@@ -14,16 +14,21 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Spatie\Permission\Models\Role;
 
 class QuoteDownloadCardTest extends FeatureTestCase
 {
-    /** @return array<string, array{Roles}> */
+    /** @return array<string, array{Roles, FileTypes}> */
     public static function editorRoles(): array
     {
-        return [
-            'admin' => [Roles::ADMIN],
-            'stakeholder' => [Roles::STAKEHOLDER],
-        ];
+        $cases = [];
+        foreach ([Roles::ADMIN, Roles::STAKEHOLDER] as $role) {
+            foreach ([FileTypes::RECEIPT, FileTypes::QUOTE_SUMMARY, FileTypes::SERVICE_PROTOCOL] as $type) {
+                $cases[$role->name . ' ' . $type->value] = [$role, $type];
+            }
+        }
+
+        return $cases;
     }
 
     public static function revokedPermissions(): array
@@ -45,7 +50,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     }
 
     #[DataProvider('editorRoles')]
-    public function test_role_can_change_file_type(Roles $role): void
+    public function test_role_can_change_file_type(Roles $role, FileTypes $type): void
     {
         $user = User::factory()->create();
         $user->assignRole($role);
@@ -62,17 +67,17 @@ class QuoteDownloadCardTest extends FeatureTestCase
 
         Livewire::actingAs($user)
             ->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file])
-            ->call('changeFileType', FileTypes::RECEIPT->value)
+            ->call('changeFileType', $type->value)
             ->assertHasNoErrors();
 
-        $this->assertSame(FileTypes::RECEIPT, $file->refresh()->file_type);
+        $this->assertSame($type, $file->refresh()->file_type);
         $this->assertSame('Receipt', $file->label);
     }
 
     public function test_changing_type_preserves_the_download_label(): void
     {
         Storage::fake();
-        $viewer = $this->viewer();
+        $viewer = $this->viewer(true);
         $quote = Quote::factory()->for($viewer)->create();
         $file = $this->attachment($quote);
 
@@ -131,7 +136,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     public function test_actions_recheck_permissions_after_mount(string $action, Permissions $permission): void
     {
         Storage::fake();
-        $viewer = $this->viewer();
+        $viewer = $this->viewer($action === 'changeFileType');
         $quote = Quote::factory()->for($viewer)->create();
         $file = $this->attachment($quote);
         $component = Livewire::actingAs($viewer)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file]);
@@ -148,7 +153,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     public function test_actions_reject_files_moved_to_another_quote_after_mount(string $action): void
     {
         Storage::fake();
-        $viewer = $this->viewer();
+        $viewer = $this->viewer($action === 'changeFileType');
         $quote = Quote::factory()->for($viewer)->create();
         $file = $this->attachment($quote);
         $component = Livewire::actingAs($viewer)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file]);
@@ -168,7 +173,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     public function test_actions_recheck_quote_ownership_after_mount(string $action): void
     {
         Storage::fake();
-        $viewer = $this->viewer();
+        $viewer = $this->viewer($action === 'changeFileType');
         $quote = Quote::factory()->for($viewer)->create();
         $file = $this->attachment($quote);
         $component = Livewire::actingAs($viewer)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file]);
@@ -196,7 +201,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     public function test_file_type_change_rejects_a_quote_closed_after_mount(): void
     {
         Storage::fake();
-        $viewer = $this->viewer();
+        $viewer = $this->viewer(true);
         $quote = Quote::factory()->for($viewer)->create();
         $file = $this->attachment($quote);
         $component = Livewire::actingAs($viewer)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file]);
@@ -207,9 +212,14 @@ class QuoteDownloadCardTest extends FeatureTestCase
         $this->assertSame(FileTypes::RECEIPT, $file->fresh()->file_type);
     }
 
-    private function viewer(): User
+    private function viewer(bool $canChangeType = false): User
     {
         $viewer = User::factory()->create();
+        if ($canChangeType) {
+            $role = Role::findById(Roles::ADMIN->value, 'web');
+            $role->syncPermissions([]);
+            $viewer->assignRole($role);
+        }
         $viewer->givePermissionTo([
             Permissions::QUOTE_VIEW_OWN, Permissions::QUOTE_EDIT_OWN,
             Permissions::FILE_VIEW_OWN, Permissions::FILE_EDIT_OWN, Permissions::FILE_DELETE_OWN,
