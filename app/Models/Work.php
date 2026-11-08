@@ -11,6 +11,7 @@ use App\Traits\HasFiles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -77,6 +78,12 @@ class Work extends Model implements OwnsFiles
         'notes',
         'mechanic_name',
     ];
+
+    /** @return BelongsToMany<SparePart, $this> */
+    public function spareParts(): BelongsToMany
+    {
+        return $this->belongsToMany(SparePart::class)->withTimestamps();
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
