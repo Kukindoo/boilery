@@ -22,7 +22,7 @@ class QuoteEditTest extends FeatureTestCase
     }
 
     #[DataProvider('contactEmails')]
-    public function test_staff_can_edit_quote_contact_details_without_account_email_uniqueness(string $emailSource): void
+    public function test_quote_edit_ignores_contact_changes_and_preserves_customer_details(string $emailSource): void
     {
         $staff = User::factory()->create();
         $staff->givePermissionTo(Permissions::QUOTE_EDIT_ALL);
@@ -31,6 +31,7 @@ class QuoteEditTest extends FeatureTestCase
         $customerBefore = $customer->refresh()->getRawOriginal();
         $anotherBefore = $another->refresh()->getRawOriginal();
         $quote = Quote::factory()->for($customer)->create(['email' => $customer->email]);
+        $originalPhone = $quote->phone;
         $email = match ($emailSource) {
             'customer' => $customer->email,
             'another' => $another->email,
@@ -49,8 +50,8 @@ class QuoteEditTest extends FeatureTestCase
         $this->assertDatabaseHas('quotes', [
             'id' => $quote->id,
             'user_id' => $customer->id,
-            'email' => $email,
-            'phone' => '+420123456789',
+            'email' => $customer->email,
+            'phone' => $originalPhone,
             'message' => 'Updated problem',
         ]);
         $this->assertSame($customerBefore, $customer->fresh()->getRawOriginal());
@@ -58,15 +59,16 @@ class QuoteEditTest extends FeatureTestCase
         $this->assertDatabaseCount('users', $userCount);
     }
 
-    public function test_edit_still_rejects_invalid_email_addresses(): void
+    public function test_quote_edit_does_not_validate_unused_contact_inputs(): void
     {
         $customer = User::factory()->customer()->create();
         $quote = Quote::factory()->for($customer)->create(['email' => $customer->email]);
+        $originalPhone = $quote->phone;
 
         Livewire::actingAs($customer)->test(QuoteEdit::class, ['quote' => $quote])
             ->set('form.email', 'invalid-email')
             ->call('submit')
-            ->assertHasErrors(['form.email' => 'email']);
+            ->assertHasNoErrors();
 
         $this->assertSame($customer->email, $quote->fresh()->email);
     }

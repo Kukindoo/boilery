@@ -114,17 +114,17 @@ class QuoteForm extends Form
 
     public function update(): Quote
     {
-        $this->validate();
+        $this->validate(Arr::except($this->rules(), ['firstName', 'lastName', 'email', 'phone', 'address']));
 
         return app(UpdateQuote::class)->handle($this->quote, new QuoteDto(
-            firstName: $this->firstName,
-            lastName: $this->lastName,
-            email: $this->email,
-            phone: $this->phone,
+            firstName: $this->quote->first_name,
+            lastName: $this->quote->last_name,
+            email: $this->quote->email,
+            phone: $this->quote->phone,
             message: $this->message,
             status: $this->quote->status,
             underWarranty: $this->boilerUnderWarranty === 'yes',
-            address: $this->address,
+            address: $this->quote->address,
             userId: $this->quote->user_id,
             boilerManufacturer: $this->boilerManufacturer,
             boilerSerialNumber: $this->boilerSerialNumber,

@@ -13,7 +13,7 @@
         'Výrobce' => $manufacturer->label(),
         'Typ bojleru' => $quote->boiler_type ?? 'Neznámý',
         'Štítek' => $quote->boiler_serial_number ?? 'Neznámý',
-        'Adresa' => $quote->address ?? 'Neznámá',
+        'Adresa' => $quote->user?->address ?? 'Neznámá',
     ];
 @endphp
 

@@ -1,4 +1,5 @@
 <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
+    @if (! $form->quote)
     <flux:input wire:model="form.firstName" label="Jméno (Vyžadováno)" type="text" autocomplete="given-name"/>
 
     <flux:input wire:model="form.lastName" label="Přijmení (Vyžadováno)" type="text" autocomplete="last-name"/>
@@ -11,6 +12,8 @@
         <flux:input wire:model="form.phone" label="Telefonní číslo (Vyžadováno)" type="tel" autocomplete="tel"/>
     </div>
 
+    @endif
+
     <div class="sm:col-span-2">
         <flux:textarea
                 wire:model="form.message"
@@ -19,6 +22,7 @@
                 rows="4"
         />
     </div>
+    @if (! $form->quote)
     <div class="sm:col-span-2">
         <flux:textarea
                 wire:model="form.address"
@@ -27,6 +31,8 @@
                 rows="4"
         />
     </div>
+
+    @endif
 
     <div class="sm:col-span-2">
         <label for="boiler-manufacturer" class="block text-sm/6 font-semibold text-heading-text dark:text-primary-dark-text">

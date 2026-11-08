@@ -5,6 +5,7 @@ namespace App\Actions\Quotes;
 use App\Dtos\Quotes\QuoteDto;
 use App\Models\Quote;
 use App\Traits\LogsActionActivity;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Throwable;
@@ -23,12 +24,14 @@ class UpdateQuote
                 $quote->refreshForUpdate();
                 Gate::authorize('update', $quote);
 
-                $attributes = $data->toArray();
-                $reassignment = array_intersect_key($attributes, array_flip([
-                    'user_id',
+                $quote->update(Arr::only($data->toArray(), [
+                    'message',
+                    'status',
+                    'under_warranty',
+                    'boiler_manufacturer',
+                    'boiler_serial_number',
+                    'boiler_type',
                 ]));
-
-                $quote->update(array_diff_key($attributes, $reassignment));
 
                 $this->logActionCompleted('quotes', $quote, 'Quote updated');
 

@@ -45,16 +45,29 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $customer = User::factory()->create(['name' => 'Jiří Novák']);
+        $customer = User::factory()->create([
+            'name' => 'Jiří Novák', 'email' => 'current@example.test',
+            'phone' => '+420111222333', 'address' => 'Aktuální adresa 42',
+        ]);
         $quote = Quote::factory()->for($customer)->create([
             'first_name' => 'Jan',
             'last_name' => 'Svoboda',
+            'email' => 'snapshot@example.test', 'phone' => '+420999888777',
+            'address' => 'Původní adresa 99',
         ]);
 
         $summary = app(GenerateQuoteSummaryPdf::class)->handle($quote);
 
         $this->assertMatchesRegularExpression('/^2026-11-08_10-42_Jiri_Novak_shrnuti_poptavky_[a-z0-9]{4}\.pdf$/', $summary->label);
         Storage::disk()->assertExists($summary->path);
+        Http::assertSent(fn (Request $request): bool => str_contains($request['html'], 'Jiří Novák')
+            && str_contains($request['html'], 'current@example.test')
+            && str_contains($request['html'], '+420111222333')
+            && str_contains($request['html'], 'Aktuální adresa 42')
+            && ! str_contains($request['html'], 'snapshot@example.test')
+            && ! str_contains($request['html'], '+420999888777')
+            && ! str_contains($request['html'], 'Původní adresa 99'));
+
     }
 
     public function test_saves_quote_summary_on_the_default_disk_with_file_metadata(): void

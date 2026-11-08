@@ -41,6 +41,7 @@ class UpdateQuoteTest extends IntegrationTestCase
         $this->actingAs($customer);
         $quote = Quote::factory()->for($customer)->create([
             'first_name' => 'Original', 'last_name' => 'Customer', 'email' => 'original@example.test',
+            'phone' => 'original-phone', 'address' => 'Original address',
         ]);
         $data = $this->data($customer->id);
 
@@ -50,14 +51,14 @@ class UpdateQuoteTest extends IntegrationTestCase
         $this->assertDatabaseHas('quotes', [
             'id' => $quote->id,
             'user_id' => $customer->id,
-            'first_name' => 'Jan',
-            'last_name' => 'Novak',
-            'email' => 'jan@example.test',
-            'phone' => '+420123456789',
+            'first_name' => 'Original',
+            'last_name' => 'Customer',
+            'email' => 'original@example.test',
+            'phone' => 'original-phone',
             'message' => 'Updated problem',
             'status' => 'contacted',
             'under_warranty' => true,
-            'address' => null,
+            'address' => 'Original address',
             'boiler_manufacturer' => 'drazice',
             'boiler_serial_number' => null,
             'boiler_type' => null,
@@ -94,18 +95,19 @@ class UpdateQuoteTest extends IntegrationTestCase
         $owner = User::factory()->customer()->create();
         $this->actingAs($allEditor ? User::factory()->admin()->create() : $owner);
         $quote = Quote::factory()->for($owner)->create();
+        $contactBefore = $quote->only(['first_name', 'last_name', 'email', 'phone', 'address']);
+        $ownerBefore = $owner->refresh()->getRawOriginal();
         $data = $this->data($removeOwner ? null : User::factory()->create()->id);
 
         $updated = app(UpdateQuote::class)->handle($quote, $data);
 
         $this->assertSame($quote, $updated);
         $this->assertSame($owner->id, $updated->user_id);
+        $this->assertSame($contactBefore, $updated->fresh()->only(array_keys($contactBefore)));
+        $this->assertSame($ownerBefore, $owner->fresh()->getRawOriginal());
         $this->assertDatabaseHas('quotes', [
             'id' => $quote->id,
             'user_id' => $owner->id,
-            'first_name' => 'Jan',
-            'last_name' => 'Novak',
-            'email' => 'jan@example.test',
             'message' => 'Updated problem',
         ]);
     }

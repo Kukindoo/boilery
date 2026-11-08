@@ -108,19 +108,19 @@
     <table>
         <tr>
             <th>Jméno</th>
-            <td>{{ $quote->first_name }} {{ $quote->last_name }}</td>
+            <td>{{ $quote->user?->name ?? 'Neuvedeno' }}</td>
         </tr>
         <tr>
             <th>Email</th>
-            <td>{{ $quote->email }}</td>
+            <td>{{ $quote->user?->email }}</td>
         </tr>
         <tr>
             <th>Telefon</th>
-            <td>{{ $quote->phone }}</td>
+            <td>{{ $quote->user?->phone }}</td>
         </tr>
         <tr>
             <th>Adresa</th>
-            <td>{{ $quote->address ?? 'Neuvedeno' }}</td>
+            <td>{{ $quote->user?->address ?? 'Neuvedeno' }}</td>
         </tr>
     </table>
     <h2>Informace o kotli</h2>
