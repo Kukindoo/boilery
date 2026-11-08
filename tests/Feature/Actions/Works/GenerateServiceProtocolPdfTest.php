@@ -57,8 +57,15 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
             'reported_problem' => '<script>alert("test")</script>',
         ]);
 
+        $labelAtCreation = null;
+        File::creating(function (File $file) use (&$labelAtCreation): void {
+            $labelAtCreation = $file->label;
+        });
+
         $file = app(GenerateServiceProtocolPdf::class)->handle($work);
 
+        $this->assertNotEmpty($labelAtCreation);
+        $this->assertSame($file->label, $labelAtCreation);
         $this->assertMatchesRegularExpression('/^2026-11-08_10-42_Jiri_Novak_servisni_protokol_[a-z0-9]{4}\.pdf$/', $file->label);
         $this->assertModelExists($file);
         $this->assertTrue($file->isAttachedTo($work));

@@ -43,16 +43,26 @@ class GenerateFileLabelTest extends FeatureTestCase
     ): void {
         $user = User::factory()->make(['name' => $name]);
 
-        $label = app(GenerateFileLabel::class)->handle($user, $fileType, $extension);
+        $label = app(GenerateFileLabel::class)->handle($user, $fileType, new File(['extension' => $extension]));
 
         $this->assertSame($expectedLabel, $label);
+    }
+
+    public function test_uses_the_unsaved_file_models_extension(): void
+    {
+        $user = User::factory()->make(['name' => 'Jan Novák']);
+        $file = new File(['original_name' => 'receipt.txt', 'extension' => 'pdf']);
+
+        $label = app(GenerateFileLabel::class)->handle($user, FileTypes::RECEIPT, $file);
+
+        $this->assertSame('2026-11-08_10-42_Jan_Novak_kupni_smlouva_abcd.pdf', $label);
     }
 
     public function test_extension_is_optional(): void
     {
         $user = User::factory()->make(['name' => 'Jan Novák']);
 
-        $label = app(GenerateFileLabel::class)->handle($user, FileTypes::SERVICE_PROTOCOL);
+        $label = app(GenerateFileLabel::class)->handle($user, FileTypes::SERVICE_PROTOCOL, new File());
 
         $this->assertSame('2026-11-08_10-42_Jan_Novak_servisni_protokol_abcd', $label);
     }
@@ -62,7 +72,7 @@ class GenerateFileLabelTest extends FeatureTestCase
         $user = User::factory()->make(['name' => 'Jan Novák']);
         Str::createRandomStringsUsingSequence(['A1B2']);
 
-        $label = app(GenerateFileLabel::class)->handle($user, FileTypes::RECEIPT, 'pdf');
+        $label = app(GenerateFileLabel::class)->handle($user, FileTypes::RECEIPT, new File(['extension' => 'pdf']));
 
         $this->assertSame('2026-11-08_10-42_Jan_Novak_kupni_smlouva_a1b2.pdf', $label);
     }
@@ -73,7 +83,7 @@ class GenerateFileLabelTest extends FeatureTestCase
         File::factory()->create(['label' => '2026-11-08_10-42_Jan_Novak_kupni_smlouva_abcd.pdf']);
         Str::createRandomStringsUsingSequence(['ABCD', 'WXYZ']);
 
-        $label = app(GenerateFileLabel::class)->handle($user, FileTypes::RECEIPT, 'pdf');
+        $label = app(GenerateFileLabel::class)->handle($user, FileTypes::RECEIPT, new File(['extension' => 'pdf']));
 
         $this->assertSame('2026-11-08_10-42_Jan_Novak_kupni_smlouva_wxyz.pdf', $label);
     }

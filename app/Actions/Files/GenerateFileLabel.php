@@ -9,8 +9,9 @@ use Illuminate\Support\Str;
 
 class GenerateFileLabel
 {
-    public function handle(User $user, FileTypes $fileType, ?string $extension = null): string
+    public function handle(User $user, FileTypes $fileType, File $file): string
     {
+        $extension = $file->extension;
         $customerName = Str::ascii(Str::replace([' ', '-'], '_', $user->name));
         $prefix = implode('_', [
             now()->timezone('Europe/Prague')->format('Y-m-d_H-i'),

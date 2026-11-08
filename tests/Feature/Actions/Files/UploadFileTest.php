@@ -5,6 +5,7 @@ namespace Tests\Feature\Actions\Files;
 use App\Actions\Files\UploadFile;
 use App\Enums\FileTypes;
 use App\Enums\Permissions;
+use App\Models\File;
 use App\Models\FileAttachment;
 use App\Models\Quote;
 use App\Models\User;
@@ -21,6 +22,27 @@ class UploadFileTest extends FeatureTestCase
     public static function origins(): array
     {
         return ['quote' => ['quote'], 'work' => ['work']];
+    }
+
+    public function test_label_is_generated_before_the_file_is_persisted(): void
+    {
+        Storage::fake();
+        $this->actingAs(User::factory()->admin()->create());
+        $quote = Quote::factory()->for(User::factory())->create();
+        $labelAtCreation = null;
+        File::creating(function (File $file) use (&$labelAtCreation): void {
+            $labelAtCreation = $file->label;
+        });
+
+        $file = app(UploadFile::class)->handle(
+            UploadedFile::fake()->image('receipt.jpg'), $quote, FileTypes::RECEIPT,
+        );
+
+        $this->assertNotEmpty($labelAtCreation);
+        $this->assertSame($file->label, $labelAtCreation);
+        $this->assertModelExists($file);
+        $this->assertTrue($file->isAttachedTo($quote));
+        Storage::disk()->assertExists($file->path);
     }
 
     #[DataProvider('origins')]

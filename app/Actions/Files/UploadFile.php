@@ -80,13 +80,19 @@ readonly class UploadFile
                 if ($customer === null) {
                     throw ValidationException::withMessages(['file' => 'Nejprve přiřaďte zákazníka.']);
                 }
-                $label = $this->generateFileLabel->handle($customer, $fileType, $extension);
-                $storedFile = $lockedParent->files()->create([
-                    'path' => $path, 'label' => $label,
+
+                $storedFile = $lockedParent->files()->make([
+                    'path' => $path,
                     'original_name' => $file->getClientOriginalName(),
-                    'extension' => $extension, 'mime_type' => $file->getMimeType(),
-                    'file_type' => $fileType->value, 'size' => $file->getSize(),
+                    'extension' => $extension,
+                    'mime_type' => $file->getMimeType(),
+                    'file_type' => $fileType->value,
+                    'size' => $file->getSize(),
                 ]);
+
+                $storedFile->label = $this->generateFileLabel->handle($customer, $fileType, $storedFile);
+                $lockedParent->files()->save($storedFile);
+
                 foreach ([$quote, $work] as $related) {
                     if ($related !== null && ! $related->is($lockedParent)) {
                         $related->files()->syncWithoutDetaching([$storedFile->id]);
