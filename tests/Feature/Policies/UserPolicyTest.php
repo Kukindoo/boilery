@@ -64,7 +64,7 @@ class UserPolicyTest extends FeatureTestCase
 
         foreach ([Roles::ADMIN, Roles::STAKEHOLDER] as $role) {
             Role::findById($role->value, 'web')->revokePermissionTo([
-                Permissions::USER_VIEW_ALL->label(), Permissions::USER_EDIT_ALL->label(), Permissions::USER_VIEW_INDEX->label(),
+                Permissions::USER_VIEW_ALL->label(), Permissions::USER_EDIT_ALL->label(),
             ]);
             $staff = User::factory()->create()->assignRole($role->value);
             $gate = Gate::forUser($staff);
@@ -87,6 +87,16 @@ class UserPolicyTest extends FeatureTestCase
 
         $this->assertSame($ownAllowed, $gate->allows($ability, $user));
         $this->assertSame($otherAllowed, $gate->allows($ability, $other));
+    }
+
+    public function test_legacy_index_permission_does_not_allow_listing_users(): void
+    {
+        $permission = \Spatie\Permission\Models\Permission::findOrCreate('View index users', 'web');
+        $user = User::factory()->create();
+        $user->givePermissionTo($permission);
+
+        $this->assertFalse(Gate::forUser($user)->allows('viewAny', User::class));
+        $this->actingAs($user)->get(route('customers.index'))->assertForbidden();
     }
 
     public function test_customer_own_permissions_do_not_allow_listing_all_users(): void

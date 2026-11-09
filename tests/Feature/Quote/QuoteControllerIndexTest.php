@@ -16,8 +16,6 @@ class QuoteControllerIndexTest extends FeatureTestCase
             'view all, own quote' => [Permissions::QUOTE_VIEW_ALL, true],
             'view own, own quote' => [Permissions::QUOTE_VIEW_OWN, false],
             'no permission, own quote' => [null, false],
-            'view index, own quote' => [Permissions::QUOTE_VIEW_INDEX, false],
-            'print all, own quote' => [Permissions::QUOTE_PRINT_ALL, false],
             'edit all, own quote' => [Permissions::QUOTE_EDIT_ALL, false],
             'edit own, own quote' => [Permissions::QUOTE_EDIT_OWN, false],
             'quote_delete_all' => [Permissions::QUOTE_DELETE_ALL, false],

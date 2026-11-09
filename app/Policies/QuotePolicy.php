@@ -56,7 +56,7 @@ class QuotePolicy
     public function generatePdf(User $user, Quote $quote): bool
     {
         return $this->viewAny($user)
-            && $user->can(Permissions::GENERATE_PDF->label())
+            && $user->can(Permissions::PDF_GENERATE_ALL->label())
             && ! $quote->hasQuoteSummary();
     }
 

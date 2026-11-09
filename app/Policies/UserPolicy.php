@@ -15,8 +15,7 @@ class UserPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->can(Permissions::USER_VIEW_ALL->label())
-            || $user->can(Permissions::USER_VIEW_INDEX->label());
+        return $user->can(Permissions::USER_VIEW_ALL->label());
     }
 
     public function view(User $user, User $customer): bool

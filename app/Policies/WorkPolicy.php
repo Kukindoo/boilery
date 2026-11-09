@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Enums\Permissions;
 use App\Enums\WorkStatus;
-use App\Models\AssemblyAction;
 use App\Models\User;
 use App\Models\Work;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -28,7 +27,7 @@ class WorkPolicy
     public function generatePdf(User $user, Work $work): bool
     {
         return $this->viewAny($user)
-            && $user->can(Permissions::GENERATE_PDF->label())
+            && $user->can(Permissions::PDF_GENERATE_ALL->label())
             && ! $work->hasServiceProtocol();
     }
 
