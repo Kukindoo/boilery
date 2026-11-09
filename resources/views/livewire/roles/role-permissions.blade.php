@@ -4,7 +4,7 @@
 
 <x-stellaris.container.show-card :title="__('Oprávnění')">
     <x-slot name="action">
-        @can('update', $role)
+        @can('managePermissions', $role)
             <div class="flex gap-2">
                 @if ($editing)
                     <flux:button size="sm" variant="primary" wire:click="save" wire:loading.attr="disabled">
@@ -51,7 +51,7 @@
                                             <span @class(['line-through' => $removed])>
                                                 {{ Permissions::fromLabel($permission->name)?->badgeLabel() ?? $permission->name }}
                                             </span>
-                                            @can('update', $role)
+                                            @can('managePermissions', $role)
                                                 @if ($editing)
                                                     <flux:badge.close wire:click="togglePermission({{ $permission->id }})"
                                                                       :aria-label="($removed ? 'Obnovit oprávnění ' : 'Odebrat oprávnění ') . $permission->name" wire:loading.attr="disabled" />
