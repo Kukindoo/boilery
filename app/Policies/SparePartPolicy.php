@@ -39,7 +39,8 @@ class SparePartPolicy
     {
         return ! $sparePart->trashed()
             && $user->hasAnyRole([Roles::ADMIN->value, Roles::STAKEHOLDER->value])
-            && $user->can(Permissions::SPARE_PART_DELETE_ALL->label());
+            && $user->can(Permissions::SPARE_PART_DELETE_ALL->label())
+            && ! ($sparePart->getAttribute('works_exists') ?? $sparePart->works()->withTrashed()->exists());
     }
 
     public function restore(User $user, SparePart $sparePart): bool
@@ -53,6 +54,7 @@ class SparePartPolicy
     {
         return $sparePart->trashed()
             && $user->hasAnyRole([Roles::ADMIN->value, Roles::STAKEHOLDER->value])
-            && $user->can(Permissions::SPARE_PART_FORCE_DELETE_ALL->label());
+            && $user->can(Permissions::SPARE_PART_FORCE_DELETE_ALL->label())
+            && ! ($sparePart->getAttribute('works_exists') ?? $sparePart->works()->withTrashed()->exists());
     }
 }
