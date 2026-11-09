@@ -30,7 +30,9 @@ class SparePartsPagesTest extends FeatureTestCase
 
         $this->get(route('spare-parts.index'))->assertOk()->assertSeeLivewire(SparePartsTable::class);
         $this->get(route('spare-parts.create'))->assertOk()->assertSeeLivewire(SparePartCreate::class);
-        $this->get(route('spare-parts.show', $part))->assertOk()->assertSee($part->name);
+        $this->get(route('spare-parts.show', $part))->assertOk()->assertSee($part->name)
+            ->assertSee('Upravit')
+            ->assertSee('href="' . route('spare-parts.edit', $part) . '"', false);
         $this->get(route('spare-parts.edit', $part))->assertOk()->assertSeeLivewire(SparePartEdit::class);
 
         Role::findById($role)->givePermissionTo([
@@ -67,11 +69,58 @@ class SparePartsPagesTest extends FeatureTestCase
         $this->get(route('spare-parts.show', $part))->assertNotFound();
     }
 
-    public function test_customers_see_parts_on_their_own_work_without_management_controls(): void
+    public function test_add_part_modal_offers_catalog_link_when_no_more_parts_are_available(): void
+    {
+        $work = Work::factory()->create();
+        $part = SparePart::factory()->create();
+
+        $component = Livewire::actingAs(User::factory()->admin()->create())
+            ->test(WorkSparePartAdd::class, ['work' => $work])
+            ->call('open')
+            ->assertDontSee('Nejsou dostupné žádné další náhradní díly.')
+            ->assertDontSee('Přejít na seznam náhradních dílů');
+
+        $work->spareParts()->attach($part);
+
+        $component->call('open')
+            ->assertSee('Nejsou dostupné žádné další náhradní díly.')
+            ->assertSee('Přejít na seznam náhradních dílů')
+            ->assertSee('href="' . route('spare-parts.index') . '"', false);
+    }
+
+    public function test_customers_with_work_edit_permission_can_manage_parts_on_their_own_work(): void
     {
         $customer = User::factory()->customer()->create();
         Role::findById(Roles::CUSTOMER->value)->givePermissionTo([
             Permissions::WORK_VIEW_OWN, Permissions::WORK_EDIT_OWN,
+        ]);
+        $work = Work::factory()->for($customer)->create();
+        $part = SparePart::factory()->create();
+
+        $this->actingAs($customer)->get(route('works.show', $work))
+            ->assertSeeLivewire(WorkSparePartAdd::class);
+        Livewire::actingAs($customer)->test(WorkSparePartAdd::class, ['work' => $work])
+            ->set('form.sparePartId', (string) $part->id)
+            ->call('submit')->assertHasNoErrors();
+        $this->assertDatabaseHas('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id]);
+
+        Livewire::test(WorkSparePartRow::class, ['work' => $work, 'part' => $part, 'amount' => 1])
+            ->call('edit')->set('form.amount', '2')->call('submit')->assertHasNoErrors();
+        $this->assertDatabaseHas('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id, 'amount' => 2]);
+
+        Livewire::test(WorkSparePartRow::class, ['work' => $work, 'part' => $part, 'amount' => 2])
+            ->call('remove')->assertHasNoErrors();
+        $this->assertDatabaseMissing('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id]);
+
+        $otherWork = Work::factory()->create();
+        Livewire::test(WorkSparePartAdd::class, ['work' => $otherWork])->assertForbidden();
+    }
+
+    public function test_customers_see_parts_on_their_own_work_without_management_controls(): void
+    {
+        $customer = User::factory()->customer()->create();
+        Role::findById(Roles::CUSTOMER->value)->givePermissionTo([
+            Permissions::WORK_VIEW_OWN,
         ]);
         $work = Work::factory()->for($customer)->create();
         $part = SparePart::factory()->create(['name' => 'Private spare part']);

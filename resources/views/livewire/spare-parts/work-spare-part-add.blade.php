@@ -17,7 +17,10 @@
             <flux:input wire:model="form.amount" type="number" label="Množství" min="1" max="65535" step="1" required />
             @if ($availableParts->isEmpty())
                 <flux:text>
-                    Nejsou dostupné žádné další náhradní díly.
+                    Nejsou dostupné žádné další náhradní díly.<br />
+                    <flux:link :href="route('spare-parts.index')">
+                        Přejít na seznam náhradních dílů
+                    </flux:link>
                 </flux:text>
             @endif
             <div class="flex justify-end gap-3">

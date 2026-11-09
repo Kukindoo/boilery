@@ -1,10 +1,7 @@
 <x-layouts::app :title="$sparePart->name">
     <x-stellaris.container.show-card :title="$sparePart->name">
-        <x-slot name="actions">
-            <flux:button :href="route('spare-parts.index')">Zpět na seznam</flux:button>
-            @can('update', $sparePart)
-                <flux:button :href="route('spare-parts.edit', $sparePart)">Upravit</flux:button>
-            @endcan
+        <x-slot name="action">
+            @include('spare-parts.partials.show-actions')
         </x-slot>
         <x-stellaris.container.show-row  title="Název">
             {{ $sparePart->name }}
