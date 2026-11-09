@@ -22,9 +22,14 @@ class DetachSparePartFromWork
             DB::transaction(function () use ($work, $sparePart): void {
                 $work->refreshForUpdate();
                 Gate::authorize('manageSpareParts', $work);
+
                 $sparePart = $work->spareParts()->lockForUpdate()->findOrFail($sparePart->id);
+                $oldAmount = (int) $sparePart->pivot->getAttribute('amount');
                 $work->spareParts()->detach($sparePart->id);
-                $this->logActionCompleted('spare_parts', $sparePart, 'Spare part detached from work', ['work_id' => $work->id]);
+
+                $this->logActionCompleted('spare_parts', $sparePart, 'Spare part detached from work', [
+                    'work_id' => $work->id, 'old_amount' => $oldAmount, 'amount' => 0,
+                ]);
             }, attempts: 5);
         } catch (Throwable $exception) {
             $this->logActionAttempt('spare_parts', $sparePart, $exception, ['work_id' => $work->id]);
