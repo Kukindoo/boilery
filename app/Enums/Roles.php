@@ -18,4 +18,13 @@ enum Roles: int
             self::CUSTOMER => 'Zákazník',
         };
     }
+
+    public function snake(): string
+    {
+        return match ($this) {
+            self::ADMIN => 'admin',
+            self::STAKEHOLDER => 'stakeholder',
+            self::CUSTOMER => 'customer',
+        };
+    }
 }
