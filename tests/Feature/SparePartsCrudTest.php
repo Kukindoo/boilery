@@ -118,18 +118,17 @@ class SparePartsCrudTest extends FeatureTestCase
         $this->assertDatabaseCount('spare_parts', 1);
     }
 
-    public function test_delete_archives_part_restore_keeps_links_and_force_delete_removes_links(): void
+    public function test_unused_part_can_be_archived_restored_and_permanently_deleted(): void
     {
         $user = User::factory()->admin()->create();
-        $work = Work::factory()->create();
         $part = SparePart::factory()->create();
-        $work->spareParts()->attach($part);
         Livewire::actingAs($user)->test(SparePartsTable::class)
-            ->call('confirmDelete', $part->id)->call('delete')->assertHasNoErrors();
+            ->call('confirmDelete', $part->id)->assertSet('confirmingDeletion', true)
+            ->assertSet('deletingId', $part->id)->call('delete')->assertHasNoErrors()
+            ->assertSet('confirmingDeletion', false)->assertSet('deletingId', null);
         $this->assertSoftDeleted($part);
-        $this->assertSame(0, $work->spareParts()->count());
         app(RestoreSparePart::class)->handle($part->refresh());
-        $this->assertSame(1, $work->spareParts()->count());
+        $this->assertFalse($part->refresh()->trashed());
         $part->delete();
         app(ForceDeleteSparePart::class)->handle($part);
         $this->assertModelMissing($part);

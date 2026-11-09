@@ -32,7 +32,7 @@
         </flux:table.rows>
     </flux:table>
     @include('livewire.modals.deletion', [
-        'heading' => 'Smazat Náhradní díl?',
+        'heading' => 'Smazat náhradní díl?',
         'text' => 'Opravdu chcete smazat tento náhradní díl? Náhradní díl bude archivován.',
         'button' => 'Smazat',
         'cancel' => 'Zrušit',

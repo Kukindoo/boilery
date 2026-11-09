@@ -21,6 +21,7 @@ class DeleteSparePart
             DB::transaction(function () use ($sparePart): void {
                 $sparePart->refreshForUpdate();
                 Gate::authorize('delete', $sparePart);
+
                 $sparePart->delete();
                 $this->logActionCompleted('spare_parts', $sparePart, 'Spare part deleted');
             }, attempts: 5);
