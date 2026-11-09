@@ -3,10 +3,16 @@
 namespace App\Policies;
 
 use App\Enums\Permissions;
+use App\Enums\Roles;
 use App\Models\User;
 
 class UserPolicy
 {
+    public function manageRoles(User $user, User $customer): bool
+    {
+        return $user->hasRole(Roles::ADMIN->value);
+    }
+
     public function viewAny(User $user): bool
     {
         return $user->can(Permissions::USER_VIEW_ALL->label())
