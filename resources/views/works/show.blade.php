@@ -1,3 +1,7 @@
+@php
+    use App\Enums\FileTypes;
+@endphp
+
 <x-layouts::app :title="__('Zakázky')">
     <div class="space-y-6">
         <x-stellaris.container.index-card
@@ -9,7 +13,7 @@
             <x-slot name="actions">
                 <x-pdfs.pdf-modal-preview :model="$work"
                                           :pdf-content="$pdfContent"
-                                          :file-type="\App\Enums\FileTypes::SERVICE_PROTOCOL->value"/>
+                                          :file-type="FileTypes::SERVICE_PROTOCOL->value"/>
 
                 @can('update', $work)
                     <flux:button size="sm" icon="pencil" :href="route('works.edit', $work)">
@@ -47,6 +51,9 @@
             <x-works.work-repair-info :work="$work"/>
             @can('view', $work)
                 <livewire:spare-parts.work-spare-parts :work="$work"/>
+            @endcan
+            @can('view', $work)
+                <livewire:assembly-actions.work-assembly-actions :work="$work" />
             @endcan
             <x-works.work-transport-info :work="$work"/>
             <x-files.attachment-card :model="$work"/>
