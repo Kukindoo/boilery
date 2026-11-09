@@ -45,7 +45,7 @@ class CustomersTable extends Component
 
         return User::query()
             ->with('roles')
-            ->role(Roles::CUSTOMER->snake())
+            ->role(Roles::CUSTOMER->value)
             ->when($this->search !== '', function ($query): void {
                 $query->where(function ($query): void {
                     $query->where('name', 'like', '%' . $this->search . '%')

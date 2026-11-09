@@ -1,6 +1,8 @@
 <x-stellaris.livewire.table.wrapper heading="Zákazníci">
+    <x-slot name="actions">
+    </x-slot>
     <x-slot name="filters">
-        <flux:input wire:model.live.debounce.300ms="search" label="Hledat zákazníky" placeholder="Jméno, e-mail, telefon nebo adresa" clearable />
+        @include('livewire.customers.partials.customers-table-filters')
     </x-slot>
 
     <flux:table :paginate="$this->customers">
@@ -15,9 +17,8 @@
                 Telefon
             </flux:table.column>
             <flux:table.column>
-                Adresa
+                Akce
             </flux:table.column>
-            <flux:table.column></flux:table.column>
         </flux:table.columns>
 
         <flux:table.rows>
@@ -35,19 +36,12 @@
                         {{ $customer->phone ?: '—' }}
                     </flux:table.cell>
                     <flux:table.cell>
-                        {{ $customer->address ?: '—' }}
-                    </flux:table.cell>
-                    <flux:table.cell>
-                        @can('update', $customer)
-                            <flux:button size="sm" icon="pencil" :href="route('customers.edit', $customer)">
-                                Upravit
-                            </flux:button>
-                        @endcan
+                        @include('livewire.customers.partials.customers-table-dropdown-actions')
                     </flux:table.cell>
                 </flux:table.row>
             @empty
                 <flux:table.row>
-                    <flux:table.cell colspan="5">
+                    <flux:table.cell colspan="4">
                         Žádní zákazníci.
                     </flux:table.cell>
                 </flux:table.row>
