@@ -158,6 +158,8 @@ enum Permissions: int
             str_starts_with($this->name, 'QUOTE') => 'quotes',
             str_starts_with($this->name, 'WORK') => 'works',
             str_starts_with($this->name, 'PDF') => 'pdfs',
+            str_starts_with($this->name, 'ROLE_') => 'roles',
+            str_starts_with($this->name, 'PERMISSION_') => 'permissions',
             default => mb_strtolower(explode('_', $this->name, 2)[0]),
         };
     }
@@ -175,6 +177,10 @@ enum Permissions: int
     public function label(): string
     {
         return match ($this) {
+            self::ROLE_VIEW_ALL => 'View all roles',
+            self::ROLE_EDIT_ALL => 'Edit all roles',
+            self::PERMISSION_VIEW_ALL => 'View all permissions',
+
             self::ASSEMBLY_ACTION_VIEW_ALL => 'View all assembly actions',
             self::ASSEMBLY_ACTION_CREATE_ALL => 'Create all assembly actions',
             self::ASSEMBLY_ACTION_EDIT_ALL => 'Edit all assembly actions',
