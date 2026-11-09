@@ -20,7 +20,7 @@ class QuotePolicyTest extends FeatureTestCase
 
         foreach (Permissions::cases() as $permission) {
             if (str_starts_with($permission->name, 'QUOTE_')) {
-                $cases[$permission->name] = [$permission];
+                $cases[mb_strtolower($permission->name)] = [$permission];
             }
         }
 
