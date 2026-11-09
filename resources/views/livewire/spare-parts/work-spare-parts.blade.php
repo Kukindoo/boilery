@@ -21,22 +21,13 @@
         </flux:table.columns>
         <flux:table.rows>
             @forelse ($parts as $part)
-                <flux:table.row :key="$part->id">
-                    <flux:table.cell><flux:link :href="route('spare-parts.show', $part)">{{ $part->name }}</flux:link></flux:table.cell>
-                    <flux:table.cell>{{ $part->part_number ?? '—' }}</flux:table.cell>
-                    <flux:table.cell>
-                        {{ $part->formattedPrice() }}
-                    </flux:table.cell>
-                    <flux:table.cell>
-                        {{ $part->pivot->amount }}
-                    </flux:table.cell>
-                    <flux:table.cell>
-                        {{ $linePrices[$part->id]->format() }}
-                    </flux:table.cell>
-                    <flux:table.cell>
-                        @include('livewire.spare-parts.partials.work-spare-parts-table-dropdown-actions')
-                    </flux:table.cell>
-                </flux:table.row>
+                <livewire:spare-parts.work-spare-part-row
+                    :work="$work"
+                    :part="$part"
+                    :amount="(int) $part->pivot->amount"
+                    :key="'work-part-'.$work->id.'-'.$part->id.'-'.$part->pivot->amount.'-'.$part->price_in_cents"
+                    @spare-parts-changed="$refresh"
+                />
             @empty
                 <flux:table.row><flux:table.cell colspan="6">K zakázce nejsou přidány žádné náhradní díly.</flux:table.cell></flux:table.row>
             @endforelse
