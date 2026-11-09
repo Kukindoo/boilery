@@ -1,3 +1,7 @@
+@php
+    use App\Enums\QuoteStatus;
+@endphp
+
 <div class="flex items-center gap-2">
     <flux:dropdown>
         <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal">
@@ -14,11 +18,11 @@
                         Přijmout
                     </flux:menu.item>
                     <flux:menu.item icon="phone-arrow-up-right"
-                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::CONTACTED }}')">
+                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ QuoteStatus::CONTACTED }}')">
                         Kontaktovaný
                     </flux:menu.item>
                     <flux:menu.item icon="x-circle"
-                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ \App\Enums\QuoteStatus::REJECTED }}')">
+                                    wire:click="changeQuoteStatus({{ $quote }}, '{{ QuoteStatus::REJECTED }}')">
                         Odmítnout
                     </flux:menu.item>
                 </flux:menu.submenu>

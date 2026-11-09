@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Contracts\Auth\MustVerifyEmail;
+@endphp
+
 <section class="w-full">
     @include('partials.settings-heading')
 
@@ -8,7 +12,7 @@
             <div>
                 <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
 
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
+                @if (auth()->user() instanceof MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
                     <div>
                         <flux:text class="mt-4">
                             {{ __('Your email address is unverified.') }}

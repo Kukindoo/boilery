@@ -1,3 +1,7 @@
+@php
+    use App\Enums\BoilerManufacturers;
+@endphp
+
 <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
     @if (! $form->quote)
     <flux:input wire:model="form.firstName" label="Jméno (Vyžadováno)" type="text" autocomplete="given-name"/>
@@ -39,7 +43,7 @@
             Výrobce bojlerů
         </label>
         <flux:select wire:model="form.boilerManufacturer" variant="listbox" placeholder="Zvolte výrobce bojlerů...">
-            @foreach(\App\Enums\BoilerManufacturers::cases() as $boilerManufacturer)
+            @foreach(BoilerManufacturers::cases() as $boilerManufacturer)
                 <flux:select.option value="{{ $boilerManufacturer->value }}">
                     {{ $boilerManufacturer->label() }}
                 </flux:select.option>
