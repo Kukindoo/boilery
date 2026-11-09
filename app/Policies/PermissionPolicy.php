@@ -17,4 +17,9 @@ class PermissionPolicy
     {
         return $this->viewAny($user);
     }
+
+    public function manageRoles(User $user, Permission $permission): bool
+    {
+        return $user->can(Permissions::ROLE_EDIT_ALL->label());
+    }
 }
