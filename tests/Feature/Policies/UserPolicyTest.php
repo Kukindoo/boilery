@@ -7,6 +7,7 @@ use App\Enums\Roles;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use Spatie\Permission\Models\Role;
 use Tests\Feature\FeatureTestCase;
 
@@ -97,6 +98,30 @@ class UserPolicyTest extends FeatureTestCase
 
         $this->assertFalse(Gate::forUser($user)->allows('viewAny', User::class));
         $this->actingAs($user)->get(route('customers.index'))->assertForbidden();
+    }
+
+    #[TestWith([null, false])]
+    #[TestWith([Permissions::USER_EDIT_ALL, true])]
+    #[TestWith([Permissions::USER_EDIT_OWN, false])]
+    public function test_role_assignment_requires_edit_all_users_permission(?Permissions $permission, bool $allowed): void
+    {
+        $actor = User::factory()->create();
+        if ($permission !== null) {
+            $role = Role::create(['name' => 'Delegated role', 'guard_name' => 'web']);
+            $role->givePermissionTo($permission->label());
+            $actor->assignRole($role);
+        }
+        $target = User::factory()->create();
+
+        $this->assertSame($allowed, Gate::forUser($actor)->allows('manageRoles', $target));
+    }
+
+    public function test_admin_without_role_assignment_permission_cannot_manage_user_roles(): void
+    {
+        Role::findById(Roles::ADMIN->value)->revokePermissionTo(Permissions::USER_EDIT_ALL->label());
+        $admin = User::factory()->admin()->create();
+
+        $this->assertFalse(Gate::forUser($admin)->allows('manageRoles', User::factory()->create()));
     }
 
     public function test_customer_own_permissions_do_not_allow_listing_all_users(): void

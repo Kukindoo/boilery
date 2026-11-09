@@ -10,11 +10,6 @@
                     <flux:button size="sm" :href="route('roles.index')">
                         Zpět
                     </flux:button>
-                    @can('update', $role)
-                        <flux:button size="sm" icon="pencil" :href="route('roles.edit', $role)">
-                            Upravit
-                        </flux:button>
-                    @endcan
                 </div>
             </x-slot>
             <x-stellaris.container.show-row title="Název">
