@@ -11,6 +11,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function (): void {
             Route::middleware(['web', 'auth'])
+                ->prefix('roles')
+                ->name('roles.')
+                ->group(base_path('routes/roles.php'));
+
+            Route::middleware(['web', 'auth'])
+                ->prefix('permissions')
+                ->name('permissions.')
+                ->group(base_path('routes/permissions.php'));
+
+            Route::middleware(['web', 'auth'])
                 ->prefix('spare-parts')
                 ->name('spare-parts.')
                 ->group(base_path('routes/spare-parts.php'));
