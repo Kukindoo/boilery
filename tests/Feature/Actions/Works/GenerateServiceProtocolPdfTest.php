@@ -55,6 +55,11 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
         ]) : null;
         $work = Work::factory()->for($customer)->create(['quote_id' => $quote?->id]);
 
+        $part = \App\Models\SparePart::factory()->create([
+            'name' => 'Protocol spare part', 'part_number' => 'PROTOCOL-42', 'price_in_cents' => 1745,
+        ]);
+        $work->spareParts()->attach($part, ['amount' => 3]);
+
         $response = $this->actingAs(User::factory()->admin()->create())
             ->get(route('works.show', $work))->assertOk();
         $preview = $response->viewData('pdfContent');
@@ -65,6 +70,9 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
         $this->assertStringContainsString('Current address 42', $preview);
         $this->assertStringNotContainsString('+420999888777', $preview);
         $this->assertStringNotContainsString('Old quote address 99', $preview);
+        $this->assertStringContainsString('Protocol spare part', $preview);
+        $this->assertStringContainsString('PROTOCOL-42', $preview);
+        $this->assertStringContainsString('CZK 52,35', $preview);
         Http::assertSent(fn (Request $request): bool => $request['html'] === $preview);
     }
 
