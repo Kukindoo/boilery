@@ -3,12 +3,17 @@
 namespace App\Providers;
 
 use App\Constants\RateLimiterNames;
+use App\Policies\PermissionPolicy;
+use App\Policies\RolePolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Contracts\Activity as ActivityContract;
 use Spatie\Activitylog\Facades\Activity;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->registerPolicies();
+
         Activity::beforeLogging(function (ActivityContract $activity) {
             if (! app()->runningInConsole()) {
                 $activity->properties = $activity->properties->merge([
@@ -47,5 +54,11 @@ class AppServiceProvider extends ServiceProvider
                     ->by('email:' . hash('sha256', mb_strtolower(mb_trim($email)))),
             ];
         });
+    }
+
+    private function registerPolicies(): void
+    {
+        Gate::policy(Role::class, RolePolicy::class);
+        Gate::policy(Permission::class, PermissionPolicy::class);
     }
 }
