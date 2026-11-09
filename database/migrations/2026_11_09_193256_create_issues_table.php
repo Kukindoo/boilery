@@ -11,8 +11,6 @@ return new class extends Migration
         Schema::create('issues', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('quote_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('work_id')->nullable()->constrained()->nullOnDelete();
             $table->dateTime('started_at')->nullable();
             $table->dateTime('finished_at')->nullable();
             $table->timestamps();
