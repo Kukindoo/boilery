@@ -17,35 +17,6 @@
                 {{ $role->name }}
             </x-stellaris.container.show-row>
         </x-stellaris.container.show-card>
-        <x-stellaris.container.show-card :title="__('Oprávnění')">
-            @forelse ($permissionGroups as $modelType => $permissions)
-                @if(! $loop->first)
-                    <flux:separator class="col-span-3" />
-                @endif
-                <x-stellaris.container.show-row :title="ucfirst($modelType)">
-                    <div class="space-y-2">
-                        <div class="grid grid-cols-1 items-start gap-4 md:grid-cols-2">
-                            @foreach (['all' => 'ALL', 'own' => 'OWN', 'other' => 'Další oprávnění'] as $scope => $label)
-                                @if ($scope !== 'other' || isset($permissionScopes[$modelType][$scope]))
-                                        <div class="grid grid-cols-1 gap-2">
-                                            @forelse ($permissionScopes[$modelType][$scope] ?? [] as $permission)
-                                                <flux:badge :href="route('permissions.show', $permission)">
-                                                    {{ $permission->name }}
-                                                </flux:badge>
-                                            @empty
-                                                <flux:text>
-                                                    —
-                                                </flux:text>
-                                            @endforelse
-                                        </div>
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                </x-stellaris.container.show-row>
-            @empty
-                —
-            @endforelse
-        </x-stellaris.container.show-card>
+        <livewire:roles.role-permissions :role="$role" />
     </div>
 </x-layouts::app>
