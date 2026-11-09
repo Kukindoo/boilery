@@ -118,7 +118,11 @@ class WorksCrudTest extends FeatureTestCase
     public function test_manufacturer_can_be_edited_validated_and_cleared(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo([Permissions::WORK_EDIT_OWN, Permissions::WORK_VIEW_OWN]);
+        $user->givePermissionTo([
+            Permissions::WORK_EDIT_OWN,
+            Permissions::WORK_VIEW_OWN,
+            Permissions::ASSEMBLY_ACTION_VIEW_ALL,
+        ]);
         $work = Work::factory()->for($user)->create([
             'type_of_product' => 'Ohřívač vody',
             'boiler_manufacturer' => BoilerManufacturers::DRAZICE,
@@ -143,7 +147,11 @@ class WorksCrudTest extends FeatureTestCase
     public function test_edit_loads_and_saves_work_status(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo([Permissions::WORK_EDIT_OWN, Permissions::WORK_VIEW_OWN]);
+        $user->givePermissionTo([
+            Permissions::WORK_EDIT_OWN,
+            Permissions::WORK_VIEW_OWN,
+            Permissions::ASSEMBLY_ACTION_VIEW_ALL,
+        ]);
         $work = Work::factory()->for($user)->create(['status' => \App\Enums\WorkStatus::PROCESSING]);
 
         Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
@@ -160,7 +168,11 @@ class WorksCrudTest extends FeatureTestCase
     public function test_edit_loads_saves_displays_and_clears_work_start_date(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo([Permissions::WORK_EDIT_OWN, Permissions::WORK_VIEW_OWN]);
+        $user->givePermissionTo([
+            Permissions::WORK_EDIT_OWN,
+            Permissions::WORK_VIEW_OWN,
+            Permissions::ASSEMBLY_ACTION_VIEW_ALL,
+        ]);
         $work = Work::factory()->for($user)->create(['work_accepted_at' => '2026-10-19', 'work_started_at' => '2026-10-20']);
 
         $component = Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
@@ -172,7 +184,7 @@ class WorksCrudTest extends FeatureTestCase
 
         $component->set('form.workStartedAt', '2026-10-21')->call('submit')->assertHasNoErrors();
         $this->assertSame('2026-10-21', $work->refresh()->work_started_at->toDateString());
-        $this->get(route('works.show', $work))->assertSee('Datum zahájení')->assertSee('21-10-2026');
+        $this->get(route('works.show', $work))->assertOk()->assertSee('Datum zahájení')->assertSee('21-10-2026');
 
         Livewire::test(WorkEdit::class, ['work' => $work])
             ->set('form.workStartedAt', '')->call('submit')->assertHasNoErrors();

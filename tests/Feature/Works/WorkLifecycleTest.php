@@ -101,26 +101,30 @@ class WorkLifecycleTest extends FeatureTestCase
     public function test_show_exposes_only_the_available_transition_to_authorized_users(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo([Permissions::WORK_VIEW_ALL, Permissions::WORK_EDIT_ALL]);
+        $user->givePermissionTo([
+            Permissions::WORK_VIEW_ALL,
+            Permissions::WORK_EDIT_ALL,
+            Permissions::ASSEMBLY_ACTION_VIEW_ALL,
+        ]);
         $work = Work::factory()->create();
 
-        $this->actingAs($user)->get(route('works.show', $work))
+        $this->actingAs($user)->get(route('works.show', $work))->assertOk()
             ->assertSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
         $this->post(route('works.start', $work));
-        $this->get(route('works.show', $work))
+        $this->get(route('works.show', $work))->assertOk()
             ->assertDontSee('Zahájit zakázku')->assertSee('Dokončit zakázku')->assertSee('Zrušit zakázku');
         $this->post(route('works.end', $work));
-        $this->get(route('works.show', $work))
+        $this->get(route('works.show', $work))->assertOk()
             ->assertSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
 
         $this->post(route('works.start', $work))->assertRedirect(route('works.show', $work));
         $this->post(route('works.cancel', $work))->assertRedirect(route('works.show', $work));
-        $this->get(route('works.show', $work))
+        $this->get(route('works.show', $work))->assertOk()
             ->assertSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
 
         $user->revokePermissionTo(Permissions::WORK_EDIT_ALL);
         $newWork = Work::factory()->create();
-        $this->get(route('works.show', $newWork))
+        $this->get(route('works.show', $newWork))->assertOk()
             ->assertDontSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
     }
 }
