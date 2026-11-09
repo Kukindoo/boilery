@@ -2,7 +2,6 @@
 
 namespace App\Livewire\SpareParts;
 
-use App\Models\SparePart;
 use App\Models\Work;
 use App\ValueObjects\Price;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -26,7 +25,6 @@ class WorkSpareParts extends Component
     {
         $this->work = $work;
         Gate::authorize('view', $work);
-        Gate::authorize('viewAny', SparePart::class);
     }
 
     /**
@@ -38,7 +36,6 @@ class WorkSpareParts extends Component
     public function render(): View
     {
         Gate::authorize('view', $this->work);
-        Gate::authorize('viewAny', SparePart::class);
 
         $parts = $this->work->spareParts()->orderBy('name')->get();
         $totalPrice = Price::fromCents(0);

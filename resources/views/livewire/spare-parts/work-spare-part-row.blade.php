@@ -1,8 +1,12 @@
 <flux:table.row>
     <flux:table.cell>
-        <flux:link :href="route('spare-parts.show', $part)">
+        @can('view', $part)
+            <flux:link :href="route('spare-parts.show', $part)">
+                {{ $part->name }}
+            </flux:link>
+        @else
             {{ $part->name }}
-        </flux:link>
+        @endcan
     </flux:table.cell>
     <flux:table.cell>
         {{ $part->part_number ?? '—' }}

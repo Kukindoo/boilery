@@ -39,7 +39,6 @@ class WorkSparePartRow extends Component
     public function mount(Work $work, SparePart $part, int $amount): void
     {
         Gate::authorize('view', $work);
-        Gate::authorize('viewAny', SparePart::class);
         $this->work = $work;
         $this->part = $part;
         $this->amount = $amount;
@@ -106,7 +105,6 @@ class WorkSparePartRow extends Component
     public function render(): View
     {
         Gate::authorize('view', $this->work);
-        Gate::authorize('viewAny', SparePart::class);
 
         return view('livewire.spare-parts.work-spare-part-row', [
             'linePrice' => Price::fromCents($this->part->price_in_cents)->multipliedBy($this->amount),
