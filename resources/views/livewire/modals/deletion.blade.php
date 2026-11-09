@@ -6,7 +6,7 @@
             </flux:button>
         </flux:modal.trigger>
     @endif
-    <flux:modal :name="$modalName ?? 'deletion-' . $this->getId()" wire:model.self="show">
+    <flux:modal :name="$modalName ?? 'deletion-' . $this->getId()" wire:model.self="show" @close="close">
         <div class="space-y-4">
             <flux:heading>
                 {{ $heading }}

@@ -17,6 +17,9 @@ class Deletion extends Component
     public bool $show = false;
 
     #[Locked]
+    public bool $confirmed = false;
+
+    #[Locked]
     public ?Model $model = null;
 
     #[Locked]
@@ -44,6 +47,7 @@ class Deletion extends Component
             Gate::authorize('delete', $this->model);
         }
 
+        $this->confirmed = false;
         $this->show = true;
     }
 
@@ -55,6 +59,7 @@ class Deletion extends Component
         }
 
         if ($this->model === null) {
+            $this->confirmed = true;
             $this->show = false;
             $this->dispatch('confirmed');
 
@@ -65,8 +70,18 @@ class Deletion extends Component
         Gate::authorize('delete', $this->model);
 
         $deleteModel->handle($this->model);
+        $this->confirmed = true;
         $this->show = false;
         $this->dispatch('deleted');
+    }
+
+    public function close(): void
+    {
+        $this->show = false;
+        if (! $this->confirmed) {
+            $this->dispatch('dismissed');
+        }
+        $this->confirmed = false;
     }
 
     public function render(): View

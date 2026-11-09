@@ -28,6 +28,21 @@ class DeletionModalTest extends TestCase
             ->assertSet('show', false)->assertNotDispatched('confirmed');
     }
 
+    public function test_outside_dismissal_notifies_parent_and_stays_closed_after_refresh(): void
+    {
+        Livewire::test(Deletion::class, ['heading' => 'Odebrat?', 'text' => 'Potvrďte odebrání.'])
+            ->assertSee('wire:close="close"', false)->set('show', true)->call('close')
+            ->assertSet('show', false)->assertDispatched('dismissed')->assertNotDispatched('confirmed')
+            ->call('$refresh')->assertSet('show', false);
+    }
+
+    public function test_closing_after_confirmation_does_not_cancel_the_parent_action(): void
+    {
+        Livewire::test(Deletion::class, ['heading' => 'Odebrat?', 'text' => 'Potvrďte odebrání.'])
+            ->set('show', true)->call('delete')->assertDispatched('confirmed')
+            ->call('close')->assertSet('show', false)->assertSet('confirmed', false)->assertNotDispatched('dismissed');
+    }
+
     public function test_a_closed_modal_does_not_dispatch_confirmation(): void
     {
         Livewire::test(Deletion::class, ['heading' => 'Smazat?', 'text' => 'Potvrďte odstranění.'])
