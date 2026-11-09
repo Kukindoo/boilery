@@ -45,6 +45,9 @@
             <x-works.work-info :work="$work"/>
             <x-works.work-boiler-info :work="$work"/>
             <x-works.work-repair-info :work="$work"/>
+            @can('view', $work)
+                <livewire:spare-parts.work-spare-parts :work="$work"/>
+            @endcan
             <x-works.work-transport-info :work="$work"/>
             <x-files.attachment-card :model="$work"/>
 

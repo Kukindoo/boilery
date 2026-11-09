@@ -32,7 +32,7 @@ readonly class GenerateServiceProtocolPdf
             $fileType = FileTypes::SERVICE_PROTOCOL;
             $fileLabel = $this->generateFileLabel->handle($work->user, $fileType, new File(['extension' => 'pdf']));
 
-            $content = Pdf::view('pdfs.service-protocol-pdf', $this->prepareServiceProtocolData->handle($work))->format('a4')
+            $content = Pdf::view('pdfs.service-protocol-pdf', $this->prepareServiceProtocolData->handle($work)->toArray())->format('a4')
                 ->generatePdfContent();
 
             $disk = Storage::disk();

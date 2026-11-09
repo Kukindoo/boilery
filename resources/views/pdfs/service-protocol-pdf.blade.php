@@ -1,6 +1,7 @@
 {{-- Standalone A4 view. All data is optional so the form can also be printed blank.
      CSS Grid requires a browser-based PDF renderer (such as Browsershot), not Dompdf.
-     Optional presentation data: $customer, $parts, $labour, $totals (arrays).
+     Optional presentation data: $customer (DTO), $parts (DTO list), $partsTotal,
+     $labour and $totals (arrays).
      Monetary values are supplied already formatted; this view performs no calculations. --}}
         <!DOCTYPE html>
 <html lang="cs">
@@ -33,7 +34,7 @@
 
         .page {
             width: 210mm;
-            height: 297mm;
+            min-height: 297mm;
             margin: 8mm auto;
             padding: 10mm;
             background: #fff;
@@ -49,7 +50,7 @@
 
         .protocol {
             display: grid;
-            grid-template-rows: 40mm 26mm 20mm 32mm 44mm 34mm 20mm 20mm 26mm;
+            grid-template-rows: 40mm 26mm 20mm 32mm minmax(44mm, auto) 34mm 20mm 20mm 26mm;
             border: .5mm solid #000;
         }
 
@@ -179,7 +180,7 @@
         }
 
         .items {
-            grid-template-rows: 6mm repeat(5, minmax(0, 1fr)) 6mm;
+            grid-template-rows: 6mm repeat(var(--parts-row-count, 5), minmax(6mm, 1fr)) 6mm;
         }
 
         .parts-row {
@@ -356,13 +357,13 @@
         <section class="grid customer section" aria-label="Údaje o zákazníkovi">
             <div class="grid customer-details divide">
                 <div class="cell field">
-                    <span>Zákazník:</span><span>{{ $customer['name'] ?? '' }}</span>
+                    <span>Zákazník:</span><span>{{ $customer->name ?? '' }}</span>
                 </div>
                 <div class="cell field">
-                    <span>Adresa:</span><span class="value">{{ $customer['address'] ?? '' }}</span>
+                    <span>Adresa:</span><span class="value">{{ $customer->address ?? '' }}</span>
                 </div>
                 <div class="cell field">
-                    <span>Tel:</span><span>{{ $customer['phone'] ?? '' }}</span>
+                    <span>Tel:</span><span>{{ $customer->phone ?? '' }}</span>
                 </div>
             </div>
             <div class="grid dates">
@@ -383,24 +384,45 @@
             <div class="value">{{ $work->work_performed_description ?? '' }}</div>
         </section>
 
-        <section class="grid items section" aria-label="Náhradní díly">
+        <section class="grid items section" aria-label="Náhradní díly"
+                 style="--parts-row-count: {{ max(5, count($parts ?? [])) }}">
             <div class="grid parts-row item-row item-heading">
-                <div class="cell">Číslo ND</div>
-                <div class="cell">Název ND</div>
-                <div class="cell">ks</div>
-                <div class="cell">Cena</div>
+                <div class="cell">
+                    Číslo ND
+                </div>
+                <div class="cell">
+                    Název ND
+                </div>
+                <div class="cell">
+                    ks
+                </div>
+                <div class="cell">
+                    Cena celkem
+                </div>
             </div>
-            @for ($row = 0; $row < 5; $row++)
+            @for ($row = 0; $row < max(5, count($parts ?? [])); $row++)
                 <div class="grid parts-row item-row">
-                    <div class="cell">{{ $parts[$row]['number'] ?? '' }}</div>
-                    <div class="cell">{{ $parts[$row]['name'] ?? '' }}</div>
-                    <div class="cell center">{{ $parts[$row]['quantity'] ?? '' }}</div>
-                    <div class="cell amount">{{ $parts[$row]['price'] ?? '' }}</div>
+                    <div class="cell">
+                        {{ $parts[$row]->number ?? '' }}
+                    </div>
+                    <div class="cell">
+                        {{ $parts[$row]->name ?? '' }}
+                    </div>
+                    <div class="cell center">
+                        {{ $parts[$row]->quantity ?? '' }}
+                    </div>
+                    <div class="cell amount">
+                        {{ $parts[$row]->price ?? '' }}
+                    </div>
                 </div>
             @endfor
             <div class="grid item-total">
-                <div class="cell label">ND celkem</div>
-                <div class="cell amount">{{ $totals['parts'] ?? '' }}</div>
+                <div class="cell label">
+                    ND celkem
+                </div>
+                <div class="cell amount">
+                    {{ $partsTotal ?? '' }}
+                </div>
             </div>
         </section>
 

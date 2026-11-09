@@ -52,6 +52,13 @@ class WorkPolicy
                 && $work->user_id === $user->id);
     }
 
+    public function manageSpareParts(User $user, Work $work): bool
+    {
+        return ! $work->trashed()
+            && $this->view($user, $work)
+            && $this->update($user, $work);
+    }
+
     public function start(User $user, Work $work): bool
     {
         return $user->can(Permissions::WORK_EDIT_ALL->label())

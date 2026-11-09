@@ -26,7 +26,7 @@ class WorksController extends Controller
     {
         $work->load(['user', 'files']);
 
-        $pdfContent = view('pdfs.service-protocol-pdf', $prepareServiceProtocolData->handle($work))->render();
+        $pdfContent = view('pdfs.service-protocol-pdf', $prepareServiceProtocolData->handle($work)->toArray())->render();
 
         return view('works.show', compact('work', 'pdfContent'));
     }
