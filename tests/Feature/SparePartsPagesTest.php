@@ -36,7 +36,7 @@ class SparePartsPagesTest extends FeatureTestCase
         $this->get(route('spare-parts.edit', $part))->assertOk()->assertSeeLivewire(SparePartEdit::class);
 
         Role::findById($role)->givePermissionTo([
-            Permissions::WORK_VIEW_ALL, Permissions::WORK_EDIT_ALL,
+            Permissions::WORK_VIEW_ALL->label(), Permissions::WORK_EDIT_ALL->label(),
         ]);
         $work = Work::factory()->create();
         Livewire::actingAs($user->fresh())->test(WorkSparePartAdd::class, ['work' => $work])
@@ -92,12 +92,14 @@ class SparePartsPagesTest extends FeatureTestCase
     {
         $customer = User::factory()->customer()->create();
         Role::findById(Roles::CUSTOMER->value)->givePermissionTo([
-            Permissions::WORK_VIEW_OWN, Permissions::WORK_EDIT_OWN,
+            Permissions::WORK_VIEW_OWN->label(), Permissions::WORK_EDIT_OWN->label(),
+            Permissions::ASSEMBLY_ACTION_VIEW_ALL->label(),
         ]);
         $work = Work::factory()->for($customer)->create();
         $part = SparePart::factory()->create();
 
         $this->actingAs($customer)->get(route('works.show', $work))
+            ->assertOk()
             ->assertSeeLivewire(WorkSparePartAdd::class);
         Livewire::actingAs($customer)->test(WorkSparePartAdd::class, ['work' => $work])
             ->set('form.sparePartId', (string) $part->id)
@@ -120,7 +122,7 @@ class SparePartsPagesTest extends FeatureTestCase
     {
         $customer = User::factory()->customer()->create();
         Role::findById(Roles::CUSTOMER->value)->givePermissionTo([
-            Permissions::WORK_VIEW_OWN,
+            Permissions::WORK_VIEW_OWN->label(),
         ]);
         $work = Work::factory()->for($customer)->create();
         $part = SparePart::factory()->create(['name' => 'Private spare part']);

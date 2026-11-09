@@ -38,7 +38,7 @@ class AssemblyActionsPagesTest extends FeatureTestCase
         $this->get(route('assembly-actions.edit', 999999))->assertNotFound();
     }
 
-    public function test_pages_require_authentication_and_customer_cannot_access_actions_even_with_permissions(): void
+    public function test_pages_require_authentication_and_customers_without_catalog_permissions_are_forbidden(): void
     {
         $action = AssemblyAction::factory()->create();
         foreach (['index', 'create', 'show', 'edit'] as $page) {
@@ -46,13 +46,30 @@ class AssemblyActionsPagesTest extends FeatureTestCase
         }
         $customer = User::factory()->create();
         $customer->assignRole(Role::findById(Roles::CUSTOMER->value));
-        $customer->givePermissionTo([Permissions::ASSEMBLY_ACTION_VIEW_ALL->label(), Permissions::WORK_VIEW_OWN->label()]);
+        Role::findById(Roles::CUSTOMER->value)->givePermissionTo(Permissions::WORK_VIEW_OWN->label());
         $work = Work::factory()->for($customer)->create();
         $this->actingAs($customer);
         foreach (['index', 'create', 'show', 'edit'] as $page) {
             $this->get(route('assembly-actions.' . $page, $action))->assertForbidden();
         }
         $this->get(route('works.show', $work))->assertOk()->assertSeeLivewire(WorkAssemblyActions::class);
+    }
+
+    public function test_customer_with_catalog_view_permission_can_view_but_cannot_create_or_edit_actions(): void
+    {
+        $customer = User::factory()->customer()->create();
+        Role::findById(Roles::CUSTOMER->value)->givePermissionTo(Permissions::ASSEMBLY_ACTION_VIEW_ALL->label());
+        $action = AssemblyAction::factory()->create();
+
+        $this->actingAs($customer)->get(route('assembly-actions.index'))
+            ->assertOk()->assertSee($action->code)->assertSee($action->name)
+            ->assertDontSee('href="' . route('assembly-actions.create') . '"', false)
+            ->assertDontSee('href="' . route('assembly-actions.edit', $action) . '"', false);
+        $this->get(route('assembly-actions.show', $action))
+            ->assertOk()->assertSee($action->code)->assertSee($action->name)
+            ->assertDontSee('href="' . route('assembly-actions.edit', $action) . '"', false);
+        $this->get(route('assembly-actions.create'))->assertForbidden();
+        $this->get(route('assembly-actions.edit', $action))->assertForbidden();
     }
 
     public function test_permissions_are_provisioned_only_to_staff_roles(): void
