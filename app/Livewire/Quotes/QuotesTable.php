@@ -101,6 +101,7 @@ class QuotesTable extends Component
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     public function delete(): void
     {
