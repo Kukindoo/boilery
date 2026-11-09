@@ -41,6 +41,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/quotes.php'));
 
             Route::middleware(['web', 'auth'])
+                ->prefix('issues')
+                ->name('issues.')
+                ->group(base_path('routes/issues.php'));
+
+            Route::middleware(['web', 'auth'])
                 ->prefix('works')
                 ->name('works.')
                 ->group(base_path('routes/works.php'));
