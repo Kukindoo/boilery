@@ -122,6 +122,12 @@ enum Permissions: int
 
     case SPARE_PART_FORCE_DELETE_ALL = 61;
 
+    case ROLE_VIEW_ALL = 70;
+
+    case ROLE_EDIT_ALL = 71;
+
+    case PERMISSION_VIEW_ALL = 72;
+
     public static function fromLabel(string $label): ?self
     {
         foreach (self::cases() as $permission) {
