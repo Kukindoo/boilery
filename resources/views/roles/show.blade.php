@@ -1,3 +1,7 @@
+@php
+    use App\Models\User;
+@endphp
+
 <x-layouts::app :title="$role->name">
     <div class="space-y-6">
         <x-stellaris.container.show-card :title="$role->name">
@@ -18,5 +22,8 @@
             </x-stellaris.container.show-row>
         </x-stellaris.container.show-card>
         <livewire:roles.role-permissions :role="$role" />
+        @can('viewAny', User::class)
+            <livewire:roles.role-users :role="$role" />
+        @endcan
     </div>
 </x-layouts::app>
