@@ -7,7 +7,7 @@
             <flux:heading size="lg">
                 Přidat díl k zakázce
             </flux:heading>
-            <flux:select wire:model.live="form.sparePartId" variant="listbox" label="Náhradní díl" placeholder="Vyberte náhradní díl">
+            <flux:select wire:model.live="form.sparePartId" variant="combobox" label="Náhradní díl" placeholder="Hledejte podle názvu nebo čísla dílu" empty="Žádné náhradní díly nenalezeny.">
                 @foreach ($availableParts as $part)
                     <flux:select.option :value="$part->id">
                         {{ $part->name }}{{ $part->part_number ? ' ('.$part->part_number.')' : '' }}
