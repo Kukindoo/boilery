@@ -17,6 +17,8 @@
             <x-customers.customer-info :customer="$customer" />
         </x-stellaris.container.index-card>
 
+        <livewire:customers.user-roles :user="$customer" />
+
         <x-customers.tables.quotes-table :quotes="$quotes" />
 
         <x-customers.tables.works-table :works="$works" />
