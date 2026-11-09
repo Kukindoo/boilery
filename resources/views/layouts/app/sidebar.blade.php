@@ -1,3 +1,11 @@
+@php
+    use App\Models\Quote;
+    use App\Models\Work;
+    use App\Models\AssemblyAction;
+    use App\Models\SparePart;
+    use App\Models\User;
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 <head>
@@ -18,19 +26,19 @@
                                wire:navigate>
                 Přehled
             </flux:navlist.item>
-            @can('viewAny', \App\Models\Quote::class)
+            @can('viewAny', Quote::class)
                 <flux:navlist.item icon="clipboard-document-list" :href="route('quotes.index')"
                                    :current="request()->routeIs('quotes.*')" wire:navigate>
                     Poptávky
                 </flux:navlist.item>
             @endcan
-            @can('viewAny', \App\Models\Work::class)
+            @can('viewAny', Work::class)
                 <flux:navlist.item icon="clipboard-document-list" :href="route('works.index')"
                                    :current="request()->routeIs('works.*')" wire:navigate>
                     Zakázky
                 </flux:navlist.item>
             @endcan
-            @can('viewAny', \App\Models\User::class)
+            @can('viewAny', User::class)
                 <flux:navlist.item icon="users" :href="route('customers.index')"
                                    :current="request()->routeIs('customers.*')" wire:navigate>
                     Zákazníci
@@ -40,12 +48,21 @@
     </flux:navlist>
 
     <flux:spacer/>
-            @can('viewAny', \App\Models\SparePart::class)
-                <flux:navlist.item icon="clipboard-document-list" :href="route('spare-parts.index')"
-                                   :current="request()->routeIs('spare-parts.*')" wire:navigate>
-                    Náhradní díly
-                </flux:navlist.item>
-            @endcan
+
+    <flux:navlist.group :heading="__('Modely')" class="grid">
+        @can('viewAny', AssemblyAction::class)
+            <flux:navlist.item icon="clipboard-document-list" :href="route('assembly-actions.index')"
+                               :current="request()->routeIs('assembly-actions.*')" wire:navigate>
+                Pracovní úkony
+            </flux:navlist.item>
+        @endcan
+        @can('viewAny', SparePart::class)
+            <flux:navlist.item icon="clipboard-document-list" :href="route('spare-parts.index')"
+                               :current="request()->routeIs('spare-parts.*')" wire:navigate>
+                Náhradní díly
+            </flux:navlist.item>
+        @endcan
+    </flux:navlist.group>
 
     <!-- Desktop User Menu -->
     <flux:dropdown class="hidden lg:block" position="bottom" align="start">
