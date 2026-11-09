@@ -48,7 +48,7 @@ class SparePartForm extends Form
             'price' => [
                 'required',
                 'string',
-                config('price.input_regex'),
+                'regex:' . config('price.input_regex'),
                 function (string $attribute, mixed $value, Closure $fail): void {
                     try {
                         Price::fromInput($value);
