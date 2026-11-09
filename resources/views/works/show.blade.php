@@ -1,3 +1,7 @@
+@php
+    use App\Models\SparePart;
+@endphp
+
 <x-layouts::app :title="__('Zakázky')">
     <div class="space-y-6">
         <x-stellaris.container.index-card
@@ -45,7 +49,9 @@
             <x-works.work-info :work="$work"/>
             <x-works.work-boiler-info :work="$work"/>
             <x-works.work-repair-info :work="$work"/>
-            <livewire:spare-parts.work-spare-parts :work="$work" />
+            @can('viewAny', SparePart::class)
+                <livewire:spare-parts.work-spare-parts :work="$work"/>
+            @endcan
             <x-works.work-transport-info :work="$work"/>
             <x-files.attachment-card :model="$work"/>
 
