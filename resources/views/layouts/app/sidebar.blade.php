@@ -1,5 +1,6 @@
 @php
     use App\Models\Quote;
+    use App\Models\Issue;
     use App\Models\Work;
     use App\Models\AssemblyAction;
     use App\Models\SparePart;
@@ -36,6 +37,12 @@
                 <flux:navlist.item icon="clipboard-document-list" :href="route('works.index')"
                                    :current="request()->routeIs('works.*')" wire:navigate>
                     Zakázky
+                </flux:navlist.item>
+            @endcan
+            @can('viewAny', Issue::class)
+                <flux:navlist.item icon="clipboard-document-list" :href="route('issues.index')"
+                                   :current="request()->routeIs('issues.*')" wire:navigate>
+                    Případy
                 </flux:navlist.item>
             @endcan
             @can('viewAny', User::class)
