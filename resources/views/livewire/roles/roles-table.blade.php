@@ -1,6 +1,4 @@
 <x-stellaris.livewire.table.wrapper heading="Role">
-    <x-slot name="actions">
-    </x-slot>
     <x-slot name="filters">
         @include('livewire.roles.partials.roles-table-filters')
     </x-slot>

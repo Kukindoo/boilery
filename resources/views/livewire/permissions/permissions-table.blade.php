@@ -2,8 +2,10 @@
     use App\Enums\Permissions;
     use Spatie\Permission\Models\Permission;
 @endphp
-
 <div class="space-y-6">
+    <flux:heading size="xl">
+        {{ __('Oprávnění') }}
+    </flux:heading>
     @include('livewire.permissions.partials.permissions-table-filters')
 
     <x-stellaris.container.show-card :title="__('Oprávnění')">
