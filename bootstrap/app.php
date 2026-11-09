@@ -36,6 +36,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/works.php'));
 
             Route::middleware(['web', 'auth'])
+                ->prefix('assembly-actions')
+                ->name('assembly-actions.')
+                ->group(base_path('routes/assembly-actions.php'));
+
+            Route::middleware(['web', 'auth'])
                 ->prefix('cold-tests')
                 ->name('cold-tests.')
                 ->group(base_path('routes/cold-tests.php'));
