@@ -38,7 +38,7 @@ class ServiceProtocolPreviewTest extends FeatureTestCase
             ->assertHasNoErrors()->assertDispatched('assembly-actions-changed');
         $preview->dispatch('assembly-actions-changed')->assertSee('CZK 25,50')->assertDontSee('CZK 17,45');
 
-        $row->call('remove')->assertDispatched('assembly-actions-changed');
+        $row->call('delete')->assertDispatched('assembly-actions-changed');
         $preview->dispatch('assembly-actions-changed')->assertDontSee('PREVIEW-01')->assertDontSee('CZK 25,50');
         Http::assertNothingSent();
         $this->assertTrue($work->files()->doesntExist());
