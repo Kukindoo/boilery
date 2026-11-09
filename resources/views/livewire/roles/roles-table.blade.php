@@ -1,6 +1,5 @@
 <x-stellaris.livewire.table.wrapper heading="Role">
     <x-slot name="actions">
-        @include('livewire.roles.partials.roles-table-actions')
     </x-slot>
     <x-slot name="filters">
         @include('livewire.roles.partials.roles-table-filters')
@@ -15,9 +14,6 @@
             </flux:table.column>
             <flux:table.column>
                 Uživatelé
-            </flux:table.column>
-            <flux:table.column>
-                Akce
             </flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
@@ -34,23 +30,14 @@
                     <flux:table.cell>
                         {{ $role->users_count }}
                     </flux:table.cell>
-                    <flux:table.cell>
-                        @include('livewire.roles.partials.roles-table-dropdown-actions')
-                    </flux:table.cell>
                 </flux:table.row>
             @empty
                 <flux:table.row>
-                    <flux:table.cell colspan="4">
+                    <flux:table.cell colspan="3">
                         Žádné záznamy.
                     </flux:table.cell>
                 </flux:table.row>
             @endforelse
         </flux:table.rows>
     </flux:table>
-    <livewire:modals.deletion
-        wire:model="confirmingDeletion"
-        @confirmed="delete"
-        heading="Smazat záznam?"
-        text="Záznam bude trvale smazán včetně všech přiřazení."
-    />
 </x-stellaris.livewire.table.wrapper>
