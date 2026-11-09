@@ -2,6 +2,7 @@
 
 namespace App\Actions\Works;
 
+use App\Dtos\Works\ServiceProtocolAssemblyActionDto;
 use App\Dtos\Works\ServiceProtocolCustomerDto;
 use App\Dtos\Works\ServiceProtocolDto;
 use App\Dtos\Works\ServiceProtocolPartDto;
@@ -35,6 +36,18 @@ class PrepareServiceProtocolData
             );
         }
 
+        $assemblyActions = [];
+        $assemblyActionsTotal = Price::fromCents(0);
+        foreach ($work->assemblyActions()->orderBy('assembly_actions.id')->get() as $action) {
+            $price = Price::fromCents((int) $action->pivot->getAttribute('price_in_cents'));
+            $assemblyActionsTotal = $assemblyActionsTotal->plus($price);
+            $assemblyActions[] = new ServiceProtocolAssemblyActionDto(
+                code: $action->code,
+                name: $action->name,
+                price: $price->format(),
+            );
+        }
+
         return new ServiceProtocolDto(
             work: $work,
             customer: new ServiceProtocolCustomerDto(
@@ -44,6 +57,8 @@ class PrepareServiceProtocolData
             ),
             parts: $parts,
             partsTotal: $partsTotal->format(),
+            assemblyActions: $assemblyActions,
+            assemblyActionsTotal: $assemblyActionsTotal->format(),
         );
     }
 }
