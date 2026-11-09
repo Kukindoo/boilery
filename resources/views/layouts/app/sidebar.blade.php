@@ -5,6 +5,8 @@
     use App\Models\AssemblyAction;
     use App\Models\SparePart;
     use App\Models\User;
+    use Spatie\Permission\Models\Role;
+    use Spatie\Permission\Models\Permission;
 @endphp
 
 <!DOCTYPE html>
