@@ -3,13 +3,10 @@
 namespace App\Livewire\Quotes;
 
 use App\Actions\Quotes\AcceptQuote;
-use App\Actions\Quotes\DeleteQuote;
 use App\Enums\QuoteStatus;
 use App\Models\Quote;
-use Exception;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Throwable;
@@ -27,11 +24,6 @@ class QuotesTable extends Component
         QuoteStatus::CONTACTED,
         QuoteStatus::PROCESSING,
     ];
-
-    #[Locked]
-    public ?int $deletingId = null;
-
-    public bool $confirmingDeletion = false;
 
     public function sort($column): void
     {
@@ -89,25 +81,5 @@ class QuotesTable extends Component
     public function openQuote(Quote $quote): void
     {
         $this->redirect(route('quotes.show', $quote));
-    }
-
-    public function confirmDelete(int $id): void
-    {
-        $quote = Quote::query()->findOrFail($id);
-        Gate::authorize('delete', $quote);
-        $this->deletingId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function delete(): void
-    {
-        abort_if($this->deletingId === null, 404);
-        $quote = Quote::query()->findOrFail($this->deletingId);
-        app(DeleteQuote::class)->handle($quote);
-        $this->reset('deletingId', 'confirmingDeletion');
-        $this->resetPage();
     }
 }

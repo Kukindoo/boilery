@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Enums\Permissions;
 use App\Enums\WorkStatus;
+use App\Models\AssemblyAction;
 use App\Models\User;
 use App\Models\Work;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -53,6 +54,13 @@ class WorkPolicy
     }
 
     public function manageSpareParts(User $user, Work $work): bool
+    {
+        return ! $work->trashed()
+            && $this->view($user, $work)
+            && $this->update($user, $work);
+    }
+
+    public function manageAssemblyActions(User $user, Work $work): bool
     {
         return ! $work->trashed()
             && $this->view($user, $work)

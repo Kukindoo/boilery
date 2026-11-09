@@ -125,7 +125,8 @@ class WorkSparePartRowTest extends FeatureTestCase
     #[TestWith(['edit'])]
     #[TestWith(['cancel'])]
     #[TestWith(['submit'])]
-    #[TestWith(['remove'])]
+    #[TestWith(['delete'])]
+    #[TestWith(['confirmDelete'])]
     public function test_row_actions_recheck_permissions_after_opening_editor(string $method): void
     {
         $admin = User::factory()->admin()->create();
@@ -141,6 +142,29 @@ class WorkSparePartRowTest extends FeatureTestCase
         Livewire::actingAs($admin->fresh());
         $row->call($method)->assertForbidden();
         $this->assertDatabaseHas('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id, 'amount' => 2]);
+    }
+
+    public function test_removal_confirmation_can_be_cancelled_before_detaching_only_this_work(): void
+    {
+        $work = Work::factory()->create();
+        $otherWork = Work::factory()->create();
+        $part = SparePart::factory()->create();
+        $work->spareParts()->attach($part, ['amount' => 2]);
+        $otherWork->spareParts()->attach($part, ['amount' => 3]);
+        $row = Livewire::actingAs(User::factory()->admin()->create())
+            ->test(WorkSparePartRow::class, ['work' => $work, 'part' => $part, 'amount' => 2])
+            ->assertSeeLivewire(\App\Livewire\Modals\Deletion::class)
+            ->assertDontSee('wire:confirm', false);
+
+        $row->call('confirmDelete')->assertSet('confirmingDeletion', true)
+            ->set('confirmingDeletion', false)->assertNotDispatched('spare-parts-changed');
+        $this->assertDatabaseHas('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id]);
+
+        $row->call('confirmDelete')->call('delete')->assertSet('confirmingDeletion', false)
+            ->assertDispatched('spare-parts-changed');
+        $this->assertDatabaseMissing('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id]);
+        $this->assertDatabaseHas('spare_part_work', ['work_id' => $otherWork->id, 'spare_part_id' => $part->id, 'amount' => 3]);
+        $this->assertNotSoftDeleted($part);
     }
 
     public function test_save_does_not_recreate_a_link_removed_after_opening_editor(): void

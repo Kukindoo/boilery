@@ -1,5 +1,9 @@
+@php
+    use App\Enums\WorkStatus;
+@endphp
+
 <flux:pillbox wire:model.live="selectedStatuses" multiple label="Status" placeholder="Vyberte statusy...">
-    @foreach (\App\Enums\WorkStatus::cases() as $status)
+    @foreach (WorkStatus::cases() as $status)
         <flux:pillbox.option :value="$status->value">
             {{ $status->label() }}
         </flux:pillbox.option>

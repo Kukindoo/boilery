@@ -1,6 +1,12 @@
+@php
+    use App\Enums\BoilerManufacturers;
+    use App\Enums\Permissions;
+    use App\Enums\WorkStatus;
+@endphp
+
 <div class="space-y-2">
     <x-stellaris.livewire.forms.side-to-side.section title="Informace o zakázce">
-        @if (auth()->user()->can($form->work ? \App\Enums\Permissions::WORK_EDIT_ALL->label() : \App\Enums\Permissions::WORK_CREATE_ALL->label()))
+        @if (auth()->user()->can($form->work ? Permissions::WORK_EDIT_ALL->label() : Permissions::WORK_CREATE_ALL->label()))
             <x-stellaris.livewire.forms.side-to-side.field label="ID Zákazníka">
                 <flux:input type="number" wire:model="form.userId" disabled/>
             </x-stellaris.livewire.forms.side-to-side.field>
@@ -17,7 +23,7 @@
         @if ($form->work)
             <x-stellaris.livewire.forms.side-to-side.field label="Status">
                 <flux:select wire:model="form.status" variant="listbox">
-                    @foreach (\App\Enums\WorkStatus::cases() as $status)
+                    @foreach (WorkStatus::cases() as $status)
                         <flux:select.option :value="$status->value">
                             {{ $status->label() }}
                         </flux:select.option>
@@ -68,7 +74,7 @@
         <x-stellaris.livewire.forms.side-to-side.field label="Výrobce bojleru">
             <flux:select wire:model="form.boilerManufacturer">
                 <flux:select.option value="">Zvolte výrobce bojleru...</flux:select.option>
-                @foreach (\App\Enums\BoilerManufacturers::cases() as $manufacturer)
+                @foreach (BoilerManufacturers::cases() as $manufacturer)
                     <flux:select.option :value="$manufacturer->value">{{ $manufacturer->label() }}</flux:select.option>
                 @endforeach
             </flux:select>

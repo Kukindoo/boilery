@@ -6,6 +6,7 @@ use App\Actions\SpareParts\DetachSparePartFromWork;
 use App\Livewire\Forms\SparePart\WorkSparePartAmountForm;
 use App\Models\SparePart;
 use App\Models\Work;
+use App\Traits\HasDeleteButton;
 use App\ValueObjects\Price;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
@@ -20,6 +21,8 @@ use Throwable;
 
 class WorkSparePartRow extends Component
 {
+    use HasDeleteButton;
+
     public WorkSparePartAmountForm $form;
 
     #[Locked]
@@ -39,6 +42,7 @@ class WorkSparePartRow extends Component
     public function mount(Work $work, SparePart $part, int $amount): void
     {
         Gate::authorize('view', $work);
+
         $this->work = $work;
         $this->part = $part;
         $this->amount = $amount;
@@ -53,6 +57,7 @@ class WorkSparePartRow extends Component
     public function edit(): void
     {
         Gate::authorize('manageSpareParts', $this->work);
+
         $part = $this->work->spareParts()->findOrFail($this->part->id);
         $this->amount = (int) $part->pivot->getAttribute('amount');
         $this->form->initForm($this->work, $part, $this->amount);
@@ -66,6 +71,7 @@ class WorkSparePartRow extends Component
     public function cancel(): void
     {
         Gate::authorize('manageSpareParts', $this->work);
+
         $this->form->amount = (string) $this->amount;
         $this->form->resetValidation();
         $this->editing = false;
@@ -77,6 +83,7 @@ class WorkSparePartRow extends Component
     public function submit(): void
     {
         Gate::authorize('manageSpareParts', $this->work);
+
         $this->form->submit();
         $this->amount = (int) $this->form->amount;
         $this->editing = false;
@@ -84,17 +91,6 @@ class WorkSparePartRow extends Component
         if ($this->amount === 0) {
             $this->skipRender();
         }
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public function remove(): void
-    {
-        Gate::authorize('manageSpareParts', $this->work);
-        app(DetachSparePartFromWork::class)->handle($this->work, $this->part);
-        $this->dispatch('spare-parts-changed');
-        $this->skipRender();
     }
 
     /**
@@ -109,5 +105,22 @@ class WorkSparePartRow extends Component
         return view('livewire.spare-parts.work-spare-part-row', [
             'linePrice' => Price::fromCents($this->part->price_in_cents)->multipliedBy($this->amount),
         ]);
+    }
+
+    protected function authorizeDeletion(): void
+    {
+        Gate::authorize('manageSpareParts', $this->work);
+
+        $this->work->spareParts()->findOrFail($this->part->id);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    protected function performDeletion(): void
+    {
+        app(DetachSparePartFromWork::class)->handle($this->work, $this->part);
+        $this->dispatch('spare-parts-changed');
+        $this->skipRender();
     }
 }

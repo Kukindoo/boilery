@@ -22,7 +22,7 @@ class WorkFileUploadTest extends FeatureTestCase
         $cases = [];
         foreach (['quote', 'work'] as $origin) {
             foreach ([Roles::ADMIN, Roles::STAKEHOLDER, Roles::CUSTOMER] as $role) {
-                $cases[$origin . ' ' . $role->name] = [$origin, $role];
+                $cases[$origin . ' ' . mb_strtolower($role->name)] = [$origin, $role];
             }
         }
 
@@ -53,6 +53,7 @@ class WorkFileUploadTest extends FeatureTestCase
                 Permissions::QUOTE_VIEW_OWN, Permissions::QUOTE_EDIT_OWN,
                 Permissions::WORK_VIEW_OWN, Permissions::WORK_EDIT_OWN,
                 Permissions::FILE_CREATE_OWN, Permissions::FILE_VIEW_OWN,
+                Permissions::ASSEMBLY_ACTION_VIEW_ALL,
             ]);
         }
         $quote = Quote::factory()->accepted()->for($customer)->create();

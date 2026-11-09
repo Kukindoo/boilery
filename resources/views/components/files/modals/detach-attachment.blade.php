@@ -1,5 +1,6 @@
 @php
     use App\Contracts\OwnsFiles;
+    use App\Models\File;
     use Illuminate\Database\Eloquent\Model;
 @endphp
 
@@ -9,7 +10,7 @@
 ])
 
 @php
-    /** @var \App\Models\File $file */
+    /** @var File $file */
     /** @var Model&OwnsFiles $model */
 @endphp
 

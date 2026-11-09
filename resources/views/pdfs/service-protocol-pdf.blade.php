@@ -1,7 +1,7 @@
 {{-- Standalone A4 view. All data is optional so the form can also be printed blank.
      CSS Grid requires a browser-based PDF renderer (such as Browsershot), not Dompdf.
      Optional presentation data: $customer (DTO), $parts (DTO list), $partsTotal,
-     $labour and $totals (arrays).
+     $assemblyActions (DTO list), $assemblyActionsTotal and $totals (array).
      Monetary values are supplied already formatted; this view performs no calculations. --}}
         <!DOCTYPE html>
 <html lang="cs">
@@ -50,7 +50,7 @@
 
         .protocol {
             display: grid;
-            grid-template-rows: 40mm 26mm 20mm 32mm minmax(44mm, auto) 34mm 20mm 20mm 26mm;
+            grid-template-rows: 40mm 26mm 20mm 32mm minmax(44mm, auto) minmax(34mm, auto) 20mm 20mm 26mm;
             border: .5mm solid #000;
         }
 
@@ -188,7 +188,7 @@
         }
 
         .labour {
-            grid-template-rows: 6mm repeat(4, minmax(0, 1fr)) 6mm;
+            grid-template-rows: 6mm repeat(var(--labour-row-count, 4), minmax(6mm, 1fr)) 6mm;
         }
 
         .labour-row {
@@ -426,22 +426,39 @@
             </div>
         </section>
 
-        <section class="grid labour section" aria-label="Práce">
+        <section class="grid labour section" aria-label="Práce"
+                 style="--labour-row-count: {{ max(4, count($assemblyActions ?? [])) }}">
             <div class="grid labour-row item-row item-heading">
-                <div class="cell">Kód opravy</div>
-                <div class="cell">Popis práce</div>
-                <div class="cell">Cena</div>
+                <div class="cell">
+                    Kód opravy
+                </div>
+                <div class="cell">
+                    Popis práce
+                </div>
+                <div class="cell">
+                    Cena
+                </div>
             </div>
-            @for ($row = 0; $row < 4; $row++)
+            @for ($row = 0; $row < max(4, count($assemblyActions ?? [])); $row++)
                 <div class="grid labour-row item-row">
-                    <div class="cell">{{ $labour[$row]['code'] ?? '' }}</div>
-                    <div class="cell">{{ $labour[$row]['description'] ?? '' }}</div>
-                    <div class="cell amount">{{ $labour[$row]['price'] ?? '' }}</div>
+                    <div class="cell">
+                        {{ $assemblyActions[$row]->code ?? '' }}
+                    </div>
+                    <div class="cell">
+                        {{ $assemblyActions[$row]->name ?? '' }}
+                    </div>
+                    <div class="cell amount">
+                        {{ $assemblyActions[$row]->price ?? '' }}
+                    </div>
                 </div>
             @endfor
             <div class="grid item-total">
-                <div class="cell label">Práce celkem</div>
-                <div class="cell amount">{{ $totals['labour'] ?? '' }}</div>
+                <div class="cell label">
+                    Práce celkem
+                </div>
+                <div class="cell amount">
+                    {{ $assemblyActionsTotal ?? '' }}
+                </div>
             </div>
         </section>
 

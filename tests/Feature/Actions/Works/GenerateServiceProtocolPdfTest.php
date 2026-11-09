@@ -4,6 +4,7 @@ namespace Tests\Feature\Actions\Works;
 
 use App\Actions\Works\GenerateServiceProtocolPdf;
 use App\Enums\FileTypes;
+use App\Livewire\Pdf\ServiceProtocolPreview;
 use App\Models\File;
 use App\Models\Quote;
 use App\Models\User;
@@ -13,6 +14,7 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 use Mockery;
 use PHPUnit\Framework\Attributes\TestWith;
 use RuntimeException;
@@ -60,9 +62,9 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
         ]);
         $work->spareParts()->attach($part, ['amount' => 3]);
 
-        $response = $this->actingAs(User::factory()->admin()->create())
-            ->get(route('works.show', $work))->assertOk();
-        $preview = $response->viewData('pdfContent');
+        $this->actingAs(User::factory()->admin()->create())
+            ->get(route('works.show', $work))->assertOk()->assertSeeLivewire(ServiceProtocolPreview::class);
+        $preview = Livewire::test(ServiceProtocolPreview::class, ['work' => $work])->viewData('pdfContent');
         app(GenerateServiceProtocolPdf::class)->handle($work);
 
         $this->assertStringContainsString('Current Customer', $preview);

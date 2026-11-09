@@ -21,6 +21,7 @@ class ForceDeleteSparePart
             DB::transaction(function () use ($sparePart): void {
                 $sparePart->refreshForUpdate();
                 Gate::authorize('forceDelete', $sparePart);
+
                 $sparePart->forceDelete();
                 $this->logActionCompleted('spare_parts', $sparePart, 'Spare part permanently deleted');
             }, attempts: 5);

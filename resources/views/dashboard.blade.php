@@ -1,8 +1,12 @@
+@php
+    use App\Enums\Roles;
+@endphp
+
 <x-layouts::app :title="__('Přehled')">
     <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
         <div class="grid auto-rows-min gap-4 md:grid-cols-3">
             <div class="relative aspect-video overflow-hidden rounded-xl border border-primary-border dark:border-primary-dark-border-strong">
-                @if(auth()->user()->hasAnyRole(\App\Enums\Roles::ADMIN->value, \App\Enums\Roles::STAKEHOLDER->value))
+                @if(auth()->user()->hasAnyRole(Roles::ADMIN->value, Roles::STAKEHOLDER->value))
                     <form action="{{ route('cold-tests.email') }}" method="POST" class="absolute inset-0 z-10">
                         @csrf
                         <flux:button type="submit" class="absolute inset-0 z-10 w-full h-full">

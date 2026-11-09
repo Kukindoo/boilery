@@ -20,7 +20,7 @@ class WorkPolicyTest extends FeatureTestCase
 
         foreach (Permissions::cases() as $permission) {
             if (str_starts_with($permission->name, 'WORK_')) {
-                $cases[$permission->name] = [$permission];
+                $cases[mb_strtolower($permission->name)] = [$permission];
             }
         }
 
@@ -82,7 +82,7 @@ class WorkPolicyTest extends FeatureTestCase
         foreach ($allowedStatuses as $ability => $statuses) {
             foreach (WorkStatus::cases() as $status) {
                 foreach ([null, Permissions::WORK_EDIT_OWN, Permissions::WORK_EDIT_ALL] as $permission) {
-                    $key = $ability . ' ' . $status->value . ' ' . ($permission?->name ?? 'none');
+                    $key = $ability . ' ' . $status->value . ' ' . mb_strtolower($permission?->name ?? 'none');
                     $cases[$key] = [$ability, $status, $permission, $permission === Permissions::WORK_EDIT_ALL && in_array($status, $statuses, true)];
                 }
             }

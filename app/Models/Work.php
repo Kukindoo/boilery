@@ -109,6 +109,12 @@ class Work extends Model implements OwnsFiles
         return $this->belongsTo(Quote::class, 'quote_id');
     }
 
+    /** @return BelongsToMany<AssemblyAction, $this> */
+    public function assemblyActions(): BelongsToMany
+    {
+        return $this->belongsToMany(AssemblyAction::class)->withPivot('price_in_cents')->withTimestamps();
+    }
+
     public function hasServiceProtocol(): bool
     {
         return $this->files()->where('file_type', FileTypes::SERVICE_PROTOCOL->value)->exists();

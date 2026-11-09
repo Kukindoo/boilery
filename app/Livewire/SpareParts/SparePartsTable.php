@@ -2,12 +2,11 @@
 
 namespace App\Livewire\SpareParts;
 
-use App\Actions\SpareParts\DeleteSparePart;
 use App\Models\SparePart;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\QueryException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
@@ -15,7 +14,6 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Throwable;
 
 class SparePartsTable extends Component
 {
@@ -26,8 +24,6 @@ class SparePartsTable extends Component
     public string $sortBy = 'name';
 
     public string $sortDirection = 'asc';
-
-    public ?int $deleteId = null;
 
     /**
      * @throws AuthorizationException
@@ -47,14 +43,17 @@ class SparePartsTable extends Component
     public function spareParts(): LengthAwarePaginator
     {
         Gate::authorize('viewAny', SparePart::class);
+
         $column = in_array($this->sortBy, ['name', 'part_number', 'created_at'], true) ? $this->sortBy : 'name';
         $direction = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
-        return SparePart::query()->when($this->search !== '', function (Builder $query): void {
-            $query->where(function (Builder $query): void {
-                $query->where('name', 'like', '%' . $this->search . '%')->orWhere('part_number', 'like', '%' . $this->search . '%');
-            });
-        })->orderBy($column, $direction)->orderBy('id')->paginate(15);
+        return SparePart::query()
+            ->withExists(['works' => fn (Builder $query) => $query->withoutGlobalScope(SoftDeletingScope::class)])
+            ->when($this->search !== '', function (Builder $query): void {
+                $query->where(function (Builder $query): void {
+                    $query->where('name', 'like', '%' . $this->search . '%')->orWhere('part_number', 'like', '%' . $this->search . '%');
+                });
+            })->orderBy($column, $direction)->orderBy('id')->paginate(15);
     }
 
     /**
@@ -71,31 +70,6 @@ class SparePartsTable extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
-    }
-
-    /**
-     * @throws AuthorizationException
-     * @throws ModelNotFoundException
-     * @throws QueryException
-     */
-    public function confirmDelete(int $id): void
-    {
-        Gate::authorize('delete', SparePart::findOrFail($id));
-        $this->deleteId = $id;
-        $this->modal('delete-spare-part')->show();
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public function delete(): void
-    {
-        abort_if($this->deleteId === null, 404);
-        app(DeleteSparePart::class)->handle(SparePart::findOrFail($this->deleteId));
-        $this->deleteId = null;
-        $this->modal('delete-spare-part')->close();
-        $this->resetPage();
-        unset($this->spareParts);
     }
 
     public function render(): View

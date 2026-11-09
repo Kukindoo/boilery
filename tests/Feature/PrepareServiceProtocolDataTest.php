@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Actions\Works\PrepareServiceProtocolData;
+use App\Models\AssemblyAction;
 use App\Models\SparePart;
 use App\Models\Work;
 
@@ -58,6 +59,8 @@ class PrepareServiceProtocolDataTest extends FeatureTestCase
         $data = app(PrepareServiceProtocolData::class)->handle(Work::factory()->create());
 
         $this->assertSame([], $data->parts);
+        $this->assertSame([], $data->assemblyActions);
+        $this->assertSame('CZK 0,00', $data->assemblyActionsTotal);
         $this->assertSame('CZK 0,00', $data->partsTotal);
         $this->assertStringContainsString('ND celkem', view('pdfs.service-protocol-pdf', $data->toArray())->render());
     }
@@ -77,5 +80,73 @@ class PrepareServiceProtocolDataTest extends FeatureTestCase
         $this->assertSame('CZK 52,35', $data->partsTotal);
         $this->assertStringContainsString('&lt;script&gt;unsafe&lt;/script&gt;', $html);
         $this->assertStringNotContainsString('<script>unsafe</script>', $html);
+    }
+
+    public function test_protocol_lists_assembly_actions_with_work_specific_prices_in_labour_section(): void
+    {
+        $work = Work::factory()->create(['work_performed_description' => 'Existing repair description']);
+        $otherWork = Work::factory()->create();
+        $first = AssemblyAction::factory()->create(['name' => 'Montáž ohřívače', 'code' => 'M-001']);
+        $second = AssemblyAction::factory()->create(['name' => 'Kontrola zapojení', 'code' => 'K-002']);
+        $unrelated = AssemblyAction::factory()->create(['name' => 'Unrelated action']);
+        $work->assemblyActions()->attach($first, ['price_in_cents' => 1745]);
+        $work->assemblyActions()->attach($second, ['price_in_cents' => 2500]);
+        $otherWork->assemblyActions()->attach($first, ['price_in_cents' => 99999]);
+        $otherWork->assemblyActions()->attach($unrelated, ['price_in_cents' => 1000]);
+
+        $data = app(PrepareServiceProtocolData::class)->handle($work);
+        $this->assertCount(2, $data->assemblyActions);
+        $this->assertSame('M-001', $data->assemblyActions[0]->code);
+        $this->assertSame('Montáž ohřívače', $data->assemblyActions[0]->name);
+        $this->assertSame('CZK 17,45', $data->assemblyActions[0]->price);
+        $this->assertSame('Kontrola zapojení', $data->assemblyActions[1]->name);
+        $this->assertSame('CZK 25,00', $data->assemblyActions[1]->price);
+        $this->assertSame('CZK 42,45', $data->assemblyActionsTotal);
+
+        $html = view('pdfs.service-protocol-pdf', $data->toArray())->render();
+        preg_match('/<section class="grid labour section".*?<\/section>/s', $html, $matches);
+        $this->assertStringContainsString('Montáž ohřívače', $matches[0]);
+        $this->assertStringContainsString('M-001', $matches[0]);
+        $this->assertStringContainsString('K-002', $matches[0]);
+        $this->assertStringContainsString('Kontrola zapojení', $matches[0]);
+        $this->assertStringContainsString('CZK 17,45', $matches[0]);
+        $this->assertStringContainsString('CZK 42,45', $matches[0]);
+        $this->assertStringNotContainsString('Unrelated action', $html);
+        $this->assertStringNotContainsString('CZK 999,99', $html);
+        $this->assertStringContainsString('Existing repair description', $html);
+    }
+
+    public function test_protocol_renders_all_assembly_actions_beyond_four_blank_rows(): void
+    {
+        $work = Work::factory()->create();
+        foreach (range(1, 6) as $number) {
+            $action = AssemblyAction::factory()->create(['name' => 'Assembly action ' . $number]);
+            $work->assemblyActions()->attach($action, ['price_in_cents' => 1000]);
+        }
+
+        $data = app(PrepareServiceProtocolData::class)->handle($work);
+        $html = view('pdfs.service-protocol-pdf', $data->toArray())->render();
+
+        $this->assertCount(6, $data->assemblyActions);
+        $this->assertStringContainsString('Assembly action 6', $html);
+        $this->assertStringContainsString('--labour-row-count: 6', $html);
+        $this->assertStringContainsString('CZK 60,00', $html);
+    }
+
+    public function test_protocol_reads_current_assembly_action_prices_and_escapes_names(): void
+    {
+        $work = Work::factory()->create();
+        $action = AssemblyAction::factory()->create(['name' => '<script>unsafe action</script>']);
+        $work->assemblyActions()->attach($action, ['price_in_cents' => 1745]);
+        $work->load('assemblyActions');
+        $work->assemblyActions()->updateExistingPivot($action->id, ['price_in_cents' => 2350]);
+
+        $data = app(PrepareServiceProtocolData::class)->handle($work);
+        $html = view('pdfs.service-protocol-pdf', $data->toArray())->render();
+
+        $this->assertSame('CZK 23,50', $data->assemblyActions[0]->price);
+        $this->assertSame('CZK 23,50', $data->assemblyActionsTotal);
+        $this->assertStringContainsString('&lt;script&gt;unsafe action&lt;/script&gt;', $html);
+        $this->assertStringNotContainsString('<script>unsafe action</script>', $html);
     }
 }

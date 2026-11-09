@@ -28,7 +28,7 @@ class UserPolicyTest extends FeatureTestCase
         $cases = [];
         foreach (['view' => 'VIEW', 'update' => 'EDIT', 'delete' => 'DELETE', 'restore' => 'RESTORE', 'forceDelete' => 'FORCE_DELETE'] as $ability => $name) {
             foreach (['none', 'ALL', 'OWN'] as $scope) {
-                $cases[$ability . ' ' . $scope] = [
+                $cases[mb_strtolower($ability . ' ' . $scope)] = [
                     $ability,
                     $scope === 'none' ? null : constant(Permissions::class . '::USER_' . $name . '_' . $scope),
                     $scope !== 'none',

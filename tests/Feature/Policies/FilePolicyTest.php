@@ -18,7 +18,7 @@ class FilePolicyTest extends FeatureTestCase
         $cases = ['none' => [null]];
         foreach (Permissions::cases() as $permission) {
             if (str_starts_with($permission->name, 'FILE_')) {
-                $cases[$permission->name] = [$permission];
+                $cases[mb_strtolower($permission->name)] = [$permission];
             }
         }
 

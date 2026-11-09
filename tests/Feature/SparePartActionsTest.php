@@ -122,7 +122,7 @@ class SparePartActionsTest extends FeatureTestCase
         if (in_array($action, [RestoreSparePart::class, ForceDeleteSparePart::class], true)) {
             $part->delete();
         }
-        if (in_array($action, [DetachSparePartFromWork::class, ForceDeleteSparePart::class, UpdateWorkSparePartAmount::class], true)) {
+        if (in_array($action, [DetachSparePartFromWork::class, UpdateWorkSparePartAmount::class], true)) {
             $work->spareParts()->attach($part);
         }
     }

@@ -121,11 +121,15 @@ class WorksPagesTest extends FeatureTestCase
     public function test_own_permissions_cannot_read_or_edit_another_users_work(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo([Permissions::WORK_VIEW_OWN, Permissions::WORK_EDIT_OWN]);
+        $user->givePermissionTo([
+            Permissions::WORK_VIEW_OWN,
+            Permissions::WORK_EDIT_OWN,
+            Permissions::ASSEMBLY_ACTION_VIEW_ALL,
+        ]);
         $own = Work::factory()->for($user)->create();
         $other = Work::factory()->create();
 
-        $this->actingAs($user)->get(route('works.show', $own))->assertSee($own->order_id);
+        $this->actingAs($user)->get(route('works.show', $own))->assertOk()->assertSee($own->order_id);
         $this->get(route('works.edit', $own))->assertSeeLivewire(WorkEdit::class);
         $this->get(route('works.show', $other))->assertForbidden();
         $this->get(route('works.edit', $other))->assertForbidden();

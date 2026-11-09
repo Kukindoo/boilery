@@ -55,6 +55,11 @@ cd -- "$destination"
 (umask 077; cp -- "$source_root/.env" .env)
 chmod 600 .env
 
+if [[ -f $source_root/.ai/laravel.md ]]; then
+    mkdir -p .ai
+    cp -- "$source_root/.ai/laravel.md" .ai/laravel.md
+fi
+
 if [[ -d $source_root/.ai/skills ]]; then
     mkdir -p .ai/skills
     cp -R -- "$source_root/.ai/skills/." .ai/skills/

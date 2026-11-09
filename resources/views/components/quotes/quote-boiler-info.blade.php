@@ -1,8 +1,10 @@
+@php
+    use App\Enums\BoilerManufacturers;
+@endphp
+
 @props(['quote'])
 
 @php
-    use App\Enums\BoilerManufacturers;
-
     $manufacturer = $quote->boiler_manufacturer;
 
         if (is_null($manufacturer)) {

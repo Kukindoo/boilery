@@ -108,6 +108,20 @@ enum Permissions: int
 
     case USER_FORCE_DELETE_OWN = 54;
 
+    case ASSEMBLY_ACTION_VIEW_ALL = 63;
+
+    case ASSEMBLY_ACTION_VIEW_INDEX = 64;
+
+    case ASSEMBLY_ACTION_CREATE_ALL = 65;
+
+    case ASSEMBLY_ACTION_EDIT_ALL = 66;
+
+    case ASSEMBLY_ACTION_DELETE_ALL = 67;
+
+    case ASSEMBLY_ACTION_RESTORE_ALL = 68;
+
+    case ASSEMBLY_ACTION_FORCE_DELETE_ALL = 69;
+
     case SPARE_PART_VIEW_ALL = 55;
 
     case SPARE_PART_VIEW_INDEX = 56;
@@ -125,6 +139,14 @@ enum Permissions: int
     public function label(): string
     {
         return match ($this) {
+            self::ASSEMBLY_ACTION_VIEW_ALL => 'View all assembly actions',
+            self::ASSEMBLY_ACTION_VIEW_INDEX => 'View index assembly actions',
+            self::ASSEMBLY_ACTION_CREATE_ALL => 'Create all assembly actions',
+            self::ASSEMBLY_ACTION_EDIT_ALL => 'Edit all assembly actions',
+            self::ASSEMBLY_ACTION_DELETE_ALL => 'Delete all assembly actions',
+            self::ASSEMBLY_ACTION_RESTORE_ALL => 'Restore all assembly actions',
+            self::ASSEMBLY_ACTION_FORCE_DELETE_ALL => 'Force delete all assembly actions',
+
             self::SPARE_PART_VIEW_ALL => 'View all spare parts',
             self::SPARE_PART_VIEW_INDEX => 'View index spare parts',
             self::SPARE_PART_CREATE_ALL => 'Create all spare parts',

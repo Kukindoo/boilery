@@ -31,10 +31,4 @@
             @endforelse
         </flux:table.rows>
     </flux:table>
-    @include('livewire.modals.deletion', [
-        'heading' => 'Smazat Náhradní díl?',
-        'text' => 'Opravdu chcete smazat tento náhradní díl? Náhradní díl bude archivován.',
-        'button' => 'Smazat',
-        'cancel' => 'Zrušit',
-    ])
 </x-stellaris.livewire.table.wrapper>

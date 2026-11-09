@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Foundation\Inspiring;
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
     <head>
@@ -15,7 +19,7 @@
                 </a>
 
                 @php
-                    [$message, $author] = str(Illuminate\Foundation\Inspiring::quotes()->random())->explode('-');
+                    [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
                 @endphp
 
                 <div class="relative z-20 mt-auto">
