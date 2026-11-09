@@ -2,8 +2,7 @@
 
 namespace App\Livewire\Roles;
 
-use App\Actions\Roles\UpdateRole;
-use App\Dtos\Roles\RoleDto;
+use App\Actions\Roles\UpdateRolePermissions;
 use App\Enums\Permissions;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
@@ -35,7 +34,8 @@ class RolePermissions extends Component
 
     public function edit(): void
     {
-        Gate::authorize('update', $this->role);
+        Gate::authorize('managePermissions', $this->role);
+
         $this->permissionIds = $this->role->permissions()->pluck('permissions.id')->all();
         $this->resetValidation();
         $this->editing = true;
@@ -50,7 +50,7 @@ class RolePermissions extends Component
 
     public function togglePermission(int $id): void
     {
-        Gate::authorize('update', $this->role);
+        Gate::authorize('managePermissions', $this->role);
         abort_unless($this->editing, 403);
         Permission::query()->where('guard_name', 'web')->findOrFail($id);
         if (in_array($id, $this->permissionIds, true)) {
@@ -65,13 +65,13 @@ class RolePermissions extends Component
      */
     public function save(): void
     {
-        Gate::authorize('update', $this->role);
+        Gate::authorize('managePermissions', $this->role);
         abort_unless($this->editing, 403);
         $this->validate([
             'permissionIds' => ['array'],
             'permissionIds.*' => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('guard_name', 'web')],
         ]);
-        app(UpdateRole::class)->handle($this->role, new RoleDto($this->role->fresh()->name, $this->permissionIds));
+        app(UpdateRolePermissions::class)->handle($this->role, $this->permissionIds);
         $this->role->unsetRelation('permissions');
         $this->cancel();
     }

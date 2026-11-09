@@ -3,14 +3,13 @@
 namespace App\Policies;
 
 use App\Enums\Permissions;
-use App\Enums\Roles;
 use App\Models\User;
 
 class UserPolicy
 {
     public function manageRoles(User $user, User $customer): bool
     {
-        return $user->hasRole(Roles::ADMIN->value);
+        return $user->can(Permissions::USER_EDIT_ALL->label());
     }
 
     public function viewAny(User $user): bool
