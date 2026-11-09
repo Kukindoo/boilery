@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Roles;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Roles\RoleCreateRequest;
-use App\Http\Requests\Roles\RoleEditRequest;
 use App\Http\Requests\Roles\RoleIndexRequest;
 use App\Http\Requests\Roles\RoleShowRequest;
 use Illuminate\Contracts\View\View;
@@ -17,18 +15,8 @@ class RoleController extends Controller
         return view('roles.index');
     }
 
-    public function create(RoleCreateRequest $request): View
-    {
-        return view('roles.create');
-    }
-
     public function show(RoleShowRequest $request, Role $role): View
     {
         return view('roles.show', compact('role'));
-    }
-
-    public function edit(RoleEditRequest $request, Role $role): View
-    {
-        return view('roles.edit', compact('role'));
     }
 }
