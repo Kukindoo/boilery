@@ -128,6 +128,26 @@ enum Permissions: int
 
     case PERMISSION_VIEW_ALL = 72;
 
+    case ISSUE_VIEW_ALL = 73;
+
+    case ISSUE_VIEW_OWN = 74;
+
+    case ISSUE_CREATE_ALL = 75;
+
+    case ISSUE_CREATE_OWN = 76;
+
+    case ISSUE_EDIT_ALL = 77;
+
+    case ISSUE_EDIT_OWN = 78;
+
+    case ISSUE_DELETE_ALL = 79;
+
+    case ISSUE_RESTORE_ALL = 80;
+
+    case ISSUE_RESTORE_OWN = 81;
+
+    case ISSUE_FORCE_DELETE_ALL = 82;
+
     public static function fromLabel(string $label): ?self
     {
         foreach (self::cases() as $permission) {
@@ -156,6 +176,7 @@ enum Permissions: int
             str_starts_with($this->name, 'USER') => 'users',
             str_starts_with($this->name, 'FILE') => 'files',
             str_starts_with($this->name, 'QUOTE') => 'quotes',
+            str_starts_with($this->name, 'ISSUE') => 'issues',
             str_starts_with($this->name, 'WORK') => 'works',
             str_starts_with($this->name, 'PDF') => 'pdfs',
             str_starts_with($this->name, 'ROLE_') => 'roles',
@@ -177,6 +198,17 @@ enum Permissions: int
     public function label(): string
     {
         return match ($this) {
+            self::ISSUE_VIEW_ALL => 'View all issues',
+            self::ISSUE_VIEW_OWN => 'View own issues',
+            self::ISSUE_CREATE_ALL => 'Create all issues',
+            self::ISSUE_CREATE_OWN => 'Create own issues',
+            self::ISSUE_EDIT_ALL => 'Edit all issues',
+            self::ISSUE_EDIT_OWN => 'Edit own issues',
+            self::ISSUE_DELETE_ALL => 'Delete all issues',
+            self::ISSUE_RESTORE_ALL => 'Restore all issues',
+            self::ISSUE_RESTORE_OWN => 'Restore own issues',
+            self::ISSUE_FORCE_DELETE_ALL => 'Force delete all issues',
+
             self::ROLE_VIEW_ALL => 'View all roles',
             self::ROLE_EDIT_ALL => 'Edit all roles',
             self::PERMISSION_VIEW_ALL => 'View all permissions',
