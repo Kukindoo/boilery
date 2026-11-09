@@ -13,6 +13,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -28,9 +29,11 @@ class AssemblyActionsTable extends Component
 
     public string $sortDirection = 'asc';
 
+    #[Locked]
     public ?int $deletingId = null;
 
     public bool $confirmingDeletion = false;
+
     /**
      * @throws AuthorizationException
      */
@@ -104,6 +107,7 @@ class AssemblyActionsTable extends Component
         app(DeleteAssemblyAction::class)->handle($assemblyAction);
         $this->reset('deletingId', 'confirmingDeletion');
         $this->resetPage();
+        unset($this->assemblyActions);
     }
 
     public function render(): View
