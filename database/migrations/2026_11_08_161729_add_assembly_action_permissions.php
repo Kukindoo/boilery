@@ -14,7 +14,6 @@ return new class extends Migration
         app(PermissionRegistrar::class)->forgetCachedPermissions();
         foreach ([
             Permissions::ASSEMBLY_ACTION_VIEW_ALL,
-            Permissions::ASSEMBLY_ACTION_VIEW_INDEX,
             Permissions::ASSEMBLY_ACTION_CREATE_ALL,
             Permissions::ASSEMBLY_ACTION_EDIT_ALL,
             Permissions::ASSEMBLY_ACTION_DELETE_ALL,

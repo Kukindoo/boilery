@@ -16,7 +16,7 @@ return new class extends Migration
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $permission = Permissions::GENERATE_PDF;
+        $permission = Permissions::PDF_GENERATE_ALL;
 
         $record = Permission::unguarded(fn () => Permission::firstOrCreate([
             'id' => $permission->value,

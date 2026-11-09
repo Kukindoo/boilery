@@ -14,8 +14,6 @@ return new class extends Migration
         foreach ([
             Permissions::WORK_VIEW_ALL,
             Permissions::WORK_VIEW_OWN,
-            Permissions::WORK_VIEW_INDEX,
-            Permissions::WORK_PRINT_ALL,
             Permissions::WORK_EDIT_ALL,
             Permissions::WORK_EDIT_OWN,
             Permissions::WORK_DELETE_ALL,

@@ -14,7 +14,6 @@ return new class extends Migration
         app(PermissionRegistrar::class)->forgetCachedPermissions();
         foreach ([
             Permissions::SPARE_PART_VIEW_ALL,
-            Permissions::SPARE_PART_VIEW_INDEX,
             Permissions::SPARE_PART_CREATE_ALL,
             Permissions::SPARE_PART_EDIT_ALL,
             Permissions::SPARE_PART_DELETE_ALL,

@@ -30,14 +30,12 @@ return new class extends Migration
         $stakeholderRole = Role::findById(Roles::STAKEHOLDER->value);
         $stakeholderRole->givePermissionTo([Permissions::QUOTE_VIEW_ALL,
             Permissions::QUOTE_EDIT_ALL,
-            Permissions::QUOTE_VIEW_INDEX,
-            Permissions::QUOTE_PRINT_ALL]);
+        ]);
 
         $adminRole = Role::findById(Roles::ADMIN->value);
         $adminRole->givePermissionTo([Permissions::QUOTE_VIEW_ALL,
             Permissions::QUOTE_EDIT_ALL,
-            Permissions::QUOTE_VIEW_INDEX,
-            Permissions::QUOTE_PRINT_ALL]);
+        ]);
 
         $customRole = Role::findById(Roles::CUSTOMER->value);
         $customRole->givePermissionTo([Permissions::QUOTE_VIEW_OWN,

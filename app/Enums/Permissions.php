@@ -8,10 +8,6 @@ enum Permissions: int
 
     case QUOTE_VIEW_OWN = 2;
 
-    case QUOTE_VIEW_INDEX = 3;
-
-    case QUOTE_PRINT_ALL = 4;
-
     case QUOTE_EDIT_ALL = 5;
 
     case QUOTE_EDIT_OWN = 6;
@@ -35,10 +31,6 @@ enum Permissions: int
     case WORK_VIEW_ALL = 9;
 
     case WORK_VIEW_OWN = 10;
-
-    case WORK_VIEW_INDEX = 11;
-
-    case WORK_PRINT_ALL = 12;
 
     case WORK_EDIT_ALL = 13;
 
@@ -80,15 +72,13 @@ enum Permissions: int
 
     case FILE_FORCE_DELETE_OWN = 38;
 
-    case GENERATE_PDF = 39;
+    case PDF_GENERATE_ALL = 39;
 
     case USER_VIEW_ALL = 40;
 
     case USER_EDIT_ALL = 41;
 
     case USER_VIEW_OWN = 42;
-
-    case USER_VIEW_INDEX = 43;
 
     case USER_EDIT_OWN = 46;
 
@@ -110,8 +100,6 @@ enum Permissions: int
 
     case ASSEMBLY_ACTION_VIEW_ALL = 63;
 
-    case ASSEMBLY_ACTION_VIEW_INDEX = 64;
-
     case ASSEMBLY_ACTION_CREATE_ALL = 65;
 
     case ASSEMBLY_ACTION_EDIT_ALL = 66;
@@ -124,8 +112,6 @@ enum Permissions: int
 
     case SPARE_PART_VIEW_ALL = 55;
 
-    case SPARE_PART_VIEW_INDEX = 56;
-
     case SPARE_PART_CREATE_ALL = 57;
 
     case SPARE_PART_EDIT_ALL = 58;
@@ -136,11 +122,44 @@ enum Permissions: int
 
     case SPARE_PART_FORCE_DELETE_ALL = 61;
 
+    public static function fromLabel(string $label): ?self
+    {
+        foreach (self::cases() as $permission) {
+            if ($permission->label() === $label) {
+                return $permission;
+            }
+        }
+
+        return null;
+    }
+
+    public function scope(): string
+    {
+        return match (true) {
+            str_ends_with($this->name, '_ALL') => 'all',
+            str_ends_with($this->name, '_OWN') => 'own',
+            default => 'other',
+        };
+    }
+
+    public function modelType(): string
+    {
+        return match (true) {
+            str_starts_with($this->name, 'ASSEMBLY_ACTION') => 'assembly actions',
+            str_starts_with($this->name, 'SPARE_PART') => 'spare parts',
+            str_starts_with($this->name, 'USER') => 'users',
+            str_starts_with($this->name, 'FILE') => 'files',
+            str_starts_with($this->name, 'QUOTE') => 'quotes',
+            str_starts_with($this->name, 'WORK') => 'works',
+            str_starts_with($this->name, 'PDF') => 'pdfs',
+            default => mb_strtolower(explode('_', $this->name, 2)[0]),
+        };
+    }
+
     public function label(): string
     {
         return match ($this) {
             self::ASSEMBLY_ACTION_VIEW_ALL => 'View all assembly actions',
-            self::ASSEMBLY_ACTION_VIEW_INDEX => 'View index assembly actions',
             self::ASSEMBLY_ACTION_CREATE_ALL => 'Create all assembly actions',
             self::ASSEMBLY_ACTION_EDIT_ALL => 'Edit all assembly actions',
             self::ASSEMBLY_ACTION_DELETE_ALL => 'Delete all assembly actions',
@@ -148,7 +167,6 @@ enum Permissions: int
             self::ASSEMBLY_ACTION_FORCE_DELETE_ALL => 'Force delete all assembly actions',
 
             self::SPARE_PART_VIEW_ALL => 'View all spare parts',
-            self::SPARE_PART_VIEW_INDEX => 'View index spare parts',
             self::SPARE_PART_CREATE_ALL => 'Create all spare parts',
             self::SPARE_PART_EDIT_ALL => 'Edit all spare parts',
             self::SPARE_PART_DELETE_ALL => 'Delete all spare parts',
@@ -158,7 +176,6 @@ enum Permissions: int
             self::USER_VIEW_ALL => 'View all users',
             self::USER_EDIT_ALL => 'Edit all users',
             self::USER_VIEW_OWN => 'View own users',
-            self::USER_VIEW_INDEX => 'View index users',
             self::USER_EDIT_OWN => 'Edit own users',
             self::USER_DELETE_ALL => 'Delete all users',
             self::USER_DELETE_OWN => 'Delete own users',
@@ -169,7 +186,7 @@ enum Permissions: int
             self::USER_FORCE_DELETE_ALL => 'Force delete all users',
             self::USER_FORCE_DELETE_OWN => 'Force delete own users',
 
-            self::GENERATE_PDF => 'Generate PDF',
+            self::PDF_GENERATE_ALL => 'Generate PDF',
 
             self::FILE_VIEW_ALL => 'View all files',
             self::FILE_VIEW_OWN => 'View own files',
@@ -184,8 +201,6 @@ enum Permissions: int
 
             self::QUOTE_VIEW_ALL => 'View all quotes',
             self::QUOTE_VIEW_OWN => 'View own quotes',
-            self::QUOTE_VIEW_INDEX => 'View index quotes',
-            self::QUOTE_PRINT_ALL => 'Print all quotes',
             self::QUOTE_EDIT_ALL => 'Edit all quotes',
             self::QUOTE_EDIT_OWN => 'Edit own quotes',
             self::QUOTE_DELETE_ALL => 'Delete all quotes',
@@ -199,8 +214,6 @@ enum Permissions: int
 
             self::WORK_VIEW_ALL => 'View all works',
             self::WORK_VIEW_OWN => 'View own works',
-            self::WORK_VIEW_INDEX => 'View index works',
-            self::WORK_PRINT_ALL => 'Print all works',
             self::WORK_EDIT_ALL => 'Edit all works',
             self::WORK_EDIT_OWN => 'Edit own works',
             self::WORK_DELETE_ALL => 'Delete all works',

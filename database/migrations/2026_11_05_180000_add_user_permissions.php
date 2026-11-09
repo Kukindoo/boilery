@@ -36,7 +36,6 @@ return new class extends Migration
         return [
             Permissions::USER_VIEW_ALL,
             Permissions::USER_VIEW_OWN,
-            Permissions::USER_VIEW_INDEX,
             Permissions::USER_EDIT_ALL,
             Permissions::USER_EDIT_OWN,
             Permissions::USER_DELETE_ALL,
