@@ -1,6 +1,7 @@
 @php
     use App\Contracts\OwnsFiles;
     use App\Enums\FileTypes;
+    use App\Models\Work;
     use Illuminate\Database\Eloquent\Model;
 @endphp
 
@@ -31,12 +32,16 @@
         <flux:heading size="lg">Náhled {{ $triggerName }} – {{ $model->getKey() }}</flux:heading>
         <livewire:pdf.pdf-generation :model="$model" />
 
-        <iframe
-                title="Náhled {{ $triggerName ?? 'PDF' }} {{ $model->getKey() }}"
-                class="h-[75vh] w-full rounded-lg border border-zinc-200 bg-white dark:border-zinc-700"
-                sandbox=""
-                srcdoc="{{ $pdfContent }}"
-        ></iframe>
+        @if ($model instanceof Work)
+            <livewire:pdf.service-protocol-preview :work="$model" />
+        @else
+            <iframe
+                    title="Náhled {{ $triggerName ?? 'PDF' }} {{ $model->getKey() }}"
+                    class="h-[75vh] w-full rounded-lg border border-zinc-200 bg-white dark:border-zinc-700"
+                    sandbox=""
+                    srcdoc="{{ $pdfContent }}"
+            ></iframe>
+        @endif
 
         <div class="flex justify-end">
             <flux:modal.close>

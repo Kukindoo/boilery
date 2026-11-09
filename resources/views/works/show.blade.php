@@ -12,7 +12,6 @@
 
             <x-slot name="actions">
                 <x-pdfs.pdf-modal-preview :model="$work"
-                                          :pdf-content="$pdfContent"
                                           :file-type="FileTypes::SERVICE_PROTOCOL->value"/>
 
                 @can('update', $work)
