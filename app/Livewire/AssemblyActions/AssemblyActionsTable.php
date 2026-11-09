@@ -2,22 +2,18 @@
 
 namespace App\Livewire\AssemblyActions;
 
-use App\Actions\AssemblyActions\DeleteAssemblyAction;
 use App\Models\AssemblyAction;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\QueryException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Throwable;
 
 class AssemblyActionsTable extends Component
 {
@@ -28,11 +24,6 @@ class AssemblyActionsTable extends Component
     public string $sortBy = 'name';
 
     public string $sortDirection = 'asc';
-
-    #[Locked]
-    public ?int $deletingId = null;
-
-    public bool $confirmingDeletion = false;
 
     /**
      * @throws AuthorizationException
@@ -81,33 +72,6 @@ class AssemblyActionsTable extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
-    }
-
-    /**
-     * @throws AuthorizationException
-     * @throws ModelNotFoundException
-     * @throws QueryException
-     */
-    public function confirmDelete(int $id): void
-    {
-        $assemblyAction = AssemblyAction::query()->findOrFail($id);
-        Gate::authorize('delete', $assemblyAction);
-
-        $this->deletingId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public function delete(): void
-    {
-        abort_if($this->deletingId === null, 404);
-        $assemblyAction = AssemblyAction::query()->findOrFail($this->deletingId);
-        app(DeleteAssemblyAction::class)->handle($assemblyAction);
-        $this->reset('deletingId', 'confirmingDeletion');
-        $this->resetPage();
-        unset($this->assemblyActions);
     }
 
     public function render(): View

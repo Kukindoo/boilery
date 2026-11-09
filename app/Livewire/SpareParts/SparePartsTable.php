@@ -2,22 +2,18 @@
 
 namespace App\Livewire\SpareParts;
 
-use App\Actions\SpareParts\DeleteSparePart;
 use App\Models\SparePart;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\QueryException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Throwable;
 
 class SparePartsTable extends Component
 {
@@ -28,11 +24,6 @@ class SparePartsTable extends Component
     public string $sortBy = 'name';
 
     public string $sortDirection = 'asc';
-
-    #[Locked]
-    public ?int $deletingId = null;
-
-    public bool $confirmingDeletion = false;
 
     /**
      * @throws AuthorizationException
@@ -79,33 +70,6 @@ class SparePartsTable extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
-    }
-
-    /**
-     * @throws AuthorizationException
-     * @throws ModelNotFoundException
-     * @throws QueryException
-     */
-    public function confirmDelete(int $id): void
-    {
-        $sparePart = SparePart::findOrFail($id);
-        Gate::authorize('delete', $sparePart);
-
-        $this->deletingId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    /**
-     * @throws Throwable
-     */
-    public function delete(): void
-    {
-        abort_if($this->deletingId === null, 404);
-        $sparePart = SparePart::findOrFail($this->deletingId);
-        app(DeleteSparePart::class)->handle($sparePart);
-        $this->reset('deletingId', 'confirmingDeletion');
-        $this->resetPage();
-        unset($this->spareParts);
     }
 
     public function render(): View

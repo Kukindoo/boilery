@@ -3,7 +3,6 @@
 namespace App\Livewire\Works;
 
 use App\Actions\Works\CancelWork;
-use App\Actions\Works\DeleteWork;
 use App\Actions\Works\EndWork;
 use App\Actions\Works\StartWork;
 use App\Enums\WorkStatus;
@@ -13,7 +12,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -28,11 +26,6 @@ class WorksTable extends Component
         WorkStatus::NEW,
         WorkStatus::PROCESSING,
     ];
-
-    #[Locked]
-    public ?int $deletingId = null;
-
-    public bool $confirmingDeletion = false;
 
     public string $sortBy = 'created_at';
 
@@ -90,23 +83,6 @@ class WorksTable extends Component
 
     public function updatedSearch(): void
     {
-        $this->resetPage();
-    }
-
-    public function confirmDelete(int $id): void
-    {
-        $work = Work::query()->findOrFail($id);
-        Gate::authorize('delete', $work);
-        $this->deletingId = $id;
-        $this->confirmingDeletion = true;
-    }
-
-    public function delete(): void
-    {
-        abort_if($this->deletingId === null, 404);
-        $work = Work::query()->findOrFail($this->deletingId);
-        app(DeleteWork::class)->handle($work);
-        $this->reset('deletingId', 'confirmingDeletion');
         $this->resetPage();
     }
 

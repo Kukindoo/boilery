@@ -111,7 +111,7 @@ class SparePartsPagesTest extends FeatureTestCase
         $this->assertDatabaseHas('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id, 'amount' => 2]);
 
         Livewire::test(WorkSparePartRow::class, ['work' => $work, 'part' => $part, 'amount' => 2])
-            ->call('remove')->assertHasNoErrors();
+            ->call('delete')->assertHasNoErrors();
         $this->assertDatabaseMissing('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id]);
 
         $otherWork = Work::factory()->create();
@@ -132,13 +132,13 @@ class SparePartsPagesTest extends FeatureTestCase
             ->assertSee('Private spare part')->assertSeeLivewire(WorkSpareParts::class)
             ->assertDontSeeLivewire(WorkSparePartAdd::class)
             ->assertDontSee('Přidat díl')->assertDontSee('wire:click="edit"', false)
-            ->assertDontSee('wire:click="remove"', false);
+            ->assertDontSee('wire:click="confirmDelete"', false);
 
         Livewire::test(WorkSparePartAdd::class, ['work' => $work])->assertForbidden();
         Livewire::test(WorkSparePartRow::class, ['work' => $work, 'part' => $part, 'amount' => 1])
             ->call('edit')->assertForbidden();
         Livewire::test(WorkSparePartRow::class, ['work' => $work, 'part' => $part, 'amount' => 1])
-            ->call('remove')->assertForbidden();
+            ->call('delete')->assertForbidden();
         $this->assertDatabaseHas('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id]);
 
         $otherWork = Work::factory()->create();

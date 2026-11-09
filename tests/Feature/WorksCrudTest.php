@@ -6,6 +6,7 @@ use App\Actions\Works\ForceDeleteWork;
 use App\Actions\Works\RestoreWork;
 use App\Enums\BoilerManufacturers;
 use App\Enums\Permissions;
+use App\Livewire\Modals\Deletion;
 use App\Livewire\Works\WorkCreate;
 use App\Livewire\Works\WorkEdit;
 use App\Livewire\Works\WorksTable;
@@ -362,13 +363,13 @@ class WorksCrudTest extends FeatureTestCase
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::WORK_VIEW_ALL, Permissions::WORK_DELETE_ALL]);
         $work = Work::factory()->create();
-        $component = Livewire::actingAs($user)->test(WorksTable::class)->call('confirmDelete', $work->id);
+        $component = Livewire::actingAs($user)->test(Deletion::class, ['model' => $work, 'heading' => 'Smazat?', 'text' => 'Potvrďte odstranění.'])->call('confirmDelete');
         $this->assertNotSoftDeleted($work);
         $user->revokePermissionTo(Permissions::WORK_DELETE_ALL);
         $component->call('delete')->assertForbidden();
         $this->assertNotSoftDeleted($work);
         $user->givePermissionTo(Permissions::WORK_DELETE_ALL);
-        Livewire::actingAs($user)->test(WorksTable::class)->call('confirmDelete', $work->id)->call('delete');
+        Livewire::actingAs($user)->test(Deletion::class, ['model' => $work, 'heading' => 'Smazat?', 'text' => 'Potvrďte odstranění.'])->call('confirmDelete')->call('delete');
         $this->assertSoftDeleted($work);
     }
 

@@ -6,6 +6,7 @@ use App\Actions\SpareParts\ForceDeleteSparePart;
 use App\Actions\SpareParts\RestoreSparePart;
 use App\Enums\Permissions;
 use App\Enums\Roles;
+use App\Livewire\Modals\Deletion;
 use App\Livewire\SpareParts\SparePartCreate;
 use App\Livewire\SpareParts\SparePartEdit;
 use App\Livewire\SpareParts\SparePartsTable;
@@ -105,7 +106,7 @@ class SparePartsCrudTest extends FeatureTestCase
         $part = SparePart::factory()->create();
         $create = Livewire::actingAs($user)->test(SparePartCreate::class)->set('form.name', 'Forbidden');
         $edit = Livewire::test(SparePartEdit::class, ['sparePart' => $part])->set('form.name', 'Forbidden');
-        $table = Livewire::test(SparePartsTable::class)->call('confirmDelete', $part->id);
+        $table = Livewire::test(Deletion::class, ['model' => $part, 'heading' => 'Smazat?', 'text' => 'Potvrďte odstranění.'])->call('confirmDelete');
         Role::findById(Roles::ADMIN->value)->revokePermissionTo([
             Permissions::SPARE_PART_CREATE_ALL->label(), Permissions::SPARE_PART_EDIT_ALL->label(), Permissions::SPARE_PART_DELETE_ALL->label(),
         ]);
@@ -122,10 +123,10 @@ class SparePartsCrudTest extends FeatureTestCase
     {
         $user = User::factory()->admin()->create();
         $part = SparePart::factory()->create();
-        Livewire::actingAs($user)->test(SparePartsTable::class)
-            ->call('confirmDelete', $part->id)->assertSet('confirmingDeletion', true)
-            ->assertSet('deletingId', $part->id)->call('delete')->assertHasNoErrors()
-            ->assertSet('confirmingDeletion', false)->assertSet('deletingId', null);
+        Livewire::actingAs($user)->test(Deletion::class, ['model' => $part, 'heading' => 'Smazat?', 'text' => 'Potvrďte odstranění.'])
+            ->call('confirmDelete')->assertSet('show', true)
+            ->call('delete')->assertHasNoErrors()
+            ->assertSet('show', false);
         $this->assertSoftDeleted($part);
         app(RestoreSparePart::class)->handle($part->refresh());
         $this->assertFalse($part->refresh()->trashed());
@@ -149,7 +150,7 @@ class SparePartsCrudTest extends FeatureTestCase
             ->set('form.sparePartId', (string) $part->id)->call('submit')->assertHasNoErrors();
         $this->assertSame(2, $works[0]->spareParts()->count());
         $this->assertSame(2, $part->works()->count());
-        Livewire::test(WorkSparePartRow::class, ['work' => $works[0], 'part' => $part, 'amount' => 1])->call('remove')->assertHasNoErrors();
+        Livewire::test(WorkSparePartRow::class, ['work' => $works[0], 'part' => $part, 'amount' => 1])->call('delete')->assertHasNoErrors();
         $this->assertDatabaseMissing('spare_part_work', ['spare_part_id' => $part->id, 'work_id' => $works[0]->id]);
         $this->assertSame(1, $part->works()->count());
         $this->assertModelExists($part);
@@ -210,9 +211,9 @@ class SparePartsCrudTest extends FeatureTestCase
         $table = Livewire::test(WorkSpareParts::class, ['work' => $work])
             ->assertSee('CZK 52,35')->assertSee('CZK 30,00')->assertSee('CZK 82,35')
             ->assertDontSee('CZK 174,50');
-        Livewire::test(WorkSparePartRow::class, ['work' => $work, 'part' => $first, 'amount' => 3])->call('remove');
+        Livewire::test(WorkSparePartRow::class, ['work' => $work, 'part' => $first, 'amount' => 3])->call('delete');
         $table->call('$refresh')->assertSee('CZK 30,00')->assertDontSee('CZK 82,35');
-        Livewire::test(WorkSparePartRow::class, ['work' => $work, 'part' => $second, 'amount' => 2])->call('remove');
+        Livewire::test(WorkSparePartRow::class, ['work' => $work, 'part' => $second, 'amount' => 2])->call('delete');
         $table->call('$refresh')->assertSee('CZK 0,00');
     }
 

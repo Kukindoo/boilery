@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Actions\SpareParts\DeleteSparePart;
 use App\Actions\SpareParts\ForceDeleteSparePart;
+use App\Livewire\Modals\Deletion;
 use App\Livewire\SpareParts\SparePartsTable;
 use App\Models\SparePart;
 use App\Models\User;
@@ -28,9 +29,8 @@ class SparePartDeletionTest extends FeatureTestCase
         }
 
         $this->assertFalse(Gate::allows('delete', $part));
-        Livewire::test(SparePartsTable::class)
-            ->assertDontSee('wire:click="confirmDelete(' . $part->id . ')"', false)
-            ->call('confirmDelete', $part->id)->assertForbidden();
+        Livewire::test(SparePartsTable::class)->assertDontSeeLivewire(Deletion::class);
+        Livewire::test(Deletion::class, ['model' => $part, 'heading' => 'Smazat náhradní díl?', 'text' => 'Potvrďte odstranění.'])->call('confirmDelete')->assertForbidden();
 
         try {
             app(DeleteSparePart::class)->handle($part);
@@ -47,7 +47,7 @@ class SparePartDeletionTest extends FeatureTestCase
     {
         $this->actingAs(User::factory()->admin()->create());
         $part = SparePart::factory()->create();
-        $component = Livewire::test(SparePartsTable::class)->call('confirmDelete', $part->id);
+        $component = Livewire::test(Deletion::class, ['model' => $part, 'heading' => 'Smazat náhradní díl?', 'text' => 'Potvrďte odstranění.'])->call('confirmDelete');
         Work::factory()->create()->spareParts()->attach($part);
 
         $component->call('delete')->assertForbidden();
@@ -64,9 +64,8 @@ class SparePartDeletionTest extends FeatureTestCase
         $this->assertFalse(Gate::allows('delete', $part));
 
         $work->spareParts()->detach($part);
-        Livewire::test(SparePartsTable::class)
-            ->assertSee('wire:click="confirmDelete(' . $part->id . ')"', false)
-            ->call('confirmDelete', $part->id)->call('delete')->assertHasNoErrors();
+        Livewire::test(SparePartsTable::class)->assertSeeLivewire(Deletion::class);
+        Livewire::test(Deletion::class, ['model' => $part, 'heading' => 'Smazat náhradní díl?', 'text' => 'Potvrďte odstranění.'])->call('confirmDelete')->call('delete')->assertHasNoErrors();
         $this->assertSoftDeleted($part);
     }
 
@@ -108,10 +107,10 @@ class SparePartDeletionTest extends FeatureTestCase
     {
         Livewire::actingAs(User::factory()->admin()->create());
         $part = SparePart::factory()->create();
-        Livewire::test(SparePartsTable::class)
-            ->call('confirmDelete', $part->id)->assertSet('confirmingDeletion', true)
+        Livewire::test(Deletion::class, ['model' => $part, 'heading' => 'Smazat náhradní díl?', 'text' => 'Potvrďte odstranění.'])
+            ->call('confirmDelete')->assertSet('show', true)
             ->assertSee('Smazat náhradní díl?')
-            ->set('confirmingDeletion', false)->assertSet('confirmingDeletion', false);
+            ->set('show', false)->assertSet('show', false);
         $this->assertNotSoftDeleted($part);
     }
 

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Actions\AssemblyActions\DeleteAssemblyAction;
 use App\Actions\AssemblyActions\ForceDeleteAssemblyAction;
 use App\Livewire\AssemblyActions\AssemblyActionsTable;
+use App\Livewire\Modals\Deletion;
 use App\Models\AssemblyAction;
 use App\Models\User;
 use App\Models\Work;
@@ -28,9 +29,8 @@ class AssemblyActionDeletionTest extends FeatureTestCase
         }
 
         $this->assertFalse(Gate::allows('delete', $action));
-        Livewire::test(AssemblyActionsTable::class)
-            ->assertDontSee('wire:click="confirmDelete(' . $action->id . ')"', false)
-            ->call('confirmDelete', $action->id)->assertForbidden();
+        Livewire::test(AssemblyActionsTable::class)->assertDontSeeLivewire(Deletion::class);
+        Livewire::test(Deletion::class, ['model' => $action, 'heading' => 'Smazat pracovní úkon?', 'text' => 'Potvrďte odstranění.'])->call('confirmDelete')->assertForbidden();
 
         try {
             app(DeleteAssemblyAction::class)->handle($action);
@@ -47,7 +47,7 @@ class AssemblyActionDeletionTest extends FeatureTestCase
     {
         $this->actingAs(User::factory()->admin()->create());
         $action = AssemblyAction::factory()->create();
-        $component = Livewire::test(AssemblyActionsTable::class)->call('confirmDelete', $action->id);
+        $component = Livewire::test(Deletion::class, ['model' => $action, 'heading' => 'Smazat pracovní úkon?', 'text' => 'Potvrďte odstranění.'])->call('confirmDelete');
         Work::factory()->create()->assemblyActions()->attach($action);
 
         $component->call('delete')->assertForbidden();
@@ -64,11 +64,10 @@ class AssemblyActionDeletionTest extends FeatureTestCase
         $this->assertFalse(Gate::allows('delete', $action));
 
         $work->assemblyActions()->detach($action);
-        Livewire::test(AssemblyActionsTable::class)
-            ->assertSee('wire:click="confirmDelete(' . $action->id . ')"', false)
-            ->call('confirmDelete', $action->id)->assertSet('confirmingDeletion', true)
-            ->assertSet('deletingId', $action->id)->call('delete')->assertHasNoErrors()
-            ->assertSet('confirmingDeletion', false)->assertSet('deletingId', null);
+        Livewire::test(AssemblyActionsTable::class)->assertSeeLivewire(Deletion::class);
+        Livewire::test(Deletion::class, ['model' => $action, 'heading' => 'Smazat pracovní úkon?', 'text' => 'Potvrďte odstranění.'])->call('confirmDelete')->assertSet('show', true)
+            ->call('delete')->assertHasNoErrors()
+            ->assertSet('show', false);
         $this->assertSoftDeleted($action);
     }
 

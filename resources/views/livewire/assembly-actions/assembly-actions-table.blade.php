@@ -45,10 +45,4 @@
             @endforelse
         </flux:table.rows>
     </flux:table>
-    @include('livewire.modals.deletion', [
-        'heading' => 'Smazat pracovní úkon?',
-        'text' => 'Opravdu chcete smazat tento pracovní úkon? Úkon bude archivován.',
-        'button' => 'Smazat',
-        'cancel' => 'Zrušit',
-    ])
 </x-stellaris.livewire.table.wrapper>

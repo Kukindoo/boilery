@@ -15,6 +15,7 @@ use App\Livewire\AssemblyActions\AssemblyActionEdit;
 use App\Livewire\AssemblyActions\AssemblyActionsTable;
 use App\Livewire\AssemblyActions\WorkAssemblyActionAdd;
 use App\Livewire\AssemblyActions\WorkAssemblyActionRow;
+use App\Livewire\Modals\Deletion;
 use App\Models\AssemblyAction;
 use App\Models\User;
 use App\Models\Work;
@@ -38,7 +39,7 @@ class AssemblyActionsCrudTest extends FeatureTestCase
         $this->assertSame('Oprava', $action->refresh()->name);
         $this->assertSame('AA-02', $action->code);
         $this->assertNull($action->description);
-        Livewire::test(AssemblyActionsTable::class)->call('confirmDelete', $action->id)->call('delete')->assertHasNoErrors();
+        Livewire::test(Deletion::class, ['model' => $action, 'heading' => 'Smazat?', 'text' => 'Potvrďte odstranění.'])->call('confirmDelete')->call('delete')->assertHasNoErrors();
         $this->assertSoftDeleted($action);
         app(RestoreAssemblyAction::class)->handle($action->refresh());
         $this->assertFalse($action->refresh()->trashed());
@@ -102,7 +103,7 @@ class AssemblyActionsCrudTest extends FeatureTestCase
         $user = $this->staff();
         $action = AssemblyAction::factory()->create();
         $edit = Livewire::test(AssemblyActionEdit::class, ['assemblyAction' => $action]);
-        $table = Livewire::test(AssemblyActionsTable::class)->call('confirmDelete', $action->id);
+        $table = Livewire::test(Deletion::class, ['model' => $action, 'heading' => 'Smazat?', 'text' => 'Potvrďte odstranění.'])->call('confirmDelete');
         $attach = Livewire::test(WorkAssemblyActionAdd::class, ['work' => Work::factory()->create()])->set('form.assemblyActionId', $action->id)->set('form.price', '17,45');
         $user->removeRole(Role::findById(Roles::ADMIN->value));
         $edit->set('form.name', 'Unauthorized')->call('submit')->assertForbidden();

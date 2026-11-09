@@ -157,7 +157,8 @@ class WorkAssemblyActionPriceTest extends FeatureTestCase
         $row = Livewire::actingAs(User::factory()->admin()->create())
             ->test(WorkAssemblyActionRow::class, ['work' => $work, 'action' => $action, 'priceInCents' => 1745]);
 
-        $row->call('confirmDelete')->assertSet('confirmingDeletion', true)->assertSee('Odebrat pracovní úkon?')
+        $row->assertSeeLivewire(\App\Livewire\Modals\Deletion::class);
+        $row->call('confirmDelete')->assertSet('confirmingDeletion', true)
             ->set('confirmingDeletion', false)->assertNotDispatched('assembly-actions-changed');
         $this->assertDatabaseHas('assembly_action_work', ['work_id' => $work->id, 'assembly_action_id' => $action->id]);
 

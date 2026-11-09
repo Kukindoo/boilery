@@ -6,6 +6,7 @@ use App\Actions\AssemblyActions\DetachAssemblyActionFromWork;
 use App\Livewire\Forms\AssemblyAction\WorkAssemblyActionPriceForm;
 use App\Models\AssemblyAction;
 use App\Models\Work;
+use App\Traits\HasDeleteButton;
 use App\ValueObjects\Price;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
@@ -15,11 +16,11 @@ use Throwable;
 
 class WorkAssemblyActionRow extends Component
 {
+    use HasDeleteButton;
+
     public WorkAssemblyActionPriceForm $form;
 
     public bool $editing = false;
-
-    public bool $confirmingDeletion = false;
 
     #[Locked]
     public int $priceInCents;
@@ -69,25 +70,6 @@ class WorkAssemblyActionRow extends Component
         $this->dispatch('assembly-actions-changed');
     }
 
-    public function confirmDelete(): void
-    {
-        Gate::authorize('manageAssemblyActions', $this->work);
-
-        $this->work->assemblyActions()->findOrFail($this->action->id);
-        $this->confirmingDeletion = true;
-    }
-
-    /** @throws Throwable */
-    public function delete(): void
-    {
-        Gate::authorize('manageAssemblyActions', $this->work);
-
-        app(DetachAssemblyActionFromWork::class)->handle($this->work, $this->action);
-        $this->confirmingDeletion = false;
-        $this->dispatch('assembly-actions-changed');
-        $this->skipRender();
-    }
-
     public function render(): View
     {
         Gate::authorize('view', $this->work);
@@ -95,5 +77,20 @@ class WorkAssemblyActionRow extends Component
         return view('livewire.assembly-actions.work-assembly-action-row', [
             'price' => Price::fromCents($this->priceInCents),
         ]);
+    }
+
+    protected function authorizeDeletion(): void
+    {
+        Gate::authorize('manageAssemblyActions', $this->work);
+
+        $this->work->assemblyActions()->findOrFail($this->action->id);
+    }
+
+    /** @throws Throwable */
+    protected function performDeletion(): void
+    {
+        app(DetachAssemblyActionFromWork::class)->handle($this->work, $this->action);
+        $this->dispatch('assembly-actions-changed');
+        $this->skipRender();
     }
 }
