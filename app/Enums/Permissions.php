@@ -156,6 +156,16 @@ enum Permissions: int
         };
     }
 
+    public function badgeLabel(): string
+    {
+        $label = $this->label();
+        $suffix = ' ' . $this->modelType();
+
+        return str_ends_with($label, $suffix)
+            ? mb_substr($label, 0, -mb_strlen($suffix))
+            : $label;
+    }
+
     public function label(): string
     {
         return match ($this) {
