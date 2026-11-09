@@ -15,7 +15,7 @@ enum Roles: int
         return match ($this) {
             self::ADMIN => 'Admin',
             self::STAKEHOLDER => 'Stakeholder',
-            self::CUSTOMER => 'Customer',
+            self::CUSTOMER => 'Zákazník',
         };
     }
 }
