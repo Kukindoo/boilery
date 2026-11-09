@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Actions\SpareParts\DetachSparePartFromWork;
 use App\Actions\SpareParts\UpdateWorkSparePartAmount;
 use App\Enums\Permissions;
 use App\Enums\Roles;
@@ -12,6 +13,7 @@ use App\Models\User;
 use App\Models\Work;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\TestWith;
+use RuntimeException;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 
@@ -42,7 +44,55 @@ class WorkSparePartRowTest extends FeatureTestCase
         $this->assertSame(3, $entry->getProperty('amount'));
     }
 
-    #[TestWith(['0'])]
+    public function test_zero_amount_removes_only_the_current_work_link_and_refreshes_totals(): void
+    {
+        $work = Work::factory()->create();
+        $otherWork = Work::factory()->create();
+        $part = SparePart::factory()->create(['price_in_cents' => 1745]);
+        $work->spareParts()->attach($part, ['amount' => 2]);
+        $otherWork->spareParts()->attach($part, ['amount' => 5]);
+
+        Livewire::actingAs(User::factory()->admin()->create())
+            ->test(WorkSparePartRow::class, ['work' => $work, 'part' => $part, 'amount' => 2])
+            ->call('edit')->set('form.amount', '0')->call('submit')
+            ->assertHasNoErrors()->assertDispatched('spare-parts-changed');
+
+        $this->assertDatabaseMissing('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id]);
+        $this->assertDatabaseHas('spare_part_work', ['work_id' => $otherWork->id, 'spare_part_id' => $part->id, 'amount' => 5]);
+        $this->assertModelExists($part);
+        Livewire::test(WorkSpareParts::class, ['work' => $work])
+            ->assertSee('CZK 0,00')->assertDontSeeLivewire(WorkSparePartRow::class);
+        $activity = Activity::inLog('spare_parts')->where('event', 'action_completed')->sole();
+        $this->assertSame('Spare part detached from work', $activity->description);
+        $this->assertSame(DetachSparePartFromWork::class, $activity->getProperty('action'));
+        $this->assertSame(0, $activity->getProperty('amount'));
+        $this->assertSame(2, $activity->getProperty('old_amount'));
+    }
+
+    public function test_zero_amount_removal_rolls_back_when_activity_logging_fails(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+        $work = Work::factory()->create();
+        $part = SparePart::factory()->create();
+        $work->spareParts()->attach($part, ['amount' => 2]);
+        $failure = new RuntimeException('Could not log removal.');
+        Activity::creating(function (Activity $activity) use ($failure): void {
+            if ($activity->log_name === 'spare_parts' && $activity->event === 'action_completed') {
+                throw $failure;
+            }
+        });
+
+        try {
+            app(UpdateWorkSparePartAmount::class)->handle($work, $part, 0);
+            $this->fail('Logging failure must propagate.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame($failure, $exception);
+        }
+
+        $this->assertDatabaseHas('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id, 'amount' => 2]);
+        $this->assertSame(1, Activity::inLog('spare_parts')->where('event', 'action_attempted')->count());
+    }
+
     #[TestWith(['-1'])]
     #[TestWith(['1.5'])]
     #[TestWith([''])]

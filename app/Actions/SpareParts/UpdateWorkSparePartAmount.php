@@ -13,11 +13,19 @@ class UpdateWorkSparePartAmount
 {
     use LogsActionActivity;
 
+    public function __construct(private readonly DetachSparePartFromWork $detachSparePartFromWork) {}
+
     /**
      * @throws Throwable
      */
     public function handle(Work $work, SparePart $sparePart, int $amount): void
     {
+        if ($amount === 0) {
+            $this->detachSparePartFromWork->handle($work, $sparePart);
+
+            return;
+        }
+
         try {
             DB::transaction(function () use ($work, $sparePart, $amount): void {
                 $work->refreshForUpdate();

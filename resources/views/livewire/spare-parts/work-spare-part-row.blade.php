@@ -13,7 +13,7 @@
     <flux:table.cell>
         @if ($editing && auth()->user()->can('manageSpareParts', $work))
             <form wire:submit="submit" class="space-y-2">
-                <flux:input wire:model="form.amount" type="number" aria-label="Množství" min="1" max="65535" step="1" size="sm" required />
+                <flux:input wire:model="form.amount" type="number" aria-label="Množství" min="0" max="65535" step="1" size="sm" required />
                 <div class="flex gap-2">
                     <flux:button type="submit" size="sm" variant="primary" wire:loading.attr="disabled">
                         Uložit

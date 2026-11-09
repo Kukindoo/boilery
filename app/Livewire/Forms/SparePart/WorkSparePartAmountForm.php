@@ -30,7 +30,7 @@ class WorkSparePartAmountForm extends Form
     public function rules(): array
     {
         return [
-            'amount' => ['required', 'integer', 'min:1', 'max:65535'],
+            'amount' => ['required', 'integer', 'min:0', 'max:65535'],
         ];
     }
 

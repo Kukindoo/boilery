@@ -82,6 +82,9 @@ class WorkSparePartRow extends Component
         $this->amount = (int) $this->form->amount;
         $this->editing = false;
         $this->dispatch('spare-parts-changed');
+        if ($this->amount === 0) {
+            $this->skipRender();
+        }
     }
 
     /**
