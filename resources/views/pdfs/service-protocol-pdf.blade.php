@@ -50,7 +50,8 @@
 
         .protocol {
             display: grid;
-            grid-template-rows: 40mm 26mm 20mm 32mm 44mm 34mm 20mm 20mm 26mm;
+            height: 262mm;
+            grid-template-rows: 40mm 26mm 24mm minmax(0, 1fr) 36mm 31mm 20mm 20mm 26mm;
             border: .5mm solid #000;
         }
 
@@ -180,7 +181,7 @@
         }
 
         .parts-section {
-            grid-template-rows: 6mm repeat(5, minmax(0, 1fr)) 6mm;
+            grid-template-rows: repeat(6, 5mm) 6mm;
         }
 
         .parts-row {
@@ -188,7 +189,7 @@
         }
 
         .labour-section {
-            grid-template-rows: 6mm repeat(4, minmax(0, 1fr)) 6mm;
+            grid-template-rows: repeat(5, 5mm) 6mm;
         }
 
         .labour-row {
