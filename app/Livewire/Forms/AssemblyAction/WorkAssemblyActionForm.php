@@ -7,8 +7,10 @@ use App\Models\AssemblyAction;
 use App\Models\Work;
 use App\ValueObjects\Price;
 use Closure;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
@@ -57,6 +59,12 @@ class WorkAssemblyActionForm extends Form
         Gate::authorize('viewAny', AssemblyAction::class);
 
         $this->validate();
-        app(AttachAssemblyActionToWork::class)->handle($this->work, AssemblyAction::findOrFail($this->assemblyActionId), Price::fromInput($this->price));
+        try {
+            app(AttachAssemblyActionToWork::class)->handle($this->work, AssemblyAction::findOrFail($this->assemblyActionId), Price::fromInput($this->price));
+        } catch (ValidationException $exception) {
+            throw ValidationException::withMessages(
+                Arr::prependKeysWith($exception->errors(), $this->getPropertyName() . '.'),
+            );
+        }
     }
 }

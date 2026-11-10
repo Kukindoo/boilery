@@ -1,6 +1,6 @@
 <x-stellaris.livewire.table.wrapper heading="Náhradní díly">
     <x-slot name="actions">
-        @include('livewire.spare-parts.partials.work-spare-parts-table-actions')
+        @includeWhen($parts->count() < 5, 'livewire.spare-parts.partials.work-spare-parts-table-actions')
     </x-slot>
     <flux:table>
         <flux:table.columns>
