@@ -80,6 +80,12 @@ class User extends Authenticatable implements OwnsFiles
         return $this->is($user);
     }
 
+    /** @return HasMany<Issue, $this> */
+    public function issues(): HasMany
+    {
+        return $this->hasMany(Issue::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
