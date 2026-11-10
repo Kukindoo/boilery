@@ -50,7 +50,7 @@
 
         .protocol {
             display: grid;
-            grid-template-rows: 40mm 26mm 20mm 32mm minmax(44mm, auto) minmax(34mm, auto) 20mm 20mm 26mm;
+            grid-template-rows: 40mm 26mm 20mm 32mm 44mm 34mm 20mm 20mm 26mm;
             border: .5mm solid #000;
         }
 
@@ -180,7 +180,7 @@
         }
 
         .items {
-            grid-template-rows: 6mm repeat(var(--parts-row-count, 5), minmax(6mm, 1fr)) 6mm;
+            grid-template-rows: 6mm repeat(5, minmax(0, 1fr)) 6mm;
         }
 
         .parts-row {
@@ -188,7 +188,7 @@
         }
 
         .labour {
-            grid-template-rows: 6mm repeat(var(--labour-row-count, 4), minmax(6mm, 1fr)) 6mm;
+            grid-template-rows: 6mm repeat(4, minmax(0, 1fr)) 6mm;
         }
 
         .labour-row {
@@ -384,8 +384,7 @@
             <div class="value">{{ $work->work_performed_description ?? '' }}</div>
         </section>
 
-        <section class="grid items section" aria-label="Náhradní díly"
-                 style="--parts-row-count: {{ max(5, count($parts ?? [])) }}">
+        <section class="grid items section" aria-label="Náhradní díly">
             <div class="grid parts-row item-row item-heading">
                 <div class="cell">
                     Číslo ND
@@ -400,7 +399,7 @@
                     Cena celkem
                 </div>
             </div>
-            @for ($row = 0; $row < max(5, count($parts ?? [])); $row++)
+            @for ($row = 0; $row < 5; $row++)
                 <div class="grid parts-row item-row">
                     <div class="cell">
                         {{ $parts[$row]->number ?? '' }}
@@ -426,8 +425,7 @@
             </div>
         </section>
 
-        <section class="grid labour section" aria-label="Práce"
-                 style="--labour-row-count: {{ max(4, count($assemblyActions ?? [])) }}">
+        <section class="grid labour section" aria-label="Práce">
             <div class="grid labour-row item-row item-heading">
                 <div class="cell">
                     Kód opravy
@@ -439,7 +437,7 @@
                     Cena
                 </div>
             </div>
-            @for ($row = 0; $row < max(4, count($assemblyActions ?? [])); $row++)
+            @for ($row = 0; $row < 4; $row++)
                 <div class="grid labour-row item-row">
                     <div class="cell">
                         {{ $assemblyActions[$row]->code ?? '' }}
