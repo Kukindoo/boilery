@@ -18,6 +18,7 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
+ * @property ?int $issue_id
  * @property int $id
  * @property QuoteStatus $status
  * @property string $first_name
@@ -43,6 +44,7 @@ class Quote extends Model implements OwnsFiles
     use HasFiles;
 
     protected $fillable = [
+        'issue_id',
         'status',
         'first_name',
         'last_name',
@@ -98,6 +100,12 @@ class Quote extends Model implements OwnsFiles
     public function isFileOwner(User $user): bool
     {
         return $this->user_id === $user->id;
+    }
+
+    /** @return BelongsTo<Issue, $this> */
+    public function issue(): BelongsTo
+    {
+        return $this->belongsTo(Issue::class);
     }
 
     protected function casts(): array
