@@ -84,7 +84,7 @@
             overflow-wrap: anywhere;
         }
 
-        .header {
+        .protocol-header {
             grid-template-columns: 35% 30% 35%;
             grid-template-rows: 20mm repeat(3, minmax(0, 1fr));
             grid-template-areas:
@@ -94,28 +94,28 @@
                 "serial purchase building";
         }
 
-        .header .order { grid-area: order; }
-        .header .brand { grid-area: brand; }
-        .header .company { grid-area: company; }
-        .product-type { grid-area: type; }
-        .product-number { grid-area: number; }
-        .product-serial { grid-area: serial; }
-        .product-claim { grid-area: claim; }
-        .product-purchase { grid-area: purchase; }
-        .product-warranty { grid-area: warranty; }
-        .product-building { grid-area: building; }
+        .protocol-header .order-cell { grid-area: order; }
+        .protocol-header .brand-cell { grid-area: brand; }
+        .protocol-header .company-cell { grid-area: company; }
+        .product-type-cell { grid-area: type; }
+        .product-number-cell { grid-area: number; }
+        .product-serial-cell { grid-area: serial; }
+        .product-claim-cell { grid-area: claim; }
+        .product-purchase-cell { grid-area: purchase; }
+        .product-warranty-cell { grid-area: warranty; }
+        .product-building-cell { grid-area: building; }
 
-        .header .order,
-        .header .brand,
-        .header .company {
+        .protocol-header .order-cell,
+        .protocol-header .brand-cell,
+        .protocol-header .company-cell {
             border-bottom: .4mm solid #000;
         }
 
-        .order {
+        .order-cell {
             grid-template-rows: auto 1fr;
         }
 
-        .order strong {
+        .order-cell strong {
             font-size: 12pt;
         }
 
@@ -124,30 +124,30 @@
             font-size: 15pt;
         }
 
-        .brand {
+        .brand-cell {
             display: grid;
             place-items: center;
             padding: 3mm;
         }
 
-        .brand img {
+        .brand-cell img {
             width: 100%;
             max-height: 13mm;
             object-fit: contain;
             filter: grayscale(1);
         }
 
-        .company {
+        .company-cell {
             text-align: center;
             font-size: 8pt;
         }
 
-        .company h2 {
+        .company-cell h2 {
             margin: 0 0 2mm;
             font-size: 12pt;
         }
 
-        .company strong {
+        .company-cell strong {
             display: block;
             font-size: 10pt;
         }
@@ -159,15 +159,15 @@
             gap: 1mm;
         }
 
-        .customer {
+        .customer-section {
             grid-template-columns: 65% 35%;
         }
 
-        .customer-details {
+        .customer-details-column {
             grid-template-rows: 1fr 2fr 1fr;
         }
 
-        .dates {
+        .work-dates-column {
             grid-template-rows: 1fr 1fr;
         }
 
@@ -179,7 +179,7 @@
             padding: 0 1mm 1mm;
         }
 
-        .items {
+        .parts-section {
             grid-template-rows: 6mm repeat(5, minmax(0, 1fr)) 6mm;
         }
 
@@ -187,7 +187,7 @@
             grid-template-columns: 16% 58% 10% 16%;
         }
 
-        .labour {
+        .labour-section {
             grid-template-rows: 6mm repeat(4, minmax(0, 1fr)) 6mm;
         }
 
@@ -208,19 +208,19 @@
             text-align: center;
         }
 
-        .item-total {
+        :is(.parts-total-row, .labour-total-row) {
             grid-template-columns: 84% 16%;
         }
 
         /* Draw shared dividers on the same side of each column boundary. */
-        .item-total .amount,
-        .transport > :nth-child(n + 2),
-        .notes > :nth-child(n + 2),
-        .signatures > :nth-child(n + 2) {
+        :is(.parts-total-row, .labour-total-row) .amount,
+        .transport-section > :nth-child(n + 2),
+        .notes-section > :nth-child(n + 2),
+        .signatures-section > :nth-child(n + 2) {
             border-left: .4mm solid #000;
         }
 
-        .item-total .label {
+        :is(.parts-total-row, .labour-total-row) .item-total-label {
             text-align: right;
             padding-right: 4mm;
         }
@@ -229,72 +229,72 @@
             text-align: right;
         }
 
-        .transport {
+        .transport-section {
             grid-template-columns: 64% 20% 16%;
         }
 
-        .transport-route {
+        .transport-route-column {
             grid-template-rows: repeat(3, 1fr);
         }
 
-        .transport-cost {
+        .transport-cost-column {
             grid-template-rows: 1fr 1fr 1fr;
         }
 
-        .total-label {
+        .transport-total-cell {
             border-top: .4mm solid #000;
             text-align: center;
         }
 
-        .notes {
+        .notes-section {
             grid-template-columns: 64% 36%;
         }
 
-        .totals {
+        .price-totals-column {
             /* Continue the 84% price divider through the nested 36% column.
                Account for this grid's left border before splitting its content. */
             grid-template-columns: calc((100% + .4mm) * 5 / 9 - .4mm) minmax(0, 1fr);
             grid-template-rows: repeat(3, 1fr);
         }
 
-        .totals .cell {
+        .price-totals-column .cell {
             border-bottom: .4mm solid #000;
         }
 
-        .totals .cell:nth-last-child(-n + 2) {
+        .price-totals-column .cell:nth-last-child(-n + 2) {
             border-bottom: 0;
         }
 
-        .totals .amount {
+        .price-totals-column .amount {
             border-left: .4mm solid #000;
         }
 
-        .signatures {
+        .signatures-section {
             grid-template-columns: 28% 36% 36%;
         }
 
-        .signature {
+        .signature-column {
             grid-template-rows: minmax(0, 1fr) auto;
         }
 
-        .mechanic {
+        .mechanic-name-cell {
             align-self: center;
             text-align: center;
             font-size: 13pt;
         }
 
-        .stamp {
+        .company-stamp-cell {
             align-self: start;
             text-align: center;
             font-size: 8pt;
         }
 
-        .stamp strong {
+        .company-stamp-cell strong {
             display: block;
             font-size: 10pt;
         }
 
-        .consent {
+        .customer-consent-cell {
             font-size: 9pt;
         }
 
@@ -314,16 +314,16 @@
 <main class="page">
     <h1>SERVISNÍ PROTOKOL</h1>
     <div class="protocol">
-        <header class="grid header section">
-            <div class="grid order cell divide">
+        <header class="grid protocol-header section">
+            <div class="grid order-cell cell divide">
                 <strong>MONTÁŽNÍ LIST Č.</strong>
                 <div class="order-number center">{{ $work->order_id ?? '' }}</div>
             </div>
-            <div class="brand divide">
+            <div class="brand-cell divide">
                 <img src="data:image/jpeg;base64,{{ base64_encode(file_get_contents(public_path('images/drazice-logo.jpg'))) }}"
                      alt="DRAŽICE">
             </div>
-            <div class="company cell">
+            <div class="company-cell cell">
                 <h2>SERVISNÍ FIRMA</h2>
                 <strong>SERVIS – ZÁVACKÝ</strong>
                 <div>IČ: 15499685</div>
@@ -331,31 +331,31 @@
                 <div>bojleryzavacky@seznam.cz</div>
             </div>
 
-            <div class="cell field product-type divide">
+            <div class="cell field product-type-cell divide">
                 <span>Typ výrobku:</span><span>{{ $work->type_of_product ?? '' }}</span>
             </div>
-            <div class="cell field product-number divide">
+            <div class="cell field product-number-cell divide">
                 <span>Typové číslo:</span><span>{{ $work->type_number ?? '' }}</span>
             </div>
-            <div class="cell field product-serial divide">
+            <div class="cell field product-serial-cell divide">
                 <span>Výr. číslo:</span><span>{{ $work->serial_number ?? '' }}</span>
             </div>
-            <div class="cell product-claim divide">
+            <div class="cell product-claim-cell divide">
                 Reklamace: {{ isset($work) ? ($work->warranty_accepted ? 'uznaná' : 'neuznaná') : 'uznaná / neuznaná' }}
             </div>
-            <div class="cell product-purchase divide">
+            <div class="cell product-purchase-cell divide">
                 Datum zakoupení ohřívače:<br>{{ isset($work) ? $work->day_of_purchase?->format('d.m.Y') : '' }}
             </div>
-            <div class="cell product-warranty">
+            <div class="cell product-warranty-cell">
                 Záruční oprava: {{ $work->repair_in_warranty ? 'ano': 'ne' }}
             </div>
-            <div class="cell product-building">
+            <div class="cell product-building-cell">
                 Výstavba: {{ $work->building_type ?? 'neznámá' }}
             </div>
         </header>
 
-        <section class="grid customer section" aria-label="Údaje o zákazníkovi">
-            <div class="grid customer-details divide">
+        <section class="grid customer-section section" aria-label="Údaje o zákazníkovi">
+            <div class="grid customer-details-column divide">
                 <div class="cell field">
                     <span>Zákazník:</span><span>{{ $customer->name ?? '' }}</span>
                 </div>
@@ -366,7 +366,7 @@
                     <span>Tel:</span><span>{{ $customer->phone ?? '' }}</span>
                 </div>
             </div>
-            <div class="grid dates">
+            <div class="grid work-dates-column">
                 <div class="cell">Zakázka přijata:<br>
                     {{ isset($work) ? $work->work_accepted_at?->format('d.m.Y') : '' }}</div>
                 <div class="cell">Zakázka vyřízena:<br>
@@ -374,17 +374,17 @@
             </div>
         </section>
 
-        <section class="grid text-section section" aria-label="Nahlášená závada">
+        <section class="grid reported-problem-section text-section section" aria-label="Nahlášená závada">
             <div class="cell">Nahlášená závada:</div>
             <div class="value">{{ $work->reported_problem ?? '' }}</div>
         </section>
 
-        <section class="grid text-section section" aria-label="Provedená práce">
+        <section class="grid performed-work-section text-section section" aria-label="Provedená práce">
             <div class="cell">Popis provedené práce, odstranění závady</div>
             <div class="value">{{ $work->work_performed_description ?? '' }}</div>
         </section>
 
-        <section class="grid items section" aria-label="Náhradní díly">
+        <section class="grid parts-section section" aria-label="Náhradní díly">
             <div class="grid parts-row item-row item-heading">
                 <div class="cell">
                     Číslo ND
@@ -415,8 +415,8 @@
                     </div>
                 </div>
             @endfor
-            <div class="grid item-total">
-                <div class="cell label">
+            <div class="grid parts-total-row">
+                <div class="cell item-total-label">
                     ND celkem
                 </div>
                 <div class="cell amount">
@@ -425,7 +425,7 @@
             </div>
         </section>
 
-        <section class="grid labour section" aria-label="Práce">
+        <section class="grid labour-section section" aria-label="Práce">
             <div class="grid labour-row item-row item-heading">
                 <div class="cell">
                     Kód opravy
@@ -450,8 +450,8 @@
                     </div>
                 </div>
             @endfor
-            <div class="grid item-total">
-                <div class="cell label">
+            <div class="grid labour-total-row">
+                <div class="cell item-total-label">
                     Práce celkem
                 </div>
                 <div class="cell amount">
@@ -460,30 +460,30 @@
             </div>
         </section>
 
-        <section class="grid transport section" aria-label="Jízdné">
-            <div class="grid transport-route">
+        <section class="grid transport-section section" aria-label="Jízdné">
+            <div class="grid transport-route-column">
                 <strong class="cell">Jízdné:</strong>
                 <div class="cell field"><span>odkud:</span><span>{{ $work->transport_from ?? '' }}</span></div>
                 <div class="cell field"><span>kam:</span><span>{{ $work->transport_to ?? '' }}</span></div>
             </div>
-            <div class="grid transport-cost center">
+            <div class="grid transport-cost-column center">
                 <div class="cell">sazba Kč/km</div>
                 <div class="cell">{{ $work->transport_rate_in_czk ?? '' }}</div>
-                <div class="cell total-label">Jízdné celkem</div>
+                <div class="cell transport-total-cell">Jízdné celkem</div>
             </div>
-            <div class="grid transport-cost">
+            <div class="grid transport-cost-column">
                 <div class="cell center">ujeté km</div>
                 <div class="cell center">{{ $work->transport_distance_in_km ?? '' }}</div>
-                <div class="cell total-label amount">{{ $totals['transport'] ?? '' }}</div>
+                <div class="cell transport-total-cell amount">{{ $totals['transport'] ?? '' }}</div>
             </div>
         </section>
 
-        <section class="grid notes section" aria-label="Poznámka a celková cena">
+        <section class="grid notes-section section" aria-label="Poznámka a celková cena">
             <div class="grid text-section">
                 <div class="cell">Poznámka (zákazníka nebo mechanika)</div>
                 <div class="value">{{ $work->notes ?? '' }}</div>
             </div>
-            <div class="grid totals">
+            <div class="grid price-totals-column">
                 <div class="cell center">Součet</div>
                 <div class="cell amount">{{ $totals['subtotal'] ?? '' }}</div>
                 <div class="cell center">DPH</div>
@@ -493,13 +493,13 @@
             </div>
         </section>
 
-        <footer class="grid signatures">
-            <div class="grid signature">
-                <div class="cell mechanic">{{ $work->mechanic_name ?? '' }}</div>
+        <footer class="grid signatures-section">
+            <div class="grid signature-column">
+                <div class="cell mechanic-name-cell">{{ $work->mechanic_name ?? '' }}</div>
                 <div class="cell center">Jméno mechanika:</div>
             </div>
-            <div class="grid signature">
-                <div class="cell stamp">
+            <div class="grid signature-column">
+                <div class="cell company-stamp-cell">
                     <strong>SERVIS – ZÁVACKÝ</strong>
                     <div>IČ: 15499685</div>
                     <div>TEL: 604897774</div>
@@ -507,8 +507,8 @@
                 </div>
                 <div class="cell center">datum, razítko, podpis</div>
             </div>
-            <div class="grid signature">
-                <div class="cell consent">Souhlasím s vyplněním zápisu a vykonanou prací.</div>
+            <div class="grid signature-column">
+                <div class="cell customer-consent-cell">Souhlasím s vyplněním zápisu a vykonanou prací.</div>
                 <div class="cell">podpis zákazníka:</div>
             </div>
         </footer>
