@@ -367,10 +367,10 @@
                 </div>
             </div>
             <div class="grid dates">
-                <div class="cell">Zakázka
-                    přijata:<br>{{ isset($work) ? $work->work_accepted_at?->format('d.m.Y') : '' }}</div>
-                <div class="cell">Zakázka
-                    vyřízena:<br>{{ isset($work) ? $work->work_completed_at?->format('d.m.Y') : '' }}</div>
+                <div class="cell">Zakázka přijata:<br>
+                    {{ isset($work) ? $work->work_accepted_at?->format('d.m.Y') : '' }}</div>
+                <div class="cell">Zakázka vyřízena:<br>
+                    {{ isset($work) ? $work->work_completed_at?->format('d.m.Y') : '' }}</div>
             </div>
         </section>
 
