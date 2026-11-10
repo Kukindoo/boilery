@@ -7,6 +7,7 @@ use App\Models\Work;
 use App\Traits\LogsActionActivity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class AttachSparePartToWork
@@ -24,6 +25,10 @@ class AttachSparePartToWork
                 Gate::authorize('manageSpareParts', $work);
 
                 $sparePart = SparePart::query()->lockForUpdate()->findOrFail($sparePart->id);
+                if (! $work->spareParts()->whereKey($sparePart->id)->exists() && $work->spareParts()->count() >= 5) {
+                    throw ValidationException::withMessages(['sparePartId' => 'K zakázce lze přidat nejvýše 5 náhradních dílů.']);
+                }
+
                 $work->spareParts()->syncWithoutDetaching([$sparePart->id => ['amount' => $amount]]);
                 $this->logActionCompleted('spare_parts', $sparePart, 'Spare part attached to work', ['work_id' => $work->id, 'amount' => $amount]);
             }, attempts: 5);

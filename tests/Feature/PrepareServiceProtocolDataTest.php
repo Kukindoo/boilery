@@ -38,10 +38,10 @@ class PrepareServiceProtocolDataTest extends FeatureTestCase
         $this->assertStringContainsString('CZK 82,35', $html);
     }
 
-    public function test_protocol_renders_all_parts_beyond_the_five_blank_rows(): void
+    public function test_protocol_renders_all_five_parts_at_the_limit(): void
     {
         $work = Work::factory()->create();
-        foreach (range(1, 6) as $number) {
+        foreach (range(1, 5) as $number) {
             $part = SparePart::factory()->create(['name' => 'Part ' . $number, 'price_in_cents' => 100]);
             $work->spareParts()->attach($part, ['amount' => 2]);
         }
@@ -49,9 +49,11 @@ class PrepareServiceProtocolDataTest extends FeatureTestCase
         $data = app(PrepareServiceProtocolData::class)->handle($work);
         $html = view('pdfs.service-protocol-pdf', $data->toArray())->render();
 
-        $this->assertCount(6, $data->parts);
-        $this->assertStringContainsString('Part 6', $html);
-        $this->assertStringContainsString('CZK 12,00', $html);
+        $this->assertCount(5, $data->parts);
+        foreach (range(1, 5) as $number) {
+            $this->assertStringContainsString('Part ' . $number, $html);
+        }
+        $this->assertStringContainsString('CZK 10,00', $html);
     }
 
     public function test_empty_work_has_zero_parts_total_and_blank_part_rows(): void
@@ -104,7 +106,7 @@ class PrepareServiceProtocolDataTest extends FeatureTestCase
         $this->assertSame('CZK 42,45', $data->assemblyActionsTotal);
 
         $html = view('pdfs.service-protocol-pdf', $data->toArray())->render();
-        preg_match('/<section class="grid labour section".*?<\/section>/s', $html, $matches);
+        preg_match('/<section class="grid labour-section section".*?<\/section>/s', $html, $matches);
         $this->assertStringContainsString('Montáž ohřívače', $matches[0]);
         $this->assertStringContainsString('M-001', $matches[0]);
         $this->assertStringContainsString('K-002', $matches[0]);
@@ -116,10 +118,10 @@ class PrepareServiceProtocolDataTest extends FeatureTestCase
         $this->assertStringContainsString('Existing repair description', $html);
     }
 
-    public function test_protocol_renders_all_assembly_actions_beyond_four_blank_rows(): void
+    public function test_protocol_renders_all_four_assembly_actions_at_the_limit(): void
     {
         $work = Work::factory()->create();
-        foreach (range(1, 6) as $number) {
+        foreach (range(1, 4) as $number) {
             $action = AssemblyAction::factory()->create(['name' => 'Assembly action ' . $number]);
             $work->assemblyActions()->attach($action, ['price_in_cents' => 1000]);
         }
@@ -127,10 +129,11 @@ class PrepareServiceProtocolDataTest extends FeatureTestCase
         $data = app(PrepareServiceProtocolData::class)->handle($work);
         $html = view('pdfs.service-protocol-pdf', $data->toArray())->render();
 
-        $this->assertCount(6, $data->assemblyActions);
-        $this->assertStringContainsString('Assembly action 6', $html);
-        $this->assertStringContainsString('--labour-row-count: 6', $html);
-        $this->assertStringContainsString('CZK 60,00', $html);
+        $this->assertCount(4, $data->assemblyActions);
+        foreach (range(1, 4) as $number) {
+            $this->assertStringContainsString('Assembly action ' . $number, $html);
+        }
+        $this->assertStringContainsString('CZK 40,00', $html);
     }
 
     public function test_protocol_reads_current_assembly_action_prices_and_escapes_names(): void

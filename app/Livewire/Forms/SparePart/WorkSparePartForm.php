@@ -5,8 +5,10 @@ namespace App\Livewire\Forms\SparePart;
 use App\Actions\SpareParts\AttachSparePartToWork;
 use App\Models\SparePart;
 use App\Models\Work;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
 use Throwable;
@@ -40,6 +42,12 @@ class WorkSparePartForm extends Form
     {
         Gate::authorize('manageSpareParts', $this->work);
         $this->validate();
-        app(AttachSparePartToWork::class)->handle($this->work, SparePart::findOrFail($this->sparePartId), (int) $this->amount);
+        try {
+            app(AttachSparePartToWork::class)->handle($this->work, SparePart::findOrFail($this->sparePartId), (int) $this->amount);
+        } catch (ValidationException $exception) {
+            throw ValidationException::withMessages(
+                Arr::prependKeysWith($exception->errors(), $this->getPropertyName() . '.'),
+            );
+        }
     }
 }

@@ -8,6 +8,7 @@ use App\Traits\LogsActionActivity;
 use App\ValueObjects\Price;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class AttachAssemblyActionToWork
@@ -26,6 +27,10 @@ class AttachAssemblyActionToWork
                 Gate::authorize('viewAny', AssemblyAction::class);
 
                 $assemblyAction = AssemblyAction::query()->lockForUpdate()->findOrFail($assemblyAction->id);
+                if (! $work->assemblyActions()->whereKey($assemblyAction->id)->exists() && $work->assemblyActions()->count() >= 4) {
+                    throw ValidationException::withMessages(['assemblyActionId' => 'K zakázce lze přidat nejvýše 4 pracovní úkony.']);
+                }
+
                 $work->assemblyActions()->syncWithoutDetaching([$assemblyAction->id => ['price_in_cents' => $price->inCents()]]);
 
                 $this->logActionCompleted('assembly_actions', $assemblyAction, 'Assembly action attached to work', ['work_id' => $work->id, 'price_in_cents' => $price->inCents()]);

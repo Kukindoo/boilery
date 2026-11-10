@@ -1,6 +1,6 @@
 <x-stellaris.livewire.table.wrapper heading="Pracovní úkony">
     <x-slot name="actions">
-        @include('livewire.assembly-actions.partials.work-assembly-actions-table-actions')
+        @includeWhen($actions->count() < 4, 'livewire.assembly-actions.partials.work-assembly-actions-table-actions')
     </x-slot>
     <flux:table>
         <flux:table.columns>
