@@ -58,7 +58,7 @@
 
     <flux:spacer/>
     <flux:navlist.group :heading="__('Modely')" class="grid">
-            @can('viewAny', \App\Models\SparePart::class)
+            @can('viewAny', SparePart::class)
                 <flux:navlist.item icon="clipboard-document-list" :href="route('spare-parts.index')"
                                    :current="request()->routeIs('spare-parts.*')" wire:navigate>
                     Náhradní díly
@@ -70,13 +70,13 @@
                     Pracovní úkony
                 </flux:navlist.item>
             @endcan
-            @can('viewAny', \Spatie\Permission\Models\Role::class)
+            @can('viewAny', Role::class)
                 <flux:navlist.item icon="users" :href="route('roles.index')"
                                    :current="request()->routeIs('roles.*')" wire:navigate>
                     Role
                 </flux:navlist.item>
             @endcan
-            @can('viewAny', \Spatie\Permission\Models\Permission::class)
+            @can('viewAny', Permission::class)
                 <flux:navlist.item icon="clipboard-document-list" :href="route('permissions.index')"
                                    :current="request()->routeIs('permissions.*')" wire:navigate>
                     Oprávnění
