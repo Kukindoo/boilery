@@ -6,13 +6,8 @@ use App\Enums\IssueStatus;
 
 class IssueDto
 {
-    /** @param list<int> $quoteIds
-     * @param  list<int>  $workIds
-     */
     public function __construct(
         public int $userId,
-        public array $quoteIds,
-        public array $workIds,
         public ?string $startedAt = null,
         public ?string $finishedAt = null,
         public IssueStatus $status = IssueStatus::OPEN,
