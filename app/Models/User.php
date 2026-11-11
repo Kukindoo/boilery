@@ -7,6 +7,7 @@ use App\Traits\HasFiles;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -64,15 +65,16 @@ class User extends Authenticatable implements OwnsFiles
             ->implode('');
     }
 
-    public function quotes(): HasMany
+    /** @return HasManyThrough<Quote, Issue, $this> */
+    public function quotes(): HasManyThrough
     {
-        return $this->hasMany(Quote::class, 'user_id', 'id');
+        return $this->hasManyThrough(Quote::class, Issue::class);
     }
 
-    /** @return HasMany<Work, $this> */
-    public function works(): HasMany
+    /** @return HasManyThrough<Work, Issue, $this> */
+    public function works(): HasManyThrough
     {
-        return $this->hasMany(Work::class, 'user_id');
+        return $this->hasManyThrough(Work::class, Issue::class);
     }
 
     public function isFileOwner(self $user): bool
