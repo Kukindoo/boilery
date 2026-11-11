@@ -267,7 +267,7 @@ class SparePartsCrudTest extends FeatureTestCase
         $user->unsetRelation('roles');
         Livewire::actingAs($user)->test(WorkSparePartAdd::class, ['work' => $work])->assertForbidden();
         $customer = User::factory()->customer()->create();
-        $customerWork = Work::factory()->for($customer)->create();
+        $customerWork = Work::factory()->forCustomer($customer)->create();
         Livewire::actingAs($customer)->test(WorkSpareParts::class, ['work' => $customerWork])->assertForbidden();
         $this->assertDatabaseCount('spare_part_work', 0);
     }

@@ -116,9 +116,9 @@ class StaleWorkActionsTest extends IntegrationTestCase
         $owner = User::factory()->create();
         $owner->givePermissionTo([Permissions::WORK_EDIT_OWN, Permissions::WORK_RESTORE_OWN]);
         $this->actingAs($owner);
-        $stale = Work::factory()->for($owner)->create(['deleted_at' => $trashed ? now() : null]);
+        $stale = Work::factory()->forCustomer($owner)->create(['deleted_at' => $trashed ? now() : null]);
         $data = $this->data($stale);
-        Work::withTrashed()->whereKey($stale->id)->update(['user_id' => User::factory()->create()->id]);
+        $stale->issue->update(['user_id' => User::factory()->create()->id]);
         $before = $stale->fresh()->getRawOriginal();
 
         try {
@@ -184,7 +184,7 @@ class StaleWorkActionsTest extends IntegrationTestCase
     private function data(Work $work): WorkDto
     {
         return new WorkDto(
-            userId: $work->user_id, quoteId: null, orderId: $work->order_id,
+            issueId: $work->issue_id, quoteId: null, orderId: $work->order_id,
             typeOfProduct: null, typeNumber: null, serialNumber: null,
             warrantyAccepted: false, repairInWarranty: null, dayOfPurchase: null,
             buildingType: null, reportedProblem: null, workAcceptedAt: null,

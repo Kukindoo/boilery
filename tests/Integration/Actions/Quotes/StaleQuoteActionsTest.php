@@ -9,6 +9,7 @@ use App\Actions\Quotes\RestoreQuote;
 use App\Actions\Quotes\UpdateQuote;
 use App\Dtos\Quotes\QuoteDto;
 use App\Enums\QuoteStatus;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -64,9 +65,9 @@ class StaleQuoteActionsTest extends IntegrationTestCase
     {
         $owner = User::factory()->customer()->create();
         $this->actingAs($owner);
-        $stale = Quote::factory()->for($owner)->create(['deleted_at' => $trashed ? now() : null]);
+        $stale = Quote::factory()->forCustomer($owner)->create(['deleted_at' => $trashed ? now() : null]);
         $newOwner = User::factory()->create();
-        Quote::withTrashed()->whereKey($stale->id)->update(['user_id' => $newOwner->id]);
+        $stale->issue->update(['user_id' => $newOwner->id]);
         $before = $stale->fresh()->getRawOriginal();
 
         try {
@@ -94,12 +95,13 @@ class StaleQuoteActionsTest extends IntegrationTestCase
         $quote = Quote::factory()->create();
         $customer = User::factory()->create();
         $data = $this->data();
-        $data->userId = $customer->id;
+        $targetIssue = Issue::factory()->for($customer)->create();
+        $data->issueId = $targetIssue->id;
 
         $result = app(QuoteReassignment::class)->handle($quote, $data);
 
         $this->assertSame($quote, $result);
-        $this->assertSame($customer->id, $quote->fresh()->user_id);
+        $this->assertSame($targetIssue->id, $quote->fresh()->issue_id);
     }
 
     private function invokeAction(string $action, Quote $quote): void

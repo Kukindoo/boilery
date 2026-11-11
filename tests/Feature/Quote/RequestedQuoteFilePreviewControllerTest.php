@@ -59,7 +59,7 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
         config(['filesystems.default' => 'local']);
         $user = User::factory()->create();
         $user->assignRole(Roles::ADMIN);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $file = $this->createFile($quote);
         $file->update(['mime_type' => 'image/jpeg', 'extension' => 'jpg']);
         $image = \Illuminate\Http\UploadedFile::fake()->image('receipt.jpg')->getContent();
@@ -77,7 +77,7 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
         Storage::fake('local');
         config(['filesystems.default' => 'local']);
         $user = User::factory()->create();
-        $quote = Quote::factory()->for($ownsQuote ? $user : User::factory()->create())->create();
+        $quote = Quote::factory()->forCustomer($ownsQuote ? $user : User::factory()->create())->create();
         $file = $this->createFile($quote);
         Storage::disk('local')->put($file->path, 'Quote attachment');
 
@@ -104,7 +104,7 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
 
     public function test_guest_is_redirected_to_login(): void
     {
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $file = $this->createFile($quote);
 
         $this->get(route('files.preview', ['quote', $quote, $file]))
@@ -117,8 +117,8 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
         config(['filesystems.default' => 'local']);
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::QUOTE_VIEW_ALL, Permissions::FILE_VIEW_ALL]);
-        $quote = Quote::factory()->for($user)->create();
-        $otherQuote = Quote::factory()->for($user)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
+        $otherQuote = Quote::factory()->forCustomer($user)->create();
         $file = $this->createFile($otherQuote);
         Storage::disk('local')->put($file->path, 'Other quote attachment');
 
@@ -132,7 +132,7 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
         config(['filesystems.default' => 'local']);
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::QUOTE_VIEW_OWN, Permissions::FILE_VIEW_OWN]);
-        $quote = Quote::factory()->for($user)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
         $file = $this->createFile($quote);
 
         $this->actingAs($user)->get(route('files.preview', ['quote', $quote, $file]))
@@ -143,7 +143,7 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::QUOTE_VIEW_OWN, Permissions::FILE_VIEW_OWN]);
-        $quote = Quote::factory()->for($user)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
 
         $this->actingAs($user)->get(route('files.preview', ['quote', $quote, 999999]))
             ->assertNotFound();
@@ -153,7 +153,7 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::QUOTE_VIEW_ALL, Permissions::FILE_VIEW_ALL]);
-        $quote = Quote::factory()->for($user)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
         $file = $this->createFile($quote);
 
         $this->actingAs($user)->get(route('files.preview', ['quote', 999999, $file]))

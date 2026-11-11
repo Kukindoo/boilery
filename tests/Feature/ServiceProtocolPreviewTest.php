@@ -62,7 +62,7 @@ class ServiceProtocolPreviewTest extends FeatureTestCase
     {
         $customer = User::factory()->customer()->create();
         $customer->givePermissionTo(Permissions::WORK_VIEW_OWN->label());
-        $work = Work::factory()->for($customer)->create();
+        $work = Work::factory()->forCustomer($customer)->create();
         $otherWork = Work::factory()->create();
 
         Livewire::actingAs($customer)->test(ServiceProtocolPreview::class, ['work' => $otherWork])->assertForbidden();

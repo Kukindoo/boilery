@@ -95,7 +95,7 @@ class SparePartsPagesTest extends FeatureTestCase
             Permissions::WORK_VIEW_OWN->label(), Permissions::WORK_EDIT_OWN->label(),
             Permissions::ASSEMBLY_ACTION_VIEW_ALL->label(),
         ]);
-        $work = Work::factory()->for($customer)->create();
+        $work = Work::factory()->forCustomer($customer)->create();
         $part = SparePart::factory()->create();
 
         $this->actingAs($customer)->get(route('works.show', $work))
@@ -124,7 +124,7 @@ class SparePartsPagesTest extends FeatureTestCase
         Role::findById(Roles::CUSTOMER->value)->givePermissionTo([
             Permissions::WORK_VIEW_OWN->label(),
         ]);
-        $work = Work::factory()->for($customer)->create();
+        $work = Work::factory()->forCustomer($customer)->create();
         $part = SparePart::factory()->create(['name' => 'Private spare part']);
         $work->spareParts()->attach($part);
 

@@ -30,7 +30,7 @@ class SingleFileUploadTest extends FeatureTestCase
         config(['filesystems.default' => 'local']);
         $user = User::factory()->create();
         $user->assignRole($role);
-        $quote = Quote::factory()->accepted()->for($ownsQuote ? $user : User::factory())->create();
+        $quote = Quote::factory()->accepted()->forCustomer($ownsQuote ? $user : User::factory())->create();
 
         Livewire::actingAs($user)->test(SingleFileUpload::class, ['model' => $quote])
             ->set('form.file', UploadedFile::fake()->image('receipt.jpg'))
@@ -49,7 +49,7 @@ class SingleFileUploadTest extends FeatureTestCase
         config(['filesystems.default' => 'local']);
         $user = User::factory()->create();
         $user->assignRole(Roles::CUSTOMER);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
 
         Livewire::actingAs($user)->test(SingleFileUpload::class, ['model' => $quote])
             ->set('form.file', UploadedFile::fake()->image('receipt.jpg'))
@@ -63,7 +63,7 @@ class SingleFileUploadTest extends FeatureTestCase
     public function test_user_without_upload_permission_cannot_upload_to_own_quote(): void
     {
         $user = User::factory()->create();
-        $quote = Quote::factory()->for($user)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
 
         Livewire::actingAs($user)->test(SingleFileUpload::class, ['model' => $quote])
             ->call('submit')
@@ -76,7 +76,7 @@ class SingleFileUploadTest extends FeatureTestCase
     {
         $user = User::factory()->create();
         $user->assignRole(Roles::CUSTOMER);
-        $quote = Quote::factory()->for($user)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
 
         Livewire::actingAs($user)->test(SingleFileUpload::class, ['model' => $quote])
             ->call('submit')

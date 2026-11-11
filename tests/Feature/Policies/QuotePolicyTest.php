@@ -4,6 +4,7 @@ namespace Tests\Feature\Policies;
 
 use App\Enums\Permissions;
 use App\Enums\QuoteStatus;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
@@ -121,10 +122,10 @@ class QuotePolicyTest extends FeatureTestCase
         $user = $this->userWithPermission($permission);
         $ownerId = match ($ownership) {
             'own' => $user->id,
-            'another' => $user->id + 1,
+            'another' => User::factory()->create()->id,
         };
         $quote = Quote::factory()->make([
-            'user_id' => $ownerId,
+            'issue_id' => Issue::factory()->create(['user_id' => $ownerId])->id,
             'status' => $status,
             'deleted_at' => $trashed ? '2026-10-01 12:00:00' : null,
         ]);
@@ -136,7 +137,7 @@ class QuotePolicyTest extends FeatureTestCase
     public function test_reassignment_requires_edit_all_permission(?Permissions $permission): void
     {
         $user = $this->userWithPermission($permission);
-        $quote = Quote::factory()->make(['user_id' => $user->id, 'status' => QuoteStatus::NEW]);
+        $quote = Quote::factory()->forCustomer($user)->make(['status' => QuoteStatus::NEW]);
 
         $this->assertSame($permission === Permissions::QUOTE_EDIT_ALL, $user->can('reassignment', $quote));
     }
@@ -151,10 +152,10 @@ class QuotePolicyTest extends FeatureTestCase
         $user = $this->userWithPermission(Permissions::QUOTE_EDIT_ALL);
         $ownerId = match ($ownership) {
             'own' => $user->id,
-            'another' => $user->id + 1,
+            'another' => User::factory()->create()->id,
         };
         $quote = Quote::factory()->make([
-            'user_id' => $ownerId,
+            'issue_id' => Issue::factory()->create(['user_id' => $ownerId])->id,
             'status' => $status,
             'deleted_at' => $trashed ? '2026-10-01 12:00:00' : null,
         ]);

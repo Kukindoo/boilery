@@ -7,6 +7,7 @@ use App\Models\Work;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
+use Throwable;
 
 class WorkCreate extends Component
 {
@@ -18,6 +19,7 @@ class WorkCreate extends Component
         $this->form->userId = auth()->id();
     }
 
+    /** @throws Throwable */
     public function submit(): void
     {
         $work = $this->form->submit();

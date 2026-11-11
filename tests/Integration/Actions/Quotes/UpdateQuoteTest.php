@@ -39,7 +39,7 @@ class UpdateQuoteTest extends IntegrationTestCase
     {
         $customer = User::factory()->customer()->create();
         $this->actingAs($customer);
-        $quote = Quote::factory()->for($customer)->create([
+        $quote = Quote::factory()->forCustomer($customer)->create([
             'first_name' => 'Original', 'last_name' => 'Customer', 'email' => 'original@example.test',
             'phone' => 'original-phone', 'address' => 'Original address',
         ]);
@@ -50,7 +50,7 @@ class UpdateQuoteTest extends IntegrationTestCase
         $this->assertSame($quote, $updated);
         $this->assertDatabaseHas('quotes', [
             'id' => $quote->id,
-            'user_id' => $customer->id,
+            'issue_id' => $quote->issue_id,
             'first_name' => 'Original',
             'last_name' => 'Customer',
             'email' => 'original@example.test',
@@ -77,12 +77,12 @@ class UpdateQuoteTest extends IntegrationTestCase
         if ($actor !== 'guest') {
             $this->actingAs($user);
         }
-        $quote = Quote::factory()->for($anotherOwner ? User::factory()->create() : $user)->create(['status' => $status]);
+        $quote = Quote::factory()->forCustomer($anotherOwner ? User::factory()->create() : $user)->create(['status' => $status]);
         $quote->refresh();
         $before = $quote->getRawOriginal();
 
         try {
-            app(UpdateQuote::class)->handle($quote, $this->data($quote->user_id));
+            app(UpdateQuote::class)->handle($quote, $this->data($quote->issue_id));
             $this->fail('Update should be forbidden.');
         } catch (AuthorizationException) {
             $this->assertSame($before, $quote->fresh()->getRawOriginal());
@@ -94,7 +94,7 @@ class UpdateQuoteTest extends IntegrationTestCase
     {
         $owner = User::factory()->customer()->create();
         $this->actingAs($allEditor ? User::factory()->admin()->create() : $owner);
-        $quote = Quote::factory()->for($owner)->create();
+        $quote = Quote::factory()->forCustomer($owner)->create();
         $contactBefore = $quote->only(['first_name', 'last_name', 'email', 'phone', 'address']);
         $ownerBefore = $owner->refresh()->getRawOriginal();
         $data = $this->data($removeOwner ? null : User::factory()->create()->id);
@@ -102,22 +102,22 @@ class UpdateQuoteTest extends IntegrationTestCase
         $updated = app(UpdateQuote::class)->handle($quote, $data);
 
         $this->assertSame($quote, $updated);
-        $this->assertSame($owner->id, $updated->user_id);
+        $this->assertSame($quote->issue_id, $updated->issue_id);
         $this->assertSame($contactBefore, $updated->fresh()->only(array_keys($contactBefore)));
         $this->assertSame($ownerBefore, $owner->fresh()->getRawOriginal());
         $this->assertDatabaseHas('quotes', [
             'id' => $quote->id,
-            'user_id' => $owner->id,
+            'issue_id' => $quote->issue_id,
             'message' => 'Updated problem',
         ]);
     }
 
-    private function data(?int $userId): QuoteDto
+    private function data(?int $issueId): QuoteDto
     {
         return new QuoteDto(
             firstName: 'Jan', lastName: 'Novak', email: 'jan@example.test',
             phone: '+420123456789', message: 'Updated problem',
-            status: QuoteStatus::CONTACTED, underWarranty: true, userId: $userId,
+            status: QuoteStatus::CONTACTED, underWarranty: true, issueId: $issueId,
             boilerManufacturer: BoilerManufacturers::DRAZICE,
         );
     }

@@ -5,6 +5,7 @@ namespace Tests\Feature\Models;
 use App\Enums\BoilerManufacturers;
 use App\Enums\FileTypes;
 use App\Enums\QuoteStatus;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Database\QueryException;
@@ -80,7 +81,7 @@ class QuoteTest extends FeatureTestCase
             'boiler_type' => 'B-100',
         ];
         $quote = new Quote($attributes);
-        $quote->user()->associate(User::factory()->create());
+        $quote->issue()->associate(Issue::factory()->create());
 
         $quote->save();
         $quote->refresh();
@@ -95,7 +96,7 @@ class QuoteTest extends FeatureTestCase
     {
         $user = User::factory()->create();
 
-        $quote = Quote::factory()->for($user)->create()->fresh();
+        $quote = Quote::factory()->forCustomer($user)->create()->fresh();
 
         $this->assertTrue($quote->user->is($user));
     }
@@ -136,20 +137,20 @@ class QuoteTest extends FeatureTestCase
         $this->assertNull($quote->boiler_type);
     }
 
-    public function test_cannot_create_a_quote_without_a_user(): void
+    public function test_cannot_create_a_quote_without_an_issue(): void
     {
         $this->expectException(QueryException::class);
 
-        Quote::factory()->create(['user_id' => null]);
+        Quote::factory()->create(['issue_id' => null]);
     }
 
-    public function test_cannot_remove_a_quotes_user(): void
+    public function test_cannot_remove_a_quotes_issue(): void
     {
         $quote = Quote::factory()->create();
 
         $this->expectException(QueryException::class);
 
-        $quote->update(['user_id' => null]);
+        $quote->update(['issue_id' => null]);
     }
 
     public function test_processing_quote_is_not_closed(): void
