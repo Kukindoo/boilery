@@ -3,10 +3,12 @@
 namespace App\Actions;
 
 use App\Actions\AssemblyActions\DeleteAssemblyAction;
+use App\Actions\Issues\DeleteIssue;
 use App\Actions\Quotes\DeleteQuote;
 use App\Actions\SpareParts\DeleteSparePart;
 use App\Actions\Works\DeleteWork;
 use App\Models\AssemblyAction;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\SparePart;
 use App\Models\Work;
@@ -23,6 +25,11 @@ class DeleteModel
     /** @throws Throwable */
     public function handle(Model $model): void
     {
+        if ($model instanceof Issue) {
+            app(DeleteIssue::class)->handle($model);
+
+            return;
+        }
         if ($model instanceof Quote) {
             app(DeleteQuote::class)->handle($model);
 
