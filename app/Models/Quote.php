@@ -48,7 +48,6 @@ class Quote extends Model implements OwnsFiles
         'status',
         'first_name',
         'last_name',
-        'user_id',
         'email',
         'phone',
         'address',
