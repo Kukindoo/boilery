@@ -17,7 +17,7 @@
             </flux:badge>
         </x-stellaris.container.show-row>
         <x-stellaris.container.show-row title="Zákazník">
-                {{ $issue->user?->name ?? '—' }}
+                <x-customers.customer-name :customer="$issue->user" />
             </x-stellaris.container.show-row>
             <x-stellaris.container.show-row title="E-mail">
                 {{ $issue->user?->email ?: '—' }}
