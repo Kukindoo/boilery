@@ -26,7 +26,7 @@ class QuotePolicy
     {
         return $this->viewAny($user)
             || ($user->can(Permissions::QUOTE_VIEW_OWN->label())
-                && $quote->user_id === $user->id);
+                && $quote->issue->user_id === $user->id);
     }
 
     public function create(User $user): bool
@@ -39,10 +39,10 @@ class QuotePolicy
     {
         return ($user->can(Permissions::FILE_CREATE_ALL->label())
                 || ($user->can(Permissions::FILE_CREATE_OWN->label())
-                    && $quote->user_id === $user->id))
+                    && $quote->issue->user_id === $user->id))
             && ($user->can(Permissions::QUOTE_EDIT_ALL->label())
                 || ($user->can(Permissions::QUOTE_EDIT_OWN->label())
-                    && $quote->user_id === $user->id));
+                    && $quote->issue->user_id === $user->id));
     }
 
     public function update(User $user, Quote $quote): bool
@@ -50,7 +50,7 @@ class QuotePolicy
         return ! $quote->isClosed()
             && ($user->can(Permissions::QUOTE_EDIT_ALL->label())
                 || ($user->can(Permissions::QUOTE_EDIT_OWN->label())
-                    && $quote->user_id === $user->id));
+                    && $quote->issue->user_id === $user->id));
     }
 
     public function generatePdf(User $user, Quote $quote): bool
@@ -78,7 +78,7 @@ class QuotePolicy
         return $quote->trashed()
             && ($user->can(Permissions::QUOTE_RESTORE_ALL->label())
                 || ($user->can(Permissions::QUOTE_RESTORE_OWN->label())
-                    && $quote->user_id === $user->id));
+                    && $quote->issue->user_id === $user->id));
     }
 
     public function forceDelete(User $user, Quote $quote): bool
