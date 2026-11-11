@@ -23,7 +23,7 @@
     </x-stellaris.container.show-row>
 
     <x-stellaris.container.show-row title="Případ">
-        @can ('view-any')
+        @can ('view-any', $quote->issue)
             <flux:link :href="route('issues.show', $quote->issue)" wire:navigate>
                 Případ #{{ $quote->issue_id }}
             </flux:link>
