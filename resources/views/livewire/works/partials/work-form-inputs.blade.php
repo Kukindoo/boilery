@@ -1,16 +1,14 @@
 @php
     use App\Enums\BoilerManufacturers;
-    use App\Enums\Permissions;
     use App\Enums\WorkStatus;
 @endphp
 
 <div class="space-y-2">
     <x-stellaris.livewire.forms.side-to-side.section title="Informace o zakázce">
-        @if (auth()->user()->can($form->work ? Permissions::WORK_EDIT_ALL->label() : Permissions::WORK_CREATE_ALL->label()))
-            <x-stellaris.livewire.forms.side-to-side.field label="ID Zákazníka">
-                <flux:input type="number" wire:model="form.userId" disabled/>
-            </x-stellaris.livewire.forms.side-to-side.field>
-        @endif
+        <x-stellaris.livewire.forms.side-to-side.field label="ID případu">
+            <flux:input type="number" wire:model="form.issueId" min="1" required :disabled="$form->work !== null" />
+            <flux:error name="form.issueId" />
+        </x-stellaris.livewire.forms.side-to-side.field>
 
         <x-stellaris.livewire.forms.side-to-side.field label="ID poptávky">
             <flux:input type="number" wire:model="form.quoteId" disabled/>
