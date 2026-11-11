@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\IssueStatus;
 use Database\Factories\IssueFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
+ * @property IssueStatus $status
  * @property int $user_id
  * @property ?Carbon $started_at
  * @property ?Carbon $finished_at
@@ -24,7 +26,11 @@ class Issue extends Model
     /** @use HasFactory<IssueFactory> */
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['user_id', 'started_at', 'finished_at'];
+    protected $attributes = [
+        'status' => IssueStatus::OPEN->value,
+    ];
+
+    protected $fillable = ['user_id', 'status', 'started_at', 'finished_at'];
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
@@ -47,6 +53,7 @@ class Issue extends Model
     protected function casts(): array
     {
         return [
+            'status' => IssueStatus::class,
             'started_at' => 'datetime',
             'finished_at' => 'datetime',
         ];
