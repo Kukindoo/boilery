@@ -21,7 +21,7 @@ class WorkPolicy
     {
         return $this->viewAny($user)
             || ($user->can(Permissions::WORK_VIEW_OWN->label())
-                && $work->user_id === $user->id);
+                && $work->issue->user_id === $user->id);
     }
 
     public function generatePdf(User $user, Work $work): bool
@@ -42,14 +42,14 @@ class WorkPolicy
         return ! $work->trashed()
             && $this->update($user, $work)
             && ($user->can(Permissions::FILE_CREATE_ALL->label())
-                || ($user->can(Permissions::FILE_CREATE_OWN->label()) && $work->user_id === $user->id));
+                || ($user->can(Permissions::FILE_CREATE_OWN->label()) && $work->issue->user_id === $user->id));
     }
 
     public function update(User $user, Work $work): bool
     {
         return $user->can(Permissions::WORK_EDIT_ALL->label())
             || ($user->can(Permissions::WORK_EDIT_OWN->label())
-                && $work->user_id === $user->id);
+                && $work->issue->user_id === $user->id);
     }
 
     public function manageSpareParts(User $user, Work $work): bool
@@ -97,7 +97,7 @@ class WorkPolicy
         return $work->trashed()
             && ($user->can(Permissions::WORK_RESTORE_ALL->label())
                 || ($user->can(Permissions::WORK_RESTORE_OWN->label())
-                    && $work->user_id === $user->id));
+                    && $work->issue->user_id === $user->id));
     }
 
     public function forceDelete(User $user, Work $work): bool
