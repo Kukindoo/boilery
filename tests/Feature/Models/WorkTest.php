@@ -3,6 +3,7 @@
 namespace Tests\Feature\Models;
 
 use App\Enums\BoilerManufacturers;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
@@ -38,7 +39,7 @@ class WorkTest extends FeatureTestCase
             'mechanic_name' => 'Jan Novak',
         ];
         $work = new Work($attributes);
-        $work->user()->associate(User::factory()->create());
+        $work->issue()->associate(Issue::factory()->create());
 
         $work->save();
         $work->refresh();
@@ -61,9 +62,9 @@ class WorkTest extends FeatureTestCase
     public function test_resolves_the_associated_user_and_quote(): void
     {
         $user = User::factory()->create();
-        $quote = Quote::factory()->for($user)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
 
-        $work = Work::factory()->for($user)->for($quote)->create()->fresh();
+        $work = Work::factory()->for($quote)->create()->fresh();
 
         $this->assertTrue($work->user->is($user));
         $this->assertTrue($work->quote->is($quote));
@@ -139,8 +140,8 @@ class WorkTest extends FeatureTestCase
     public function test_soft_deleting_a_linked_quote_preserves_its_work_and_foreign_key(): void
     {
         $user = User::factory()->create();
-        $quote = Quote::factory()->for($user)->create();
-        $work = Work::factory()->for($user)->for($quote)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
+        $work = Work::factory()->for($quote)->create();
 
         $quote->delete();
 

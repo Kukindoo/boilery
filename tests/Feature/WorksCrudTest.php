@@ -10,6 +10,7 @@ use App\Livewire\Modals\Deletion;
 use App\Livewire\Works\WorkCreate;
 use App\Livewire\Works\WorkEdit;
 use App\Livewire\Works\WorksTable;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
@@ -24,7 +25,7 @@ class WorksCrudTest extends FeatureTestCase
     {
         $this->freezeTime();
         $user = User::factory()->admin()->create();
-        $work = Work::factory()->for($user)->create([
+        $work = Work::factory()->forCustomer($user)->create([
             'work_accepted_at' => null, 'work_started_at' => null, 'work_completed_at' => null,
         ]);
         $today = now()->format('Y-m-d');
@@ -61,7 +62,7 @@ class WorksCrudTest extends FeatureTestCase
     public function test_edit_requires_preceding_dates_and_preserves_the_work_on_failure(): void
     {
         $user = User::factory()->admin()->create();
-        $work = Work::factory()->for($user)->create([
+        $work = Work::factory()->forCustomer($user)->create([
             'work_accepted_at' => '2026-10-19', 'work_started_at' => '2026-10-20',
             'work_completed_at' => '2026-10-21',
         ]);
@@ -88,7 +89,7 @@ class WorksCrudTest extends FeatureTestCase
     {
         $user = User::factory()->admin()->create();
 
-        Livewire::actingAs($user)->test(WorkCreate::class)
+        Livewire::actingAs($user)->test(WorkCreate::class)->set('form.issueId', Issue::factory()->for(auth()->user())->create()->id)
             ->set('form.orderId', 'INVALID-DATES')->set('form.workStartedAt', '2026-10-20')
             ->call('submit')->assertHasErrors(['form.workAcceptedAt' => 'required_with']);
         Livewire::test(WorkCreate::class)
@@ -105,7 +106,7 @@ class WorksCrudTest extends FeatureTestCase
         $user = User::factory()->create();
         $user->givePermissionTo(Permissions::WORK_CREATE_OWN);
 
-        Livewire::actingAs($user)->test(WorkCreate::class)
+        Livewire::actingAs($user)->test(WorkCreate::class)->set('form.issueId', Issue::factory()->for(auth()->user())->create()->id)
             ->set('form.orderId', 'MANUFACTURER-TEST')
             ->set('form.typeOfProduct', 'Ohřívač vody')
             ->set('form.boilerManufacturer', BoilerManufacturers::DRAZICE->value)
@@ -124,7 +125,7 @@ class WorksCrudTest extends FeatureTestCase
             Permissions::WORK_VIEW_OWN,
             Permissions::ASSEMBLY_ACTION_VIEW_ALL,
         ]);
-        $work = Work::factory()->for($user)->create([
+        $work = Work::factory()->forCustomer($user)->create([
             'type_of_product' => 'Ohřívač vody',
             'boiler_manufacturer' => BoilerManufacturers::DRAZICE,
         ]);
@@ -153,7 +154,7 @@ class WorksCrudTest extends FeatureTestCase
             Permissions::WORK_VIEW_OWN,
             Permissions::ASSEMBLY_ACTION_VIEW_ALL,
         ]);
-        $work = Work::factory()->for($user)->create(['status' => \App\Enums\WorkStatus::PROCESSING]);
+        $work = Work::factory()->forCustomer($user)->create(['status' => \App\Enums\WorkStatus::PROCESSING]);
 
         Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
             ->assertSet('form.status', 'processing')
@@ -174,7 +175,7 @@ class WorksCrudTest extends FeatureTestCase
             Permissions::WORK_VIEW_OWN,
             Permissions::ASSEMBLY_ACTION_VIEW_ALL,
         ]);
-        $work = Work::factory()->for($user)->create(['work_accepted_at' => '2026-10-19', 'work_started_at' => '2026-10-20']);
+        $work = Work::factory()->forCustomer($user)->create(['work_accepted_at' => '2026-10-19', 'work_started_at' => '2026-10-20']);
 
         $component = Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
             ->assertSet('form.workStartedAt', '2026-10-20')
@@ -196,7 +197,7 @@ class WorksCrudTest extends FeatureTestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo(Permissions::WORK_EDIT_OWN);
-        $work = Work::factory()->for($user)->create();
+        $work = Work::factory()->forCustomer($user)->create();
         $component = Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work]);
 
         $component->set('form.status', 'invalid')->call('submit')->assertHasErrors(['form.status']);
@@ -208,12 +209,11 @@ class WorksCrudTest extends FeatureTestCase
     public function test_creates_a_work_with_normalized_fields_and_relationships(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo([Permissions::WORK_CREATE_OWN, Permissions::QUOTE_VIEW_OWN]);
-        $quote = Quote::factory()->for($user)->create();
+        $user->givePermissionTo(Permissions::WORK_CREATE_OWN);
+        $issue = Issue::factory()->for($user)->create();
 
-        Livewire::actingAs($user)->test(WorkCreate::class)
-            ->set('form.orderId', 'WORK-001')
-            ->set('form.quoteId', $quote->id)
+        Livewire::actingAs($user)->test(WorkCreate::class)->set('form.issueId', Issue::factory()->for(auth()->user())->create()->id)
+            ->set('form.issueId', $issue->id)->set('form.orderId', 'WORK-001')
             ->set('form.transportDistanceInKm', '12.30')
             ->set('form.dayOfPurchase', '2026-01-02')
             ->set('form.workAcceptedAt', '2026-10-19')
@@ -222,15 +222,15 @@ class WorksCrudTest extends FeatureTestCase
             ->call('submit')->assertHasNoErrors();
 
         $work = Work::query()->where('order_id', 'WORK-001')->firstOrFail();
-        $this->assertSame($user->id, $work->user_id);
+        $this->assertSame($user->id, $work->issue->user_id);
         $this->assertSame('12.30', $work->transport_distance_in_km);
         $this->assertSame('2026-01-02', $work->day_of_purchase->format('Y-m-d'));
         $this->assertSame('2026-10-20', $work->work_started_at->toDateString());
         $this->assertNull($work->notes);
         $this->assertTrue($user->works->contains($work));
-        $this->assertTrue($quote->work->is($work));
         $this->assertTrue($work->user->is($user));
-        $this->assertTrue($work->quote->is($quote));
+        $this->assertTrue($work->issue->is($issue));
+        $this->assertNull($work->quote_id);
     }
 
     public function test_multiple_works_can_be_created_without_a_quote(): void
@@ -239,7 +239,7 @@ class WorksCrudTest extends FeatureTestCase
         $user->givePermissionTo(Permissions::WORK_CREATE_OWN);
 
         foreach (['NO-QUOTE-1', 'NO-QUOTE-2'] as $orderId) {
-            Livewire::actingAs($user)->test(WorkCreate::class)
+            Livewire::actingAs($user)->test(WorkCreate::class)->set('form.issueId', Issue::factory()->for(auth()->user())->create()->id)
                 ->set('form.orderId', $orderId)->call('submit')->assertHasNoErrors();
         }
 
@@ -248,39 +248,36 @@ class WorksCrudTest extends FeatureTestCase
         $this->assertNull(Work::query()->firstOrFail()->quote);
     }
 
-    public function test_quote_cannot_be_assigned_to_another_work_on_create_or_edit(): void
+    public function test_edit_preserves_the_origin_quote_without_quote_view_permission(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo([Permissions::WORK_CREATE_OWN, Permissions::WORK_EDIT_OWN, Permissions::QUOTE_VIEW_OWN]);
-        $quote = Quote::factory()->for($user)->create();
-        $linked = Work::factory()->for($user)->for($quote)->create();
-        $unlinked = Work::factory()->for($user)->create();
+        $user->givePermissionTo(Permissions::WORK_EDIT_OWN);
+        $quote = Quote::factory()->forCustomer($user)->create();
+        $work = Work::factory()->for($quote)->create();
 
-        Livewire::actingAs($user)->test(WorkCreate::class)
-            ->set('form.orderId', 'DUPLICATE-QUOTE')->set('form.quoteId', $quote->id)
-            ->call('submit')->assertHasErrors(['form.quoteId' => 'unique']);
-        Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $unlinked])
-            ->set('form.quoteId', $quote->id)->call('submit')->assertHasErrors(['form.quoteId' => 'unique']);
-        Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $linked])
-            ->set('form.notes', 'Same quote')->call('submit')->assertHasNoErrors();
+        Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
+            ->assertDontSee('form.quoteId', false)
+            ->assertSet('form.issueId', $quote->issue_id)
+            ->set('form.notes', 'Repaired')->call('submit')->assertHasNoErrors();
 
-        $this->assertDatabaseCount('works', 2);
-        $this->assertNull($unlinked->refresh()->quote_id);
-        $this->assertSame($quote->id, $linked->refresh()->quote_id);
+        $this->assertDatabaseHas('works', [
+            'id' => $work->id, 'quote_id' => $quote->id, 'issue_id' => $quote->issue_id, 'notes' => 'Repaired',
+        ]);
     }
 
-    public function test_soft_deleted_work_keeps_its_quote_reserved(): void
+    public function test_manual_work_can_be_added_to_an_issue_with_an_archived_quote_work(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo([Permissions::WORK_CREATE_OWN, Permissions::QUOTE_VIEW_OWN]);
-        $quote = Quote::factory()->for($user)->create();
-        Work::factory()->for($user)->for($quote)->trashed()->create();
+        $user->givePermissionTo(Permissions::WORK_CREATE_OWN);
+        $quote = Quote::factory()->forCustomer($user)->create();
+        $archived = Work::factory()->for($quote)->trashed()->create();
 
         Livewire::actingAs($user)->test(WorkCreate::class)
-            ->set('form.orderId', 'RESERVED-QUOTE')->set('form.quoteId', $quote->id)
-            ->call('submit')->assertHasErrors(['form.quoteId' => 'unique']);
+            ->set('form.issueId', $quote->issue_id)->set('form.orderId', 'ISSUE-WORK')
+            ->call('submit')->assertHasNoErrors();
 
-        $this->assertDatabaseCount('works', 1);
+        $this->assertDatabaseHas('works', ['order_id' => 'ISSUE-WORK', 'issue_id' => $quote->issue_id, 'quote_id' => null]);
+        $this->assertSame($quote->id, $archived->fresh()->quote_id);
     }
 
     public function test_database_rejects_duplicate_quote_assignments(): void
@@ -297,7 +294,7 @@ class WorksCrudTest extends FeatureTestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo(Permissions::WORK_EDIT_OWN);
-        $work = Work::factory()->for($user)->create();
+        $work = Work::factory()->forCustomer($user)->create();
 
         Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
             ->assertSet('form.notes', null)
@@ -313,7 +310,7 @@ class WorksCrudTest extends FeatureTestCase
         $user->givePermissionTo(Permissions::WORK_CREATE_OWN);
         $existing = Work::factory()->create();
 
-        Livewire::actingAs($user)->test(WorkCreate::class)
+        Livewire::actingAs($user)->test(WorkCreate::class)->set('form.issueId', Issue::factory()->for(auth()->user())->create()->id)
             ->call('submit')->assertHasErrors(['form.orderId' => 'required'])
             ->set('form.orderId', $existing->order_id)
             ->set('form.transportDistanceInKm', '1.234')
@@ -324,18 +321,14 @@ class WorksCrudTest extends FeatureTestCase
         $this->assertDatabaseCount('works', 1);
     }
 
-    public function test_own_creator_cannot_assign_another_owner_or_an_inaccessible_quote(): void
+    public function test_own_creator_cannot_assign_another_owners_issue(): void
     {
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::WORK_CREATE_OWN, Permissions::QUOTE_VIEW_OWN]);
         $other = User::factory()->create();
-        $quote = Quote::factory()->for($other)->create();
 
-        Livewire::actingAs($user)->test(WorkCreate::class)
-            ->set('form.orderId', 'OWNER-TAMPER')->set('form.userId', $other->id)
-            ->call('submit')->assertForbidden();
-        Livewire::actingAs($user)->test(WorkCreate::class)
-            ->set('form.orderId', 'QUOTE-TAMPER')->set('form.quoteId', $quote->id)
+        Livewire::actingAs($user)->test(WorkCreate::class)->set('form.issueId', Issue::factory()->for(auth()->user())->create()->id)
+            ->set('form.orderId', 'OWNER-TAMPER')->set('form.issueId', Issue::factory()->for($other)->create()->id)
             ->call('submit')->assertForbidden();
 
         $this->assertDatabaseCount('works', 0);
@@ -345,16 +338,16 @@ class WorksCrudTest extends FeatureTestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo(Permissions::WORK_EDIT_OWN);
-        $work = Work::factory()->for($user)->create();
+        $work = Work::factory()->forCustomer($user)->create();
         $other = User::factory()->create();
         Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
-            ->set('form.userId', $other->id)->call('submit')->assertForbidden();
+            ->set('form.issueId', Issue::factory()->for($other)->create()->id)->call('submit')->assertForbidden();
 
         $component = Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work]);
         $user->revokePermissionTo(Permissions::WORK_EDIT_OWN);
         $component->set('form.notes', 'Unauthorized')->call('submit')->assertForbidden();
 
-        $this->assertSame($user->id, $work->refresh()->user_id);
+        $this->assertSame($user->id, $work->refresh()->issue->user_id);
         $this->assertNull($work->notes);
     }
 
@@ -389,7 +382,7 @@ class WorksCrudTest extends FeatureTestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::WORK_RESTORE_OWN, Permissions::WORK_FORCE_DELETE_ALL]);
-        $work = Work::factory()->for($user)->trashed()->create();
+        $work = Work::factory()->forCustomer($user)->trashed()->create();
         $this->actingAs($user);
 
         app(RestoreWork::class)->handle($work);

@@ -41,7 +41,7 @@ class WorkFileCardTest extends FeatureTestCase
         Storage::fake();
         $user = User::factory()->customer()->create();
         $user->givePermissionTo(Permissions::WORK_VIEW_OWN->label());
-        $work = Work::factory()->for($user)->create();
+        $work = Work::factory()->forCustomer($user)->create();
         $file = $this->attachment($work);
 
         Livewire::actingAs($user)->test(FilePreviewCard::class, ['model' => $work, 'file' => $file])
@@ -87,7 +87,7 @@ class WorkFileCardTest extends FeatureTestCase
         Storage::fake();
         $user = User::factory()->customer()->create();
         $user->givePermissionTo(Permissions::WORK_VIEW_OWN->label());
-        $work = Work::factory()->for($user)->create();
+        $work = Work::factory()->forCustomer($user)->create();
         $file = $this->attachment($work);
 
         Livewire::actingAs($user)->test(FilePreviewCard::class, ['model' => $work, 'file' => $file])

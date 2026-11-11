@@ -68,19 +68,18 @@ class WorkOwnershipTest extends FeatureTestCase
         $this->assertDatabaseCount('works', 0);
     }
 
-    public function test_work_cannot_link_a_quote_from_another_issue_on_create_or_update(): void
+    public function test_edit_changes_only_work_details_and_preserves_parent_issue_and_origin_quote(): void
     {
         $admin = User::factory()->admin()->create();
-        $issue = Issue::factory()->create();
         $quote = Quote::factory()->create();
-        Livewire::actingAs($admin)->test(WorkCreate::class)
-            ->set('form.issueId', $issue->id)->set('form.orderId', 'MISMATCHED-ISSUE')
-            ->set('form.quoteId', $quote->id)->call('submit')->assertHasErrors('form.quoteId');
-        $this->assertDatabaseCount('works', 0);
-        $work = Work::factory()->for($issue)->create();
-        Livewire::test(WorkEdit::class, ['work' => $work])
-            ->set('form.quoteId', $quote->id)->call('submit')->assertHasErrors('form.quoteId');
-        $this->assertNull($work->fresh()->quote_id);
-        $this->assertSame($issue->id, $work->fresh()->issue_id);
+        $work = Work::factory()->for($quote)->create();
+
+        Livewire::actingAs($admin)->test(WorkEdit::class, ['work' => $work])
+            ->assertDontSee('form.quoteId', false)
+            ->set('form.notes', 'Updated through issue')->call('submit')->assertHasNoErrors();
+
+        $this->assertDatabaseHas('works', [
+            'id' => $work->id, 'issue_id' => $quote->issue_id, 'quote_id' => $quote->id, 'notes' => 'Updated through issue',
+        ]);
     }
 }

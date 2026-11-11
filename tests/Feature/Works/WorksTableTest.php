@@ -15,8 +15,8 @@ class WorksTableTest extends FeatureTestCase
     public function test_displays_work_details_newest_first_and_excludes_deleted_works(): void
     {
         $user = $this->viewer();
-        $older = Work::factory()->for($user)->create(['order_id' => 'ORDER-OLD', 'created_at' => '2026-01-01']);
-        $newer = Work::factory()->for($user)->create([
+        $older = Work::factory()->forCustomer($user)->create(['order_id' => 'ORDER-OLD', 'created_at' => '2026-01-01']);
+        $newer = Work::factory()->forCustomer($user)->create([
             'order_id' => 'ORDER-NEW',
             'type_of_product' => 'Boiler',
             'status' => WorkStatus::PROCESSING,
@@ -24,7 +24,7 @@ class WorksTableTest extends FeatureTestCase
             'work_completed_at' => '2026-01-03',
             'created_at' => '2026-01-02',
         ]);
-        Work::factory()->for($user)->create(['order_id' => 'ORDER-DELETED', 'deleted_at' => now()]);
+        Work::factory()->forCustomer($user)->create(['order_id' => 'ORDER-DELETED', 'deleted_at' => now()]);
 
         Livewire::actingAs($user)->test(WorksTable::class)
             ->assertSeeInOrder([$newer->order_id, $older->order_id])
@@ -41,10 +41,10 @@ class WorksTableTest extends FeatureTestCase
     public function test_filters_by_multiple_statuses_and_resets_pagination(): void
     {
         $user = $this->viewer();
-        Work::factory()->for($user)->create(['order_id' => 'NEW-WORK', 'status' => WorkStatus::NEW]);
-        Work::factory()->for($user)->create(['order_id' => 'ACTIVE-WORK', 'status' => WorkStatus::PROCESSING]);
-        Work::factory()->for($user)->create(['order_id' => 'DONE-WORK', 'status' => WorkStatus::FINISHED]);
-        Work::factory()->for($user)->create(['order_id' => 'CANCELLED-WORK', 'status' => WorkStatus::CANCELLED]);
+        Work::factory()->forCustomer($user)->create(['order_id' => 'NEW-WORK', 'status' => WorkStatus::NEW]);
+        Work::factory()->forCustomer($user)->create(['order_id' => 'ACTIVE-WORK', 'status' => WorkStatus::PROCESSING]);
+        Work::factory()->forCustomer($user)->create(['order_id' => 'DONE-WORK', 'status' => WorkStatus::FINISHED]);
+        Work::factory()->forCustomer($user)->create(['order_id' => 'CANCELLED-WORK', 'status' => WorkStatus::CANCELLED]);
 
         Livewire::actingAs($user)->test(WorksTable::class)
             ->assertSee('NEW-WORK')->assertSee('ACTIVE-WORK')
@@ -69,7 +69,7 @@ class WorksTableTest extends FeatureTestCase
     public function test_paginates_fifteen_works(): void
     {
         $user = $this->viewer();
-        Work::factory()->count(16)->for($user)->sequence(fn ($sequence) => [
+        Work::factory()->count(16)->forCustomer($user)->sequence(fn ($sequence) => [
             'order_id' => sprintf('ORDER-%02d', $sequence->index),
             'created_at' => '2026-01-01',
         ])->create();
@@ -85,7 +85,7 @@ class WorksTableTest extends FeatureTestCase
     public function test_sorting_toggles_direction_and_resets_pagination(): void
     {
         $user = $this->viewer();
-        Work::factory()->count(16)->for($user)->sequence(fn ($sequence) => [
+        Work::factory()->count(16)->forCustomer($user)->sequence(fn ($sequence) => [
             'order_id' => sprintf('ORDER-%02d', $sequence->index),
         ])->create();
 
@@ -104,8 +104,8 @@ class WorksTableTest extends FeatureTestCase
     public function test_sorts_works_by_status(): void
     {
         $user = $this->viewer();
-        Work::factory()->for($user)->create(['order_id' => 'NEW-WORK', 'status' => WorkStatus::NEW]);
-        Work::factory()->for($user)->create(['order_id' => 'FINISHED-WORK', 'status' => WorkStatus::FINISHED]);
+        Work::factory()->forCustomer($user)->create(['order_id' => 'NEW-WORK', 'status' => WorkStatus::NEW]);
+        Work::factory()->forCustomer($user)->create(['order_id' => 'FINISHED-WORK', 'status' => WorkStatus::FINISHED]);
 
         Livewire::actingAs($user)->test(WorksTable::class)
             ->set('selectedStatuses', [WorkStatus::NEW->value, WorkStatus::FINISHED->value])
@@ -136,7 +136,7 @@ class WorksTableTest extends FeatureTestCase
     public function test_opens_an_authorized_work(): void
     {
         $user = $this->viewer();
-        $work = Work::factory()->for($user)->create();
+        $work = Work::factory()->forCustomer($user)->create();
 
         Livewire::actingAs($user)->test(WorksTable::class)
             ->call('openWork', $work->id)->assertRedirect(route('works.show', $work));
@@ -150,7 +150,7 @@ class WorksTableTest extends FeatureTestCase
     public function test_cannot_open_a_work_after_permission_is_revoked(): void
     {
         $user = $this->viewer();
-        $work = Work::factory()->for($user)->create();
+        $work = Work::factory()->forCustomer($user)->create();
         $component = Livewire::actingAs($user)->test(WorksTable::class);
         $user->revokePermissionTo(Permissions::WORK_VIEW_ALL);
 
@@ -174,7 +174,7 @@ class WorksTableTest extends FeatureTestCase
     public function test_escapes_work_details(): void
     {
         $user = $this->viewer();
-        Work::factory()->for($user)->create(['order_id' => '<script>alert(1)</script>']);
+        Work::factory()->forCustomer($user)->create(['order_id' => '<script>alert(1)</script>']);
 
         Livewire::actingAs($user)->test(WorksTable::class)
             ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false)

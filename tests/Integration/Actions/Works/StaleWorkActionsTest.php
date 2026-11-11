@@ -184,7 +184,7 @@ class StaleWorkActionsTest extends IntegrationTestCase
     private function data(Work $work): WorkDto
     {
         return new WorkDto(
-            issueId: $work->issue_id, quoteId: null, orderId: $work->order_id,
+            issueId: $work->issue_id, orderId: $work->order_id,
             typeOfProduct: null, typeNumber: null, serialNumber: null,
             warrantyAccepted: false, repairInWarranty: null, dayOfPurchase: null,
             buildingType: null, reportedProblem: null, workAcceptedAt: null,

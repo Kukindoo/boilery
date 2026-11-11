@@ -56,8 +56,8 @@ class WorkFileUploadTest extends FeatureTestCase
                 Permissions::ASSEMBLY_ACTION_VIEW_ALL,
             ]);
         }
-        $quote = Quote::factory()->accepted()->for($customer)->create();
-        $work = Work::factory()->for($customer)->for($quote)->create();
+        $quote = Quote::factory()->accepted()->forCustomer($customer)->create();
+        $work = Work::factory()->for($quote)->create();
         $parent = $origin === 'quote' ? $quote : $work;
 
         Livewire::actingAs($actor)->test(SingleFileUpload::class, ['model' => $parent])
@@ -100,7 +100,7 @@ class WorkFileUploadTest extends FeatureTestCase
         Storage::fake();
         $actor = User::factory()->create();
         $actor->givePermissionTo($permissions);
-        $work = Work::factory()->for($anotherOwner ? User::factory() : $actor)->create();
+        $work = Work::factory()->forCustomer($anotherOwner ? User::factory() : $actor)->create();
 
         Livewire::actingAs($actor)->test(SingleFileUpload::class, ['model' => $work])
             ->set('form.file', UploadedFile::fake()->image('receipt.jpg'))
@@ -116,7 +116,7 @@ class WorkFileUploadTest extends FeatureTestCase
         Storage::fake();
         $actor = User::factory()->create();
         $actor->givePermissionTo([Permissions::WORK_VIEW_OWN, Permissions::WORK_EDIT_OWN, Permissions::FILE_CREATE_OWN]);
-        $work = Work::factory()->for($actor)->create();
+        $work = Work::factory()->forCustomer($actor)->create();
         $component = Livewire::actingAs($actor)->test(SingleFileUpload::class, ['model' => $work]);
         $actor->revokePermissionTo(Permissions::FILE_CREATE_OWN);
 

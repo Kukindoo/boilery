@@ -42,13 +42,14 @@ class WorkIssueTest extends FeatureTestCase
         $this->assertSame(2, Issue::query()->count());
     }
 
-    public function test_manual_creation_reuses_the_quotes_issue(): void
+    public function test_manual_creation_uses_an_issue_without_linking_its_quote(): void
     {
         $user = User::factory()->admin()->create();
         $issue = Issue::factory()->for($user)->create();
         $quote = Quote::factory()->forCustomer($user)->for($issue)->create();
         Livewire::actingAs($user)->test(WorkCreate::class)->set('form.issueId', $issue->id)->set('form.orderId', 'LINKED-WORK')
-            ->set('form.quoteId', $quote->id)->call('submit')->assertHasNoErrors();
+            ->assertDontSee('form.quoteId', false)->call('submit')->assertHasNoErrors();
+        $this->assertNull(Work::query()->sole()->quote_id);
         $this->assertSame($issue->id, Work::query()->sole()->issue_id);
         $this->assertSame(1, Issue::query()->count());
     }

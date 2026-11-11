@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Enums\Permissions;
 use App\Enums\Roles;
-use App\Livewire\Works\WorkCreate;
 use App\Livewire\Works\WorkEdit;
 use App\Models\Quote;
 use App\Models\User;
@@ -13,6 +12,20 @@ use Spatie\Permission\Models\Role;
 
 class WorksPagesTest extends FeatureTestCase
 {
+    public function test_show_links_to_the_parent_issue_instead_of_the_origin_quote(): void
+    {
+        $user = User::factory()->admin()->create();
+        $quote = Quote::factory()->create();
+        $work = Work::factory()->for($quote)->create();
+
+        $this->actingAs($user)->get(route('works.show', $work))
+            ->assertSee('Případ #' . $work->issue_id)
+            ->assertSee('href="' . route('issues.show', $work->issue) . '"', false)
+            ->assertDontSee('href="' . route('quotes.show', $quote) . '"', false);
+        $this->get(route('works.edit', $work))
+            ->assertSee('form.issueId', false)->assertDontSee('form.quoteId', false);
+    }
+
     public function test_show_does_not_display_related_quote_details(): void
     {
         $user = User::factory()->create();
@@ -82,12 +95,12 @@ class WorksPagesTest extends FeatureTestCase
     public function test_pages_require_authentication_and_authorization(): void
     {
         $work = Work::factory()->create();
-        foreach (['works.create', 'works.show', 'works.edit'] as $route) {
+        foreach (['works.show', 'works.edit'] as $route) {
             $this->get(route($route, $work))->assertRedirect(route('login'));
         }
 
         $user = User::factory()->create();
-        foreach (['works.create', 'works.show', 'works.edit'] as $route) {
+        foreach (['works.show', 'works.edit'] as $route) {
             $this->actingAs($user)->get(route($route, $work))->assertForbidden();
         }
     }
@@ -98,7 +111,7 @@ class WorksPagesTest extends FeatureTestCase
         $user->assignRole(Role::findById(Roles::ADMIN->value));
         $work = Work::factory()->create();
 
-        $this->actingAs($user)->get(route('works.create'))->assertSeeLivewire(WorkCreate::class);
+        $this->actingAs($user);
         $this->get(route('works.edit', $work))->assertSeeLivewire(WorkEdit::class);
         $this->get(route('works.show', $work))->assertSee($work->order_id);
         $this->get(route('works.show', 999999))->assertNotFound();
@@ -126,12 +139,22 @@ class WorksPagesTest extends FeatureTestCase
             Permissions::WORK_EDIT_OWN,
             Permissions::ASSEMBLY_ACTION_VIEW_ALL,
         ]);
-        $own = Work::factory()->for($user)->create();
+        $own = Work::factory()->forCustomer($user)->create();
         $other = Work::factory()->create();
 
         $this->actingAs($user)->get(route('works.show', $own))->assertOk()->assertSee($own->order_id);
         $this->get(route('works.edit', $own))->assertSeeLivewire(WorkEdit::class);
         $this->get(route('works.show', $other))->assertForbidden();
         $this->get(route('works.edit', $other))->assertForbidden();
+    }
+
+    public function test_work_index_has_no_add_button_and_standalone_creation_page_is_unavailable(): void
+    {
+        $user = User::factory()->admin()->create();
+
+        $this->actingAs($user)->get(route('works.index'))
+            ->assertDontSee('Přidat zakázku')
+            ->assertDontSee('href="' . url('/works/create') . '"', false);
+        $this->get('/works/create')->assertNotFound();
     }
 }

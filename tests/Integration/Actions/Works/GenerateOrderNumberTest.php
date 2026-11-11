@@ -56,10 +56,9 @@ class GenerateOrderNumberTest extends IntegrationTestCase
         $this->actingAs(User::factory()->admin()->create());
         $data = new WorkDto(
             issueId: Issue::factory()->create()->id,
-            quoteId: null,
+
             orderId: null,
             typeOfProduct: 'Ohřívač vody',
-            boilerManufacturer: BoilerManufacturers::DRAZICE,
             typeNumber: null,
             serialNumber: null,
             warrantyAccepted: false,
@@ -77,6 +76,7 @@ class GenerateOrderNumberTest extends IntegrationTestCase
             transportDistanceInKm: null,
             notes: null,
             mechanicName: null,
+            boilerManufacturer: BoilerManufacturers::DRAZICE,
         );
         $action = app(CreateWork::class);
 

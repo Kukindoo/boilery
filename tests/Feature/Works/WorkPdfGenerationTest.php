@@ -45,7 +45,7 @@ class WorkPdfGenerationTest extends FeatureTestCase
         Queue::fake([GeneratePdf::class]);
         $user = User::factory()->customer()->create();
         $user->givePermissionTo(\App\Enums\Permissions::WORK_VIEW_OWN->label());
-        $work = Work::factory()->for($user)->create();
+        $work = Work::factory()->forCustomer($user)->create();
 
         Livewire::actingAs($user)->test(PdfGeneration::class, ['model' => $work])
             ->assertDontSee('Generovat PDF')
@@ -57,7 +57,7 @@ class WorkPdfGenerationTest extends FeatureTestCase
 
     public function test_user_cannot_monitor_another_customers_work(): void
     {
-        $work = Work::factory()->for(User::factory())->create();
+        $work = Work::factory()->forCustomer(User::factory())->create();
 
         Livewire::actingAs(User::factory()->customer()->create())
             ->test(PdfGeneration::class, ['model' => $work])->assertForbidden();

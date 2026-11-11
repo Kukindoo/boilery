@@ -4,6 +4,7 @@ namespace Tests\Feature\Policies;
 
 use App\Enums\Permissions;
 use App\Enums\WorkStatus;
+use App\Models\Issue;
 use App\Models\User;
 use App\Models\Work;
 use Illuminate\Support\Facades\Gate;
@@ -116,11 +117,11 @@ class WorkPolicyTest extends FeatureTestCase
         $user = $this->userWithPermission($permission);
         $ownerId = match ($ownership) {
             'own' => $user->id,
-            'another' => $user->id + 1,
+            'another' => User::factory()->create()->id,
             'none' => null,
         };
         $work = Work::factory()->make([
-            'user_id' => $ownerId,
+            'issue_id' => Issue::factory()->create(['user_id' => $ownerId])->id,
             'work_completed_at' => $completed ? '2026-10-01' : null,
             'deleted_at' => $trashed ? '2026-10-01 12:00:00' : null,
         ]);
@@ -132,7 +133,7 @@ class WorkPolicyTest extends FeatureTestCase
     public function test_transitions_require_edit_all_permission_and_the_correct_status(string $ability, WorkStatus $status, ?Permissions $permission, bool $allowed): void
     {
         $user = $this->userWithPermission($permission);
-        $work = Work::factory()->make(['user_id' => $user->id, 'status' => $status]);
+        $work = Work::factory()->forCustomer($user)->make(['status' => $status]);
 
         $this->assertSame($allowed, $user->can($ability, $work));
     }

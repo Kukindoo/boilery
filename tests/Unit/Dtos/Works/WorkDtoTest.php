@@ -11,8 +11,7 @@ class WorkDtoTest extends UnitTestCase
     public function test_maps_populated_fields_to_model_attributes(): void
     {
         $dto = new WorkDto(
-            userId: 42,
-            quoteId: 7,
+            issueId: 42,
             orderId: 'ORDER-1',
             typeOfProduct: 'Boiler',
             boilerManufacturer: BoilerManufacturers::DRAZICE,
@@ -36,8 +35,7 @@ class WorkDtoTest extends UnitTestCase
         );
 
         $this->assertSame([
-            'user_id' => 42,
-            'quote_id' => 7,
+            'issue_id' => 42,
             'order_id' => 'ORDER-1',
             'status' => \App\Enums\WorkStatus::NEW,
             'type_of_product' => 'Boiler',
@@ -65,8 +63,8 @@ class WorkDtoTest extends UnitTestCase
     public function test_preserves_null_optional_fields(): void
     {
         $dto = new WorkDto(
-            userId: 42,
-            quoteId: null,
+            issueId: 42,
+
             orderId: null,
             typeOfProduct: null,
             typeNumber: null,
@@ -89,8 +87,7 @@ class WorkDtoTest extends UnitTestCase
         );
 
         $this->assertSame([
-            'user_id' => 42,
-            'quote_id' => null,
+            'issue_id' => 42,
             'order_id' => null,
             'status' => \App\Enums\WorkStatus::NEW,
             'type_of_product' => null,
@@ -118,8 +115,8 @@ class WorkDtoTest extends UnitTestCase
     public function test_preserves_zero_and_false_values(): void
     {
         $dto = new WorkDto(
-            userId: 42,
-            quoteId: null,
+            issueId: 42,
+
             orderId: null,
             typeOfProduct: null,
             typeNumber: null,
@@ -142,8 +139,7 @@ class WorkDtoTest extends UnitTestCase
         );
 
         $this->assertSame([
-            'user_id' => 42,
-            'quote_id' => null,
+            'issue_id' => 42,
             'order_id' => null,
             'status' => \App\Enums\WorkStatus::NEW,
             'type_of_product' => null,
