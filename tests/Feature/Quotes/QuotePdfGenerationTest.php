@@ -106,7 +106,7 @@ class QuotePdfGenerationTest extends FeatureTestCase
     {
         Queue::fake([GeneratePdf::class]);
         $user = User::factory()->customer()->create();
-        $quote = Quote::factory()->for($user)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
 
         Livewire::actingAs($user)->test(PdfGeneration::class, ['model' => $quote])
             ->assertDontSee('Generovat PDF')
@@ -119,7 +119,7 @@ class QuotePdfGenerationTest extends FeatureTestCase
 
     public function test_user_cannot_monitor_another_customers_quote(): void
     {
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
 
         Livewire::actingAs(User::factory()->customer()->create())
             ->test(PdfGeneration::class, ['model' => $quote])->assertForbidden();

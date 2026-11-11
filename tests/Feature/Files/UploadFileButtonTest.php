@@ -24,7 +24,7 @@ class UploadFileButtonTest extends FeatureTestCase
     #[DataProvider('parentTypes')]
     public function test_upload_button_renders_the_upload_form_for_both_models(string $type): void
     {
-        $model = $type === 'quote' ? Quote::factory()->for(User::factory())->create() : Work::factory()->create();
+        $model = $type === 'quote' ? Quote::factory()->forCustomer(User::factory())->create() : Work::factory()->create();
 
         Livewire::actingAs(User::factory()->admin()->create())
             ->test(UploadFileButton::class, compact('model'))
@@ -55,7 +55,7 @@ class UploadFileButtonTest extends FeatureTestCase
     public function test_upload_form_accepts_a_custom_modal_name_and_returns_to_the_parent(string $type): void
     {
         Storage::fake();
-        $model = $type === 'quote' ? Quote::factory()->for(User::factory())->create() : Work::factory()->create();
+        $model = $type === 'quote' ? Quote::factory()->forCustomer(User::factory())->create() : Work::factory()->create();
 
         Livewire::actingAs(User::factory()->admin()->create())
             ->test(SingleFileUpload::class, ['model' => $model, 'modalName' => 'custom-upload'])

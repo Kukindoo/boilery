@@ -54,7 +54,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     {
         $user = User::factory()->create();
         $user->assignRole($role);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $file = $quote->files()->create([
             'original_name' => 'receipt.jpg',
             'file_type' => FileTypes::UNKNOWN,
@@ -78,7 +78,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     {
         Storage::fake();
         $viewer = $this->viewer(true);
-        $quote = Quote::factory()->for($viewer)->create();
+        $quote = Quote::factory()->forCustomer($viewer)->create();
         $file = $this->attachment($quote);
 
         Livewire::actingAs($viewer)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file])
@@ -93,7 +93,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     public function test_mount_requires_quote_view_permission(): void
     {
         Storage::fake();
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $file = $this->attachment($quote);
 
         Livewire::actingAs(User::factory()->create())
@@ -116,7 +116,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
         Storage::fake();
         Queue::fake([DeleteStoredFile::class]);
         $viewer = $this->viewer();
-        $quote = Quote::factory()->for($viewer)->create();
+        $quote = Quote::factory()->forCustomer($viewer)->create();
         $file = $this->attachment($quote);
         $otherFile = $this->attachment($quote, 'other.pdf');
 
@@ -137,7 +137,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     {
         Storage::fake();
         $viewer = $this->viewer($action === 'changeFileType');
-        $quote = Quote::factory()->for($viewer)->create();
+        $quote = Quote::factory()->forCustomer($viewer)->create();
         $file = $this->attachment($quote);
         $component = Livewire::actingAs($viewer)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file]);
         $viewer->revokePermissionTo($permission);
@@ -154,10 +154,10 @@ class QuoteDownloadCardTest extends FeatureTestCase
     {
         Storage::fake();
         $viewer = $this->viewer($action === 'changeFileType');
-        $quote = Quote::factory()->for($viewer)->create();
+        $quote = Quote::factory()->forCustomer($viewer)->create();
         $file = $this->attachment($quote);
         $component = Livewire::actingAs($viewer)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file]);
-        $otherQuote = Quote::factory()->for($viewer)->create();
+        $otherQuote = Quote::factory()->forCustomer($viewer)->create();
         $quote->files()->detach($file->id);
         $otherQuote->files()->attach($file->id);
 
@@ -174,10 +174,10 @@ class QuoteDownloadCardTest extends FeatureTestCase
     {
         Storage::fake();
         $viewer = $this->viewer($action === 'changeFileType');
-        $quote = Quote::factory()->for($viewer)->create();
+        $quote = Quote::factory()->forCustomer($viewer)->create();
         $file = $this->attachment($quote);
         $component = Livewire::actingAs($viewer)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file]);
-        Quote::whereKey($quote->id)->update(['user_id' => User::factory()->create()->id]);
+        $quote->issue->update(['user_id' => User::factory()->create()->id]);
 
         $component->call($action, ...($action === 'changeFileType' ? [FileTypes::WARRANTY->value] : []))->assertForbidden();
 
@@ -190,7 +190,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     {
         Storage::fake();
         $viewer = $this->viewer();
-        $quote = Quote::factory()->for($viewer)->create();
+        $quote = Quote::factory()->forCustomer($viewer)->create();
         $file = $this->attachment($quote);
         $component = Livewire::actingAs($viewer)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file]);
         $quote->delete();
@@ -202,7 +202,7 @@ class QuoteDownloadCardTest extends FeatureTestCase
     {
         Storage::fake();
         $viewer = $this->viewer(true);
-        $quote = Quote::factory()->for($viewer)->create();
+        $quote = Quote::factory()->forCustomer($viewer)->create();
         $file = $this->attachment($quote);
         $component = Livewire::actingAs($viewer)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file]);
         Quote::whereKey($quote->id)->update(['status' => \App\Enums\QuoteStatus::ACCEPTED]);

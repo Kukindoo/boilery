@@ -28,7 +28,7 @@ class UploadFileTest extends FeatureTestCase
     {
         Storage::fake();
         $this->actingAs(User::factory()->admin()->create());
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $labelAtCreation = null;
         File::creating(function (File $file) use (&$labelAtCreation): void {
             $labelAtCreation = $file->label;
@@ -51,8 +51,8 @@ class UploadFileTest extends FeatureTestCase
         Storage::fake();
         $user = User::factory()->admin()->create();
         $this->actingAs($user);
-        $quote = Quote::factory()->for(User::factory())->create();
-        $work = Work::factory()->for($quote->user)->for($quote)->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
+        $work = Work::factory()->for($quote)->create();
         $created = 0;
         FileAttachment::creating(function () use (&$created): void {
             if (++$created === 2) {
@@ -77,8 +77,8 @@ class UploadFileTest extends FeatureTestCase
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::WORK_EDIT_OWN, Permissions::FILE_CREATE_OWN]);
         $this->actingAs($user);
-        $staleWork = Work::factory()->for($user)->create();
-        Work::whereKey($staleWork->id)->update(['user_id' => User::factory()->create()->id]);
+        $staleWork = Work::factory()->forCustomer($user)->create();
+        $staleWork->issue->update(['user_id' => User::factory()->create()->id]);
 
         try {
             app(UploadFile::class)->handle(UploadedFile::fake()->image('receipt.jpg'), $staleWork, FileTypes::RECEIPT);

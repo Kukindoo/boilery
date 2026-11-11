@@ -131,7 +131,7 @@ class WorkAssemblyActionPriceTest extends FeatureTestCase
     {
         $customer = User::factory()->create()->assignRole(Roles::CUSTOMER->value);
         $customer->givePermissionTo(Permissions::WORK_VIEW_OWN->label());
-        $work = Work::factory()->for($customer)->create();
+        $work = Work::factory()->forCustomer($customer)->create();
         $otherWork = Work::factory()->create();
         $action = AssemblyAction::factory()->create(['name' => 'Kontrola kotle']);
         $work->assemblyActions()->attach($action, ['price_in_cents' => 1745]);

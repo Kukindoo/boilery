@@ -30,7 +30,7 @@ class QuoteEditTest extends FeatureTestCase
         $another = User::factory()->create();
         $customerBefore = $customer->refresh()->getRawOriginal();
         $anotherBefore = $another->refresh()->getRawOriginal();
-        $quote = Quote::factory()->for($customer)->create(['email' => $customer->email]);
+        $quote = Quote::factory()->forCustomer($customer)->create(['email' => $customer->email]);
         $originalPhone = $quote->phone;
         $email = match ($emailSource) {
             'customer' => $customer->email,
@@ -49,7 +49,7 @@ class QuoteEditTest extends FeatureTestCase
 
         $this->assertDatabaseHas('quotes', [
             'id' => $quote->id,
-            'user_id' => $customer->id,
+            'issue_id' => $quote->issue_id,
             'email' => $customer->email,
             'phone' => $originalPhone,
             'message' => 'Updated problem',
@@ -62,7 +62,7 @@ class QuoteEditTest extends FeatureTestCase
     public function test_quote_edit_does_not_validate_unused_contact_inputs(): void
     {
         $customer = User::factory()->customer()->create();
-        $quote = Quote::factory()->for($customer)->create(['email' => $customer->email]);
+        $quote = Quote::factory()->forCustomer($customer)->create(['email' => $customer->email]);
         $originalPhone = $quote->phone;
 
         Livewire::actingAs($customer)->test(QuoteEdit::class, ['quote' => $quote])

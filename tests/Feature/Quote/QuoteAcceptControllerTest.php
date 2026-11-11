@@ -31,7 +31,7 @@ class QuoteAcceptControllerTest extends FeatureTestCase
             $user->givePermissionTo($viewPermission);
         }
 
-        $quote = Quote::factory()->for(User::factory()->customer())->create();
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
 
         $response = $this->actingAs($user)->post(route('quotes.accept', $quote));
 
@@ -42,13 +42,13 @@ class QuoteAcceptControllerTest extends FeatureTestCase
             default => [],
         });
         $this->assertSame(QuoteStatus::ACCEPTED, $quote->status);
-        $this->assertDatabaseHas('works', ['quote_id' => $quote->id, 'user_id' => $quote->user_id]);
+        $this->assertDatabaseHas('works', ['quote_id' => $quote->id, 'issue_id' => $quote->issue_id]);
         $this->get($response->headers->get('Location'))->assertOk();
     }
 
     public function test_get_cannot_accept_a_quote(): void
     {
-        $quote = Quote::factory()->for(User::factory()->customer())->create();
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
 
         $this->actingAs(User::factory()->admin()->create())
             ->get(route('quotes.accept', $quote))
@@ -60,7 +60,7 @@ class QuoteAcceptControllerTest extends FeatureTestCase
 
     public function test_guests_cannot_accept_a_quote(): void
     {
-        $quote = Quote::factory()->for(User::factory()->customer())->create();
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
 
         $this->post(route('quotes.accept', $quote))->assertRedirectToRoute('login');
 
@@ -70,7 +70,7 @@ class QuoteAcceptControllerTest extends FeatureTestCase
 
     public function test_users_without_permission_cannot_accept_a_quote(): void
     {
-        $quote = Quote::factory()->for(User::factory()->customer())->create();
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
 
         $this->actingAs(User::factory()->customer()->create())
             ->post(route('quotes.accept', $quote))

@@ -18,7 +18,7 @@ class UploadQuoteFileTest extends FeatureTestCase
     public function test_pivot_creation_failure_removes_file_record_and_stored_bytes(): void
     {
         Storage::fake();
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         FileAttachment::creating(function (): void {
             throw new RuntimeException('Cannot attach file');
         });
@@ -37,7 +37,7 @@ class UploadQuoteFileTest extends FeatureTestCase
     public function test_caller_rollback_removes_file_link_record_and_stored_bytes(): void
     {
         Storage::fake();
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
 
         try {
             DB::transaction(function () use ($quote): void {
