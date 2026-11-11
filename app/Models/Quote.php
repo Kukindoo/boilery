@@ -12,18 +12,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
- * @property ?int $issue_id
+ * @property int $issue_id
  * @property int $id
  * @property QuoteStatus $status
  * @property string $first_name
  * @property string $last_name
- * @property int $user_id
  * @property string $email
  * @property string $phone
  * @property ?string $address
@@ -67,10 +67,10 @@ class Quote extends Model implements OwnsFiles
             ->logOnlyDirty();
     }
 
-    /** @return BelongsTo<User, $this> */
-    public function user(): BelongsTo
+    /** @return HasOneThrough<User, Issue, $this> */
+    public function user(): HasOneThrough
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->hasOneThrough(User::class, Issue::class, 'id', 'id', 'issue_id', 'user_id')->withTrashedParents();
     }
 
     public function isClosed(): bool
@@ -99,13 +99,13 @@ class Quote extends Model implements OwnsFiles
 
     public function isFileOwner(User $user): bool
     {
-        return $this->user_id === $user->id;
+        return $this->issue()->withTrashed()->where('user_id', $user->id)->exists();
     }
 
     /** @return BelongsTo<Issue, $this> */
     public function issue(): BelongsTo
     {
-        return $this->belongsTo(Issue::class);
+        return $this->belongsTo(Issue::class)->withTrashed();
     }
 
     protected function casts(): array
