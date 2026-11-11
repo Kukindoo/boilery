@@ -1,17 +1,18 @@
-<x-stellaris.livewire.table.wrapper heading="Případy">
+<x-stellaris.livewire.table.wrapper :heading="$customer === null ? 'Případy' : 'Případy zákazníka'">
     <x-slot name="actions">
         @include('livewire.issues.partials.issues-table-actions')
     </x-slot>
     <x-slot name="filters">
         @include('livewire.issues.partials.issues-table-filters')
     </x-slot>
+    <flux:pagination :paginator="$this->issues" />
     <flux:table :paginate="$this->issues">
         <flux:table.columns>
             <flux:table.column sortable :sorted="$sortBy === 'id'" :direction="$sortDirection" wire:click="sort('id')">
                 ID
             </flux:table.column>
             <flux:table.column>
-                Zákazník
+                {{ $customer === null ? 'Zákazník' : 'Vytvořeno' }}
             </flux:table.column>
             <flux:table.column>
                 Status
@@ -24,12 +25,16 @@
             @forelse ($this->issues as $issue)
                 <flux:table.row :key="$issue->id">
                     <flux:table.cell>
-                        <flux:link :href="route('issues.show', $issue)">
+                        @can('view', $issue)
+                            <flux:link :href="route('issues.show', $issue)">
+                                Případ #{{ $issue->id }}
+                            </flux:link>
+                        @else
                             Případ #{{ $issue->id }}
-                        </flux:link>
+                        @endcan
                     </flux:table.cell>
                     <flux:table.cell>
-                        {{ $issue->user?->name ?? '—' }}
+                        {{ $customer === null ? ($issue->user?->name ?? '—') : ($issue->created_at?->format('d-m-Y H:i') ?? '—') }}
                     </flux:table.cell>
                     <flux:table.cell>
                         <flux:badge :color="$issue->status->colour()" size="sm">
@@ -37,7 +42,9 @@
                         </flux:badge>
                     </flux:table.cell>
                     <flux:table.cell>
-                        @include('livewire.issues.partials.issues-table-dropdown-actions')
+                        @canany(['view', 'update', 'delete'], $issue)
+                            @include('livewire.issues.partials.issues-table-dropdown-actions')
+                        @endcanany
                     </flux:table.cell>
                 </flux:table.row>
             @empty
