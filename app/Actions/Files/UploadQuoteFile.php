@@ -8,9 +8,9 @@ use App\Models\Quote;
 use Illuminate\Http\UploadedFile;
 use Throwable;
 
-class UploadQuoteFile
+readonly class UploadQuoteFile
 {
-    public function __construct(private readonly UploadFile $uploadFile) {}
+    public function __construct(private UploadFile $uploadFile) {}
 
     /**
      * Uploads performed during trusted public quote creation.
