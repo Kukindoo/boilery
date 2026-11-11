@@ -73,9 +73,9 @@ class QuotesTable extends Component
             abort(403);
         }
 
-        $quote = app(AcceptQuote::class)->handle($quote);
+        $work = app(AcceptQuote::class)->handle($quote);
 
-        $this->redirect(route('works.show', $quote->work));
+        $this->redirect(route('works.show', $work));
     }
 
     public function openQuote(Quote $quote): void
