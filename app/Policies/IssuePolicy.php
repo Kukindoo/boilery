@@ -29,7 +29,7 @@ class IssuePolicy
     public function update(User $user, Issue $issue): bool
     {
         return ! $issue->trashed()
-            && ($user->can(Permissions::ISSUE_EDIT_ALL->label());
+            && $user->can(Permissions::ISSUE_EDIT_ALL->label());
     }
 
     public function delete(User $user, Issue $issue): bool
@@ -41,7 +41,7 @@ class IssuePolicy
     public function restore(User $user, Issue $issue): bool
     {
         return $issue->trashed()
-            && ($user->can(Permissions::ISSUE_RESTORE_ALL->label());
+            && $user->can(Permissions::ISSUE_RESTORE_ALL->label());
     }
 
     public function forceDelete(User $user, Issue $issue): bool
