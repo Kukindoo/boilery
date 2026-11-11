@@ -7,6 +7,7 @@ use App\Actions\Files\DetachFile;
 use App\Contracts\OwnsFiles;
 use App\Enums\FileTypes;
 use App\Models\File;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\Work;
 use Illuminate\Database\Eloquent\Model;
@@ -80,6 +81,7 @@ class FilePreviewCard extends Component
         $detachFile->handle($model, $file);
         $route = match (true) {
             $model instanceof Quote => 'quotes.show',
+            $model instanceof Issue => 'issues.show',
             $model instanceof Work => 'works.show',
         };
         $this->redirect(route($route, $model));

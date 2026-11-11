@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Files;
 
 use App\Http\Controllers\Controller;
 use App\Models\File;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\Work;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +19,7 @@ class FilePreviewController extends Controller
     ): StreamedResponse {
         $model = match ($modelType) {
             'quote' => Quote::query()->findOrFail($model),
+            'issue' => Issue::query()->findOrFail($model),
             'work' => Work::query()->findOrFail($model),
             default => null,
         };

@@ -7,11 +7,10 @@ use App\Enums\BoilerManufacturers;
 use App\Enums\FileTypes;
 use App\Enums\PdfGenerationStatus;
 use App\Enums\QuoteStatus;
-use App\Traits\HasFiles;
+use App\Traits\HasIssueFiles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -41,7 +40,7 @@ use Spatie\Activitylog\Support\LogOptions;
 class Quote extends Model implements OwnsFiles
 {
     use HasFactory, LogsActivity, SoftDeletes;
-    use HasFiles;
+    use HasIssueFiles;
 
     protected $fillable = [
         'issue_id',
@@ -88,12 +87,6 @@ class Quote extends Model implements OwnsFiles
     public function pdfGenerationInProgress(): bool
     {
         return in_array($this->pdf_generation_status, [PdfGenerationStatus::QUEUED, PdfGenerationStatus::PROCESSING], true);
-    }
-
-    /** @return HasOne<Work, $this> */
-    public function work(): HasOne
-    {
-        return $this->hasOne(Work::class, 'quote_id');
     }
 
     public function isFileOwner(User $user): bool

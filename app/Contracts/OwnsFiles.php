@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 /** @phpstan-require-extends Model */
 interface OwnsFiles
 {
-    /** @return MorphToMany<File, $this&Model, FileAttachment> */
+    /** @return MorphToMany<File, covariant Model, FileAttachment> */
     public function files(): MorphToMany;
 
     public function isFileOwner(User $user): bool;

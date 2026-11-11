@@ -32,6 +32,13 @@ class IssuePolicy
             && $user->can(Permissions::ISSUE_EDIT_ALL->label());
     }
 
+    public function uploadFile(User $user, Issue $issue): bool
+    {
+        return $this->update($user, $issue)
+            && ($user->can(Permissions::FILE_CREATE_ALL->label())
+                || ($user->can(Permissions::FILE_CREATE_OWN->label()) && $issue->isFileOwner($user)));
+    }
+
     public function delete(User $user, Issue $issue): bool
     {
         return ! $issue->trashed()
