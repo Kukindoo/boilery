@@ -2,9 +2,11 @@
     <flux:dropdown position="bottom" align="end">
         <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" :aria-label="__('Akce pro :name', ['name' => 'Případ #' . $issue->id])" />
         <flux:menu>
-            <flux:menu.item icon="eye" :href="route('issues.show', $issue)">
-                Detail
-            </flux:menu.item>
+            @can('view', $issue)
+                <flux:menu.item icon="eye" :href="route('issues.show', $issue)">
+                    Detail
+                </flux:menu.item>
+            @endcan
             @can('update', $issue)
                 <flux:menu.item icon="pencil" :href="route('issues.edit', $issue)">
                     Upravit
@@ -24,7 +26,7 @@
         <livewire:modals.deletion
             :model="$issue"
             :key="'delete-issues-'.$issue->id"
-            @deleted="resetPage"
+            @deleted="resetIssuesPage"
             heading="Smazat případ?"
             text="Opravdu chcete smazat tento případ? Případ bude archivován."
             :modal-name="'delete-issue-' . $issue->id"
