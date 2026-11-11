@@ -28,7 +28,7 @@ class QuoteController extends Controller
      */
     public function show(QuoteShowRequest $request, Quote $quote): View
     {
-        $quote->load(['user', 'files']);
+        $quote->load(['user', 'files', 'issue']);
 
         $attachments = $quote->files
             ->filter(fn (File $file): bool => $file->file_type !== FileTypes::QUOTE_SUMMARY && Gate::allows('view', $file))

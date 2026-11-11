@@ -19,7 +19,17 @@
     </x-slot:action>
 
     <x-stellaris.container.show-row title="Zákazník">
-        <x-customers.customer-name :customer="$quote->user" :name="$quote->user->name" />
+        <x-customers.customer-name :customer="$quote->user" :name="$quote->user->name"/>
+    </x-stellaris.container.show-row>
+
+    <x-stellaris.container.show-row title="Případ">
+        @can ('view-any')
+            <flux:link :href="route('issues.show', $quote->issue)" wire:navigate>
+                Případ #{{ $quote->issue_id }}
+            </flux:link>
+        @else
+            Případ #{{ $quote->issue_id }}
+        @endcan
     </x-stellaris.container.show-row>
 
     @foreach ($fields as $label => $value)
