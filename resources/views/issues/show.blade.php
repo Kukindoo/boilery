@@ -42,8 +42,8 @@
             </x-stellaris.container.show-row>
         </x-stellaris.container.show-card>
 
-        <x-customers.tables.quotes-table :quotes="$issue->quotes" heading="Poptávky případu" :paginate="false" />
+        <livewire:customers.tables.quotes-table :issue="$issue" heading="Poptávky případu" :paginate="false" />
 
-        <x-customers.tables.works-table :works="$issue->works" heading="Zakázky případu" :paginate="false" />
+        <livewire:customers.tables.works-table :issue="$issue" heading="Zakázky případu" :paginate="false" />
     </div>
 </x-layouts::app>
