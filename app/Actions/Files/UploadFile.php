@@ -5,6 +5,7 @@ namespace App\Actions\Files;
 use App\Contracts\OwnsFiles;
 use App\Enums\FileTypes;
 use App\Models\File;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\Work;
 use App\Traits\LogsActionActivity;
@@ -58,20 +59,11 @@ readonly class UploadFile
             }
 
             $storedFile = DB::transaction(function () use ($file, $parent, $fileType, $authorize, $path, $extension): File {
-                if ($parent instanceof Quote) {
-                    $quote = Quote::query()->lockForUpdate()->findOrFail($parent->id);
-                    $work = $quote->work()->withTrashed()->lockForUpdate()->first();
-                    $lockedParent = $quote;
-                } else {
-                    // Discover the quote first so both upload directions use the same lock order.
-                    $snapshot = Work::query()->findOrFail($parent->getKey());
-                    $quote = $snapshot->quote_id === null ? null : Quote::withTrashed()->lockForUpdate()->findOrFail($snapshot->quote_id);
-                    $work = Work::query()->lockForUpdate()->findOrFail($parent->getKey());
-                    if ($work->quote_id !== $quote?->id) {
-                        throw ValidationException::withMessages(['file' => 'Přiřazená poptávka se změnila. Zkuste soubor nahrát znovu.']);
-                    }
-                    $lockedParent = $work;
-                }
+                /** @var Quote|Work $lockedParent */
+                $lockedParent = $parent->newQuery()->lockForUpdate()->findOrFail($parent->getKey());
+                $issue = $lockedParent instanceof Issue
+                    ? $lockedParent
+                    : $lockedParent->issue()->lockForUpdate()->firstOrFail();
                 if ($authorize) {
                     Gate::authorize('uploadFile', $lockedParent);
                 }
@@ -81,7 +73,7 @@ readonly class UploadFile
                     throw ValidationException::withMessages(['file' => 'Nejprve přiřaďte zákazníka.']);
                 }
 
-                $storedFile = $lockedParent->files()->make([
+                $storedFile = $issue->files()->make([
                     'path' => $path,
                     'original_name' => $file->getClientOriginalName(),
                     'extension' => $extension,
@@ -91,15 +83,10 @@ readonly class UploadFile
                 ]);
 
                 $storedFile->label = $this->generateFileLabel->handle($customer, $fileType, $storedFile);
-                $lockedParent->files()->save($storedFile);
+                $issue->files()->save($storedFile);
 
-                foreach ([$quote, $work] as $related) {
-                    if ($related !== null && ! $related->is($lockedParent)) {
-                        $related->files()->syncWithoutDetaching([$storedFile->id]);
-                    }
-                }
                 $this->logActionCompleted('files', $storedFile, 'File uploaded', [
-                    'quote_id' => $quote?->id, 'work_id' => $work?->id,
+                    'issue_id' => $issue->id,
                 ]);
 
                 return $storedFile;
