@@ -10,10 +10,6 @@
             <flux:error name="form.issueId" />
         </x-stellaris.livewire.forms.side-to-side.field>
 
-        <x-stellaris.livewire.forms.side-to-side.field label="ID poptávky">
-            <flux:input type="number" wire:model="form.quoteId" disabled/>
-        </x-stellaris.livewire.forms.side-to-side.field>
-
         <x-stellaris.livewire.forms.side-to-side.field label="Číslo zakázky">
             <flux:input wire:model="form.orderId"/>
         </x-stellaris.livewire.forms.side-to-side.field>

@@ -8,12 +8,15 @@ use App\Dtos\Works\WorkDto;
 use App\Enums\BoilerManufacturers;
 use App\Enums\Permissions;
 use App\Enums\WorkStatus;
-use App\Models\Quote;
+use App\Models\Issue;
 use App\Models\Work;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
+use Throwable;
 
 class WorkForm extends Form
 {
@@ -32,9 +35,7 @@ class WorkForm extends Form
     #[Locked]
     public ?string $deletedAt = null;
 
-    public ?int $userId = null;
-
-    public ?int $quoteId = null;
+    public ?int $issueId = null;
 
     public string $orderId = '';
 
@@ -86,8 +87,7 @@ class WorkForm extends Form
         $this->createdAt = $work->created_at?->toDateTimeString();
         $this->updatedAt = $work->updated_at?->toDateTimeString();
         $this->deletedAt = $work->deleted_at?->toDateTimeString();
-        $this->userId = $work->user_id;
-        $this->quoteId = $work->quote_id;
+        $this->issueId = $work->issue_id;
         $this->orderId = $work->order_id;
         $this->status = $work->status->value;
         $this->typeOfProduct = $work->type_of_product;
@@ -115,8 +115,7 @@ class WorkForm extends Form
     {
         return [
             'status' => ['required', Rule::enum(WorkStatus::class)],
-            'userId' => ['required', 'integer', Rule::exists('users', 'id')],
-            'quoteId' => ['nullable', 'integer', Rule::exists('quotes', 'id')->whereNull('deleted_at'), Rule::unique('works', 'quote_id')->ignore($this->work)],
+            'issueId' => ['required', 'integer', Rule::exists('issues', 'id')->whereNull('deleted_at')],
             'orderId' => ['required', 'string', 'max:255', Rule::unique('works', 'order_id')->ignore($this->work)],
             'typeOfProduct' => ['nullable', 'string', 'max:255'],
             'boilerManufacturer' => ['nullable', Rule::enum(BoilerManufacturers::class)],
@@ -140,46 +139,61 @@ class WorkForm extends Form
         ];
     }
 
+    /** @throws Throwable */
     public function submit(): Work
     {
         Gate::authorize('create', Work::class);
+
         $this->validate();
         $this->authorizeAssignments(true);
 
-        return app(CreateWork::class)->handle($this->toDto());
+        try {
+            return app(CreateWork::class)->handle($this->toDto());
+        } catch (ValidationException $exception) {
+            throw ValidationException::withMessages(
+                Arr::prependKeysWith($exception->errors(), $this->getPropertyName() . '.'),
+            );
+        }
     }
 
+    /** @throws Throwable */
     public function update(): Work
     {
         abort_if($this->work === null, 404);
         $work = Work::query()->findOrFail($this->work->id);
         Gate::authorize('update', $work);
+
         $this->validate();
         $this->authorizeAssignments(false);
 
-        return app(UpdateWork::class)->handle($work, $this->toDto());
+        try {
+            return app(UpdateWork::class)->handle($work, $this->toDto());
+        } catch (ValidationException $exception) {
+            throw ValidationException::withMessages(
+                Arr::prependKeysWith($exception->errors(), $this->getPropertyName() . '.'),
+            );
+        }
     }
 
     private function authorizeAssignments(bool $creating): void
     {
-        $permission = $creating ? Permissions::WORK_CREATE_ALL : Permissions::WORK_EDIT_ALL;
-        abort_unless(auth()->user()->can($permission->label())
-            || (int) $this->userId === auth()->id(), 403);
+        $issue = Issue::query()->findOrFail($this->issueId);
+        if ($creating) {
+            Gate::authorize('create', [Work::class, $issue]);
 
-        if ($this->quoteId !== null) {
-            $quote = Quote::query()->findOrFail($this->quoteId);
-            Gate::authorize('view', $quote);
+            return;
         }
+
+        abort_unless(auth()->user()->can(Permissions::WORK_EDIT_ALL->label())
+            || $issue->user_id === auth()->id(), 403);
     }
 
     private function toDto(): WorkDto
     {
         return new WorkDto(
-            userId: (int) $this->userId,
-            quoteId: $this->quoteId,
+            issueId: (int) $this->issueId,
             orderId: $this->orderId,
             typeOfProduct: ($this->typeOfProduct === '' ? null : $this->typeOfProduct),
-            boilerManufacturer: ($this->boilerManufacturer === null || $this->boilerManufacturer === '' ? null : BoilerManufacturers::from($this->boilerManufacturer)),
             typeNumber: ($this->typeNumber === '' ? null : $this->typeNumber),
             serialNumber: ($this->serialNumber === '' ? null : $this->serialNumber),
             warrantyAccepted: $this->warrantyAccepted,
@@ -198,6 +212,7 @@ class WorkForm extends Form
             notes: ($this->notes === '' ? null : $this->notes),
             mechanicName: ($this->mechanicName === '' ? null : $this->mechanicName),
             status: WorkStatus::from($this->status),
+            boilerManufacturer: ($this->boilerManufacturer === null || $this->boilerManufacturer === '' ? null : BoilerManufacturers::from($this->boilerManufacturer)),
         );
     }
 }

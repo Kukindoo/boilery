@@ -28,10 +28,10 @@
         <x-customers.customer-name :customer="$work->user" />
     </x-stellaris.container.show-row>
 
-    <x-stellaris.container.show-row title="Poptávka">
-        @if ($work->quote && auth()->user()->can('view', $work->quote))
-            <flux:link :href="route('quotes.show', $work->quote)" wire:navigate>
-                {{ $work->quote_id }}
+    <x-stellaris.container.show-row title="Případ">
+        @if ($work->issue && auth()->user()->can('view', $work->issue))
+            <flux:link :href="route('issues.show', $work->issue)" wire:navigate>
+                Případ #{{ $work->issue_id }}
             </flux:link>
         @else
             —

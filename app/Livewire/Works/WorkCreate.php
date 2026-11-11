@@ -16,7 +16,7 @@ class WorkCreate extends Component
     public function mount(): void
     {
         Gate::authorize('create', Work::class);
-        $this->form->userId = auth()->id();
+        $this->form->issueId = request()->integer('issue_id') ?: null;
     }
 
     /** @throws Throwable */
