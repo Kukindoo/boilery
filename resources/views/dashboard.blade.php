@@ -4,6 +4,10 @@
 
 <x-layouts::app :title="__('Přehled')">
     <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
+        @if(auth()->user()->can(App\Enums\Permissions::QUOTE_VIEW_OWN->label()) || auth()->user()->can('viewAny', App\Models\Quote::class))
+            <livewire:quotes.customer-quotes-table />
+        @endif
+        @if(auth()->user()->hasAnyRole(Roles::ADMIN->value, Roles::STAKEHOLDER->value))
         <div class="grid auto-rows-min gap-4 md:grid-cols-3">
             <div class="relative aspect-video overflow-hidden rounded-xl border border-primary-border dark:border-primary-dark-border-strong">
                 @if(auth()->user()->hasAnyRole(Roles::ADMIN->value, Roles::STAKEHOLDER->value))
@@ -30,5 +34,6 @@
         <div class="relative h-full flex-1 overflow-hidden rounded-xl border border-primary-border dark:border-primary-dark-border-strong">
             <x-placeholder-pattern class="absolute inset-0 size-full stroke-heading-text/20 dark:stroke-secondary-dark-text/20"/>
         </div>
+        @endif
     </div>
 </x-layouts::app>
