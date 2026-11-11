@@ -5,7 +5,6 @@ namespace App\Livewire\Forms;
 use App\Actions\Quotes\CreateQuote;
 use App\Actions\Quotes\UpdateQuote;
 use App\Actions\Users\CreateCustomer;
-use App\Dtos\NamePlate;
 use App\Dtos\Quotes\QuoteDto;
 use App\Enums\BoilerManufacturers;
 use App\Models\Quote;
@@ -95,23 +94,38 @@ class QuoteForm extends Form
         $rules = $this->rules();
         $rules['email'][] = Rule::unique(User::class, 'email')->ignore(auth()->id());
         $this->validate($rules);
-        $namePlate = new NamePlate($this->firstName, $this->lastName, $this->email, $this->phone, $this->address);
-
         try {
-            $user = app(CreateCustomer::class)->handle($namePlate);
+            $quote = app(CreateQuote::class)->handle(
+                new QuoteDto(
+                    firstName: $this->firstName,
+                    lastName: $this->lastName,
+                    email: $this->email,
+                    phone: $this->phone,
+                    message: $this->message,
+                    underWarranty: $this->boilerUnderWarranty === 'yes',
+                    address: $this->address,
+                    boilerManufacturer: $this->boilerManufacturer,
+                    boilerSerialNumber: $this->boilerSerialNumber,
+                    boilerType: $this->boilerType,
+                ),
+                fileLabel: $this->fileLabel,
+                fileReceipt: $this->fileReceipt,
+                fileWarrantyDocument: $this->fileWarrantyDocument,
+            );
         } catch (ValidationException $exception) {
             throw ValidationException::withMessages(
                 Arr::prependKeysWith($exception->errors(), $this->getPropertyName() . '.'),
             );
         }
 
-        $quote = app(CreateQuote::class)->handle($this, $user);
-
         $this->reset();
 
         return $quote;
     }
 
+    /**
+     * @throws Throwable
+     */
     public function update(): Quote
     {
         $this->validate(Arr::except($this->rules(), ['firstName', 'lastName', 'email', 'phone', 'address']));
@@ -125,14 +139,14 @@ class QuoteForm extends Form
             status: $this->quote->status,
             underWarranty: $this->boilerUnderWarranty === 'yes',
             address: $this->quote->address,
-            userId: $this->quote->user_id,
+            issueId: $this->quote->issue_id,
             boilerManufacturer: $this->boilerManufacturer,
             boilerSerialNumber: $this->boilerSerialNumber,
             boilerType: $this->boilerType,
         ));
     }
 
-    public function initForm(Quote $quote)
+    public function initForm(Quote $quote): void
     {
         $this->quote = $quote;
 
