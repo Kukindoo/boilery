@@ -1,8 +1,17 @@
+@php
+    use App\Enums\Permissions;
+@endphp
+
 <x-layouts::app title="Zákazník">
     <div class="space-y-6">
         <x-stellaris.container.index-card :heading="$customer->name" :subheading="$customer->email">
             <x-slot name="actions">
                 <div class="flex gap-2">
+                    @can(Permissions::ISSUE_CREATE_ALL->label())
+                        <flux:button size="sm" :href="route('issues.create', ['customer_id' => $customer->id])">
+                            Přidat případ
+                        </flux:button>
+                    @endcan
                     <flux:button size="sm" :href="route('customers.index')">
                         Zpět na zákazníky
                     </flux:button>
@@ -19,8 +28,6 @@
 
         <livewire:customers.user-roles :user="$customer" />
 
-        <x-customers.tables.quotes-table :quotes="$quotes" />
-
-        <x-customers.tables.works-table :works="$works" />
+        <livewire:issues.issues-table :customer="$customer" />
     </div>
 </x-layouts::app>
