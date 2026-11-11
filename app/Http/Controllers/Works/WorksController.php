@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Works;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Works\WorkCreateRequest;
 use App\Http\Requests\Works\WorkEditRequest;
 use App\Http\Requests\Works\WorkIndexRequest;
 use App\Http\Requests\Works\WorkShowRequest;
@@ -19,14 +18,9 @@ class WorksController extends Controller
 
     public function show(WorkShowRequest $request, Work $work): View
     {
-        $work->load(['user', 'files']);
+        $work->load(['user', 'issue', 'files']);
 
         return view('works.show', compact('work'));
-    }
-
-    public function create(WorkCreateRequest $request): View
-    {
-        return view('works.create');
     }
 
     public function edit(WorkEditRequest $request, Work $work): View
