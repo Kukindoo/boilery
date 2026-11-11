@@ -44,16 +44,10 @@ class File extends Model
         return $this->hasMany(FileAttachment::class);
     }
 
-    /** @return MorphToMany<Quote, $this, FileAttachment> */
-    public function quotes(): MorphToMany
+    /** @return MorphToMany<Issue, $this, FileAttachment> */
+    public function issues(): MorphToMany
     {
-        return $this->morphedByMany(Quote::class, 'fileable')->using(FileAttachment::class)->withTimestamps();
-    }
-
-    /** @return MorphToMany<Work, $this, FileAttachment> */
-    public function works(): MorphToMany
-    {
-        return $this->morphedByMany(Work::class, 'fileable')->using(FileAttachment::class)->withTimestamps();
+        return $this->morphedByMany(Issue::class, 'fileable')->using(FileAttachment::class)->withTimestamps();
     }
 
     /** @return MorphToMany<User, $this, FileAttachment> */
@@ -89,6 +83,10 @@ class File extends Model
 
     public function isAttachedTo(Model $model): bool
     {
+        if ($model instanceof Quote || $model instanceof Work) {
+            $model = $model->issue;
+        }
+
         return $this->attachments()->where('fileable_type', $model->getMorphClass())
             ->where('fileable_id', $model->getKey())->exists();
     }
