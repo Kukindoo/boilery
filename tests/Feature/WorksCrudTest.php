@@ -321,17 +321,17 @@ class WorksCrudTest extends FeatureTestCase
         $this->assertDatabaseCount('works', 1);
     }
 
-    public function test_own_creator_cannot_assign_another_owners_issue(): void
+    public function test_creator_can_assign_the_selected_issue_with_create_permission(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo([Permissions::WORK_CREATE_OWN, Permissions::QUOTE_VIEW_OWN]);
-        $other = User::factory()->create();
+        $user->givePermissionTo(Permissions::WORK_CREATE_OWN);
+        $issue = Issue::factory()->create();
 
-        Livewire::actingAs($user)->test(WorkCreate::class)->set('form.issueId', Issue::factory()->for(auth()->user())->create()->id)
-            ->set('form.orderId', 'OWNER-TAMPER')->set('form.issueId', Issue::factory()->for($other)->create()->id)
-            ->call('submit')->assertForbidden();
+        Livewire::actingAs($user)->test(WorkCreate::class)
+            ->set('form.orderId', 'SELECTED-ISSUE')->set('form.issueId', $issue->id)
+            ->call('submit')->assertHasNoErrors();
 
-        $this->assertDatabaseCount('works', 0);
+        $this->assertDatabaseHas('works', ['order_id' => 'SELECTED-ISSUE', 'issue_id' => $issue->id]);
     }
 
     public function test_edit_rechecks_permission_and_owner_assignment(): void

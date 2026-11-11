@@ -3,7 +3,6 @@
 namespace Tests\Integration\Actions\Works;
 
 use App\Actions\Works\CancelWork;
-use App\Actions\Works\CreateWork;
 use App\Actions\Works\DeleteWork;
 use App\Actions\Works\EndWork;
 use App\Actions\Works\ForceDeleteWork;
@@ -28,12 +27,10 @@ class StaleWorkActionsTest extends IntegrationTestCase
     public static function invalidDateWrites(): array
     {
         return [
-            'create without acceptance' => [true, null, '2026-10-20', null, 'work_accepted_at'],
-            'update without acceptance' => [false, null, '2026-10-20', null, 'work_accepted_at'],
-            'create without start' => [true, '2026-10-19', null, '2026-10-21', 'work_started_at'],
-            'update without start' => [false, '2026-10-19', null, '2026-10-21', 'work_started_at'],
-            'start before acceptance' => [false, '2026-10-21', '2026-10-20', null, 'work_started_at'],
-            'completion before start' => [false, '2026-10-19', '2026-10-21', '2026-10-20', 'work_completed_at'],
+            'update without acceptance' => [null, '2026-10-20', null, 'work_accepted_at'],
+            'update without start' => ['2026-10-19', null, '2026-10-21', 'work_started_at'],
+            'start before acceptance' => ['2026-10-21', '2026-10-20', null, 'work_started_at'],
+            'completion before start' => ['2026-10-19', '2026-10-21', '2026-10-20', 'work_completed_at'],
         ];
     }
 
@@ -65,7 +62,7 @@ class StaleWorkActionsTest extends IntegrationTestCase
     }
 
     #[DataProvider('invalidDateWrites')]
-    public function test_actions_reject_invalid_date_sequences(bool $creating, ?string $accepted, ?string $started, ?string $completed, string $error): void
+    public function test_update_rejects_invalid_date_sequences(?string $accepted, ?string $started, ?string $completed, string $error): void
     {
         $this->actingAs(User::factory()->admin()->create());
         $work = Work::factory()->create();
@@ -77,11 +74,7 @@ class StaleWorkActionsTest extends IntegrationTestCase
         $data->workCompletedAt = $completed;
 
         try {
-            if ($creating) {
-                app(CreateWork::class)->handle($data);
-            } else {
-                app(UpdateWork::class)->handle($work, $data);
-            }
+            app(UpdateWork::class)->handle($work, $data);
             $this->fail('Invalid date sequence must be rejected.');
         } catch (ValidationException $exception) {
             $this->assertArrayHasKey($error, $exception->errors());

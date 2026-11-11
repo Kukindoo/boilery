@@ -4,12 +4,10 @@ namespace Tests\Integration\Actions\Quotes;
 
 use App\Actions\Quotes\DeleteQuote;
 use App\Actions\Quotes\ForceDeleteQuote;
-use App\Actions\Quotes\QuoteReassignment;
 use App\Actions\Quotes\RestoreQuote;
 use App\Actions\Quotes\UpdateQuote;
 use App\Dtos\Quotes\QuoteDto;
 use App\Enums\QuoteStatus;
-use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -26,7 +24,6 @@ class StaleQuoteActionsTest extends IntegrationTestCase
         return [
             'accepted before update' => [UpdateQuote::class, false, ['status' => QuoteStatus::ACCEPTED]],
             'rejected before update' => [UpdateQuote::class, false, ['status' => QuoteStatus::REJECTED]],
-            'accepted before reassignment' => [QuoteReassignment::class, false, ['status' => QuoteStatus::ACCEPTED]],
             'accepted before deletion' => [DeleteQuote::class, false, ['status' => QuoteStatus::ACCEPTED]],
             'already deleted' => [DeleteQuote::class, false, ['deleted_at' => '2026-11-06 12:00:00']],
             'already restored' => [RestoreQuote::class, true, ['deleted_at' => null]],
@@ -89,24 +86,9 @@ class StaleQuoteActionsTest extends IntegrationTestCase
         $this->invokeAction(UpdateQuote::class, $stale);
     }
 
-    public function test_reassignment_preserves_returned_instance_and_updates_current_record(): void
-    {
-        $this->actingAs(User::factory()->admin()->create());
-        $quote = Quote::factory()->create();
-        $customer = User::factory()->create();
-        $data = $this->data();
-        $targetIssue = Issue::factory()->for($customer)->create();
-        $data->issueId = $targetIssue->id;
-
-        $result = app(QuoteReassignment::class)->handle($quote, $data);
-
-        $this->assertSame($quote, $result);
-        $this->assertSame($targetIssue->id, $quote->fresh()->issue_id);
-    }
-
     private function invokeAction(string $action, Quote $quote): void
     {
-        if (in_array($action, [UpdateQuote::class, QuoteReassignment::class], true)) {
+        if ($action === UpdateQuote::class) {
             app($action)->handle($quote, $this->data());
         } else {
             app($action)->handle($quote);

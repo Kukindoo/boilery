@@ -136,6 +136,26 @@ class IssuesCrudTest extends FeatureTestCase
         Livewire::test(IssuesTable::class, ['customer' => $user])->call('sort', 'invalid')->assertStatus(422);
     }
 
+    public function test_index_table_renders_flux_pagination_and_moves_between_pages(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $issues = Issue::factory()->count(16)->create();
+
+        Livewire::actingAs($admin)->test(IssuesTable::class)
+            ->assertSee('data-flux-pagination', false)
+            ->assertSee("nextPage('page')", false)
+            ->assertSee('href="' . route('issues.show', $issues->first()) . '"', false)
+            ->assertDontSee('href="' . route('issues.show', $issues->last()) . '"', false)
+            ->call('nextPage')
+            ->assertSet('paginators.page', 2)
+            ->assertSee('href="' . route('issues.show', $issues->last()) . '"', false)
+            ->assertDontSee('href="' . route('issues.show', $issues->first()) . '"', false)
+            ->call('previousPage')
+            ->assertSet('paginators.page', 1)
+            ->assertSee('href="' . route('issues.show', $issues->first()) . '"', false)
+            ->assertDontSee('href="' . route('issues.show', $issues->last()) . '"', false);
+    }
+
     /** @throws Throwable */
     public function test_confirmed_deletion_restore_and_force_delete_follow_permissions(): void
     {
