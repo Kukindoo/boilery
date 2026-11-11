@@ -16,7 +16,7 @@ class QuoteDto
         public QuoteStatus $status = QuoteStatus::NEW,
         public bool $underWarranty = false,
         public ?string $address = null,
-        public ?int $userId = null,
+        public ?int $issueId = null,
         public ?BoilerManufacturers $boilerManufacturer = null,
         public ?string $boilerSerialNumber = null,
         public ?string $boilerType = null,
@@ -24,7 +24,7 @@ class QuoteDto
     ) {}
 
     /**
-     * @return array{first_name: string, last_name: string, email: string, phone: string, message: string, status: QuoteStatus, under_warranty: bool, address: ?string, user_id: ?int, boiler_manufacturer: ?BoilerManufacturers, boiler_serial_number: ?string, boiler_type: ?string}
+     * @return array{first_name: string, last_name: string, email: string, phone: string, message: string, status: QuoteStatus, under_warranty: bool, address: ?string, issue_id: ?int, boiler_manufacturer: ?BoilerManufacturers, boiler_serial_number: ?string, boiler_type: ?string}
      */
     public function toArray(): array
     {
@@ -37,7 +37,7 @@ class QuoteDto
             'status' => $this->status,
             'under_warranty' => $this->underWarranty,
             'address' => $this->address,
-            'user_id' => $this->userId,
+            'issue_id' => $this->issueId,
             'boiler_manufacturer' => $this->boilerManufacturer,
             'boiler_serial_number' => $this->boilerSerialNumber,
             'boiler_type' => $this->boilerType,

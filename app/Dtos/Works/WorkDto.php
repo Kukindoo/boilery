@@ -8,8 +8,7 @@ use App\Enums\WorkStatus;
 class WorkDto
 {
     public function __construct(
-        public int $userId,
-        public ?int $quoteId,
+        public int $issueId,
         public ?string $orderId,
         public ?string $typeOfProduct,
         public ?string $typeNumber,
@@ -33,12 +32,11 @@ class WorkDto
         public ?BoilerManufacturers $boilerManufacturer = null,
     ) {}
 
-    /** @return array{user_id: int, quote_id: ?int, order_id: ?string, status: WorkStatus, type_of_product: ?string, boiler_manufacturer: ?string, type_number: ?string, serial_number: ?string, warranty_accepted: ?bool, repair_in_warranty: ?string, day_of_purchase: ?string, building_type: ?string, reported_problem: ?string, work_accepted_at: ?string, work_started_at: ?string, work_completed_at: ?string, work_performed_description: ?string, transport_from: ?string, transport_to: ?string, transport_rate_in_czk: ?int, transport_distance_in_km: ?float, notes: ?string, mechanic_name: ?string} */
+    /** @return array{issue_id: int, order_id: ?string, status: WorkStatus, type_of_product: ?string, boiler_manufacturer: ?string, type_number: ?string, serial_number: ?string, warranty_accepted: ?bool, repair_in_warranty: ?string, day_of_purchase: ?string, building_type: ?string, reported_problem: ?string, work_accepted_at: ?string, work_started_at: ?string, work_completed_at: ?string, work_performed_description: ?string, transport_from: ?string, transport_to: ?string, transport_rate_in_czk: ?int, transport_distance_in_km: ?float, notes: ?string, mechanic_name: ?string} */
     public function toArray(): array
     {
         return [
-            'user_id' => $this->userId,
-            'quote_id' => $this->quoteId,
+            'issue_id' => $this->issueId,
             'order_id' => $this->orderId,
             'status' => $this->status,
             'type_of_product' => $this->typeOfProduct,
