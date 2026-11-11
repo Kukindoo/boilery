@@ -46,16 +46,16 @@ class UploadFileTest extends FeatureTestCase
     }
 
     #[DataProvider('origins')]
-    public function test_secondary_attachment_failure_rolls_back_both_links_the_record_and_storage(string $origin): void
+    public function test_issue_attachment_failure_rolls_back_the_record_and_storage(string $origin): void
     {
         Storage::fake();
         $user = User::factory()->admin()->create();
         $this->actingAs($user);
         $quote = Quote::factory()->forCustomer(User::factory())->create();
-        $work = Work::factory()->for($quote)->create();
+        $work = Work::factory()->for($quote->issue)->create();
         $created = 0;
         FileAttachment::creating(function () use (&$created): void {
-            if (++$created === 2) {
+            if (++$created === 1) {
                 throw new RuntimeException('Cannot share attachment');
             }
         });

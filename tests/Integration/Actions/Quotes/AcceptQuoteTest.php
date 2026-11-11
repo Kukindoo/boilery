@@ -49,7 +49,7 @@ class AcceptQuoteTest extends IntegrationTestCase
         $this->assertTrue($acceptance->causer->is($admin));
 
         $creation = Activity::inLog('works')->where('description', 'Work created from accepted quote')->sole();
-        $this->assertTrue($creation->subject->is($quote->work()->sole()));
+        $this->assertTrue($creation->subject->is($quote->issue->works()->sole()));
         $this->assertTrue($creation->causer->is($admin));
         $this->assertSame($quote->id, $creation->getProperty('quote_id'));
     }
@@ -72,10 +72,9 @@ class AcceptQuoteTest extends IntegrationTestCase
 
         $acceptedQuote = app(AcceptQuote::class)->handle($quote);
 
-        $this->assertSame($quote->id, $acceptedQuote->id);
+        $this->assertSame($quote->issue_id, $acceptedQuote->issue_id);
         $this->assertSame(QuoteStatus::ACCEPTED, $quote->fresh()->status);
         $this->assertDatabaseHas('works', [
-            'quote_id' => $quote->id,
             'issue_id' => $quote->issue_id,
             'order_id' => 'QUOTE-' . $quote->id,
             'type_of_product' => null,
@@ -96,8 +95,8 @@ class AcceptQuoteTest extends IntegrationTestCase
 
         $accepted = app(AcceptQuote::class)->handle($quote);
 
-        $this->assertNull($accepted->work->boiler_manufacturer);
-        $this->assertNull($accepted->work->type_of_product);
+        $this->assertNull($accepted->boiler_manufacturer);
+        $this->assertNull($accepted->type_of_product);
     }
 
     public function test_acceptance_links_all_quote_files_to_its_work_and_preserves_other_quote_files(): void
@@ -121,12 +120,12 @@ class AcceptQuoteTest extends IntegrationTestCase
 
         foreach ($files as $file) {
             $this->assertTrue($file->isAttachedTo($quote));
-            $this->assertTrue($file->isAttachedTo($acceptedQuote->work));
+            $this->assertTrue($file->isAttachedTo($acceptedQuote));
             $this->assertSame($attributes['path'], $file->fresh()->path);
         }
-        $this->assertSame(2, $acceptedQuote->work->files()->count());
+        $this->assertSame(2, $acceptedQuote->files()->count());
         $this->assertTrue($otherFile->isAttachedTo($otherQuote));
-        $this->assertFalse($otherFile->isAttachedTo($acceptedQuote->work));
+        $this->assertFalse($otherFile->isAttachedTo($acceptedQuote));
         $this->assertDatabaseCount('files', 3);
     }
 
@@ -153,7 +152,7 @@ class AcceptQuoteTest extends IntegrationTestCase
         $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
         $action = app(AcceptQuote::class);
         $action->handle($quote);
-        $work = $quote->work()->firstOrFail();
+        $work = $quote->issue->works()->firstOrFail();
         $work->update(['notes' => 'Keep mechanic notes.']);
         $work->delete();
 
@@ -183,9 +182,27 @@ class AcceptQuoteTest extends IntegrationTestCase
             $this->assertDatabaseMissing('activity_log', ['description' => 'Quote accepted']);
             $this->assertDatabaseMissing('activity_log', ['description' => 'Work created from accepted quote']);
             $this->assertSame(QuoteStatus::NEW, $quote->fresh()->status);
-            $this->assertDatabaseMissing('works', ['quote_id' => $quote->id]);
+            $this->assertDatabaseMissing('works', ['issue_id' => $quote->issue_id]);
             $this->assertDatabaseCount('works', 1);
         }
+    }
+
+    public function test_accepting_multiple_quotes_on_an_issue_creates_distinct_works(): void
+    {
+        $this->actingAs(User::factory()->admin()->create());
+        $existing = Work::factory()->create();
+        $firstQuote = Quote::factory()->for($existing->issue)->create();
+        $secondQuote = Quote::factory()->for($existing->issue)->create();
+
+        $first = app(AcceptQuote::class)->handle($firstQuote);
+        $second = app(AcceptQuote::class)->handle($secondQuote);
+
+        $this->assertSame($existing->issue_id, $first->issue_id);
+        $this->assertSame($existing->issue_id, $second->issue_id);
+        $this->assertNotSame($first->id, $second->id);
+        $this->assertSame(3, $existing->issue->works()->count());
+        $this->assertSame(QuoteStatus::ACCEPTED, $firstQuote->fresh()->status);
+        $this->assertSame(QuoteStatus::ACCEPTED, $secondQuote->fresh()->status);
     }
 
     public function test_admin_cannot_accept_archived_quote(): void

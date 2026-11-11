@@ -57,7 +57,7 @@ class WorkFileUploadTest extends FeatureTestCase
             ]);
         }
         $quote = Quote::factory()->accepted()->forCustomer($customer)->create();
-        $work = Work::factory()->for($quote)->create();
+        $work = Work::factory()->for($quote->issue)->create();
         $parent = $origin === 'quote' ? $quote : $work;
 
         Livewire::actingAs($actor)->test(SingleFileUpload::class, ['model' => $parent])
@@ -68,7 +68,8 @@ class WorkFileUploadTest extends FeatureTestCase
         $file = File::query()->sole();
         $this->assertTrue($quote->files()->sole()->is($file));
         $this->assertTrue($work->files()->sole()->is($file));
-        $this->assertSame(2, $file->attachments()->count());
+        $this->assertSame(1, $file->attachments()->count());
+        $this->assertTrue($file->attachments()->sole()->fileable->is($quote->issue));
         $this->assertCount(1, Storage::allFiles(config('app.files.attachments_save_directory')));
         Storage::disk()->assertExists($file->path);
         $this->get(route('quotes.show', $quote))->assertOk()

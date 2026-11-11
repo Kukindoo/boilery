@@ -55,7 +55,7 @@ class GenerateServiceProtocolPdfTest extends FeatureTestCase
         $quote = $linkedQuote ? Quote::factory()->forCustomer($customer)->create([
             'phone' => '+420999888777', 'address' => 'Old quote address 99',
         ]) : null;
-        $work = Work::factory()->forCustomer($customer)->create(['quote_id' => $quote?->id]);
+        $work = Work::factory()->forCustomer($customer)->create(['issue_id' => $quote?->issue_id ?? \App\Models\Issue::factory()->for($customer)]);
 
         $part = \App\Models\SparePart::factory()->create([
             'name' => 'Protocol spare part', 'part_number' => 'PROTOCOL-42', 'price_in_cents' => 1745,

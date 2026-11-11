@@ -16,7 +16,7 @@ class WorksPagesTest extends FeatureTestCase
     {
         $user = User::factory()->admin()->create();
         $quote = Quote::factory()->create();
-        $work = Work::factory()->for($quote)->create();
+        $work = Work::factory()->for($quote->issue)->create();
 
         $this->actingAs($user)->get(route('works.show', $work))
             ->assertSee('Případ #' . $work->issue_id)
@@ -29,13 +29,13 @@ class WorksPagesTest extends FeatureTestCase
     public function test_show_does_not_display_related_quote_details(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo([Permissions::WORK_VIEW_ALL, Permissions::QUOTE_VIEW_ALL]);
+        $user->givePermissionTo([Permissions::WORK_VIEW_ALL, Permissions::QUOTE_VIEW_ALL, Permissions::FILE_VIEW_ALL]);
         $quote = Quote::factory()->create([
             'message' => '<script>alert("quote")</script>',
             'boiler_type' => 'Related boiler type',
             'boiler_serial_number' => 'Related serial number',
         ]);
-        $work = Work::factory()->for($quote)->create();
+        $work = Work::factory()->for($quote->issue)->create();
 
         $this->actingAs($user)->get(route('works.show', $work))
             ->assertSee($work->order_id)
@@ -57,10 +57,10 @@ class WorksPagesTest extends FeatureTestCase
             ->assertSee('Nový');
     }
 
-    public function test_show_does_not_display_related_quote_files(): void
+    public function test_show_displays_files_from_quotes_on_the_same_issue(): void
     {
         $user = User::factory()->create();
-        $user->givePermissionTo([Permissions::WORK_VIEW_ALL, Permissions::QUOTE_VIEW_ALL]);
+        $user->givePermissionTo([Permissions::WORK_VIEW_ALL, Permissions::QUOTE_VIEW_ALL, Permissions::FILE_VIEW_ALL]);
         $quote = Quote::factory()->create();
         $file = $quote->files()->create([
             'original_name' => 'receipt.pdf',
@@ -71,11 +71,11 @@ class WorksPagesTest extends FeatureTestCase
             'path' => 'quotes/receipt.pdf',
             'label' => 'Receipt',
         ]);
-        $work = Work::factory()->for($quote)->create();
+        $work = Work::factory()->for($quote->issue)->create();
 
         $this->actingAs($user)->get(route('works.show', $work))
-            ->assertDontSeeLivewire(\App\Livewire\Files\FilePreviewCard::class)
-            ->assertDontSee(route('files.preview', ['quote', $quote, $file]))
+            ->assertSeeLivewire(\App\Livewire\Files\FilePreviewCard::class)
+            ->assertSee(route('files.preview', ['work', $work, $file]), false)
             ->assertDontSeeLivewire(\App\Livewire\Files\SingleFileUpload::class);
     }
 
@@ -84,7 +84,7 @@ class WorksPagesTest extends FeatureTestCase
         $user = User::factory()->create();
         $user->givePermissionTo(Permissions::WORK_VIEW_ALL);
         $quote = Quote::factory()->create();
-        $work = Work::factory()->for($quote)->create();
+        $work = Work::factory()->for($quote->issue)->create();
 
         $this->actingAs($user)->get(route('works.show', $work))
             ->assertSee($work->order_id)

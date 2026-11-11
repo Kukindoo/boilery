@@ -59,15 +59,15 @@ class WorkTest extends FeatureTestCase
         $this->assertSame('2026-10-02', $work->work_completed_at->toDateString());
     }
 
-    public function test_resolves_the_associated_user_and_quote(): void
+    public function test_resolves_the_associated_user_and_issue(): void
     {
         $user = User::factory()->create();
         $quote = Quote::factory()->forCustomer($user)->create();
 
-        $work = Work::factory()->for($quote)->create()->fresh();
+        $work = Work::factory()->for($quote->issue)->create()->fresh();
 
         $this->assertTrue($work->user->is($user));
-        $this->assertTrue($work->quote->is($quote));
+        $this->assertTrue($work->issue->is($quote->issue));
     }
 
     public function test_supports_a_standalone_work_with_nullable_service_details(): void
@@ -137,20 +137,20 @@ class WorkTest extends FeatureTestCase
         $this->assertSame(ActivityEvent::Restored->value, $activity->event);
     }
 
-    public function test_soft_deleting_a_linked_quote_preserves_its_work_and_foreign_key(): void
+    public function test_soft_deleting_a_quote_preserves_work_on_the_same_issue(): void
     {
         $user = User::factory()->create();
         $quote = Quote::factory()->forCustomer($user)->create();
-        $work = Work::factory()->for($quote)->create();
+        $work = Work::factory()->for($quote->issue)->create();
 
         $quote->delete();
 
         $this->assertNotSoftDeleted($work);
-        $this->assertSame($quote->id, $work->fresh()->quote_id);
+        $this->assertSame($quote->issue_id, $work->fresh()->issue_id);
         $this->assertNull($work->fresh()->quote);
 
         $quote->restore();
 
-        $this->assertTrue($work->fresh()->quote->is($quote));
+        $this->assertTrue($work->fresh()->issue->is($quote->issue));
     }
 }

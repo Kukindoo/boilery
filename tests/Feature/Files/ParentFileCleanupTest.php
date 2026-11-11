@@ -7,6 +7,7 @@ use App\Actions\Works\ForceDeleteWork;
 use App\Enums\Permissions;
 use App\Jobs\Files\DeleteStoredFile;
 use App\Models\File;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
@@ -28,10 +29,10 @@ class ParentFileCleanupTest extends FeatureTestCase
         config(['filesystems.default' => 'documents']);
     }
 
-    /** @return array<string, array{class-string<Quote>|class-string<Work>|class-string<User>}> */
+    /** @return array<string, array{class-string<Issue>|class-string<User>}> */
     public static function parents(): array
     {
-        return ['quote' => [Quote::class], 'work' => [Work::class], 'user' => [User::class]];
+        return ['issue' => [Issue::class], 'user' => [User::class]];
     }
 
     /** @return array<string, array{class-string<Quote>|class-string<Work>}> */
@@ -140,7 +141,7 @@ class ParentFileCleanupTest extends FeatureTestCase
     }
 
     #[DataProvider('softDeletingParents')]
-    public function test_force_delete_action_commits_before_a_worker_removes_orphan_storage(string $type): void
+    public function test_force_delete_action_preserves_issue_files_and_schedules_no_cleanup(string $type): void
     {
         Storage::fake('documents');
         config(['queue.default' => 'database']);
@@ -153,12 +154,9 @@ class ParentFileCleanupTest extends FeatureTestCase
         app($action)->handle($parent);
 
         $this->assertDatabaseMissing($parent->getTable(), ['id' => $parent->id]);
-        $this->assertModelMissing($file);
+        $this->assertModelExists($file);
+        $this->assertTrue($parent->issue->files()->sole()->is($file));
         Storage::disk()->assertExists($file->path);
-        $this->assertDatabaseHas('jobs', ['queue' => 'default']);
-        $this->artisan('queue:work', ['connection' => 'database', '--queue' => 'default', '--once' => true, '--sleep' => 0])
-            ->assertExitCode(0);
-        Storage::disk()->assertMissing($file->path);
         $this->assertDatabaseCount('jobs', 0);
     }
 
@@ -199,7 +197,7 @@ class ParentFileCleanupTest extends FeatureTestCase
         return User::factory()->create()->assignRole($role);
     }
 
-    private function attachFile(Quote|Work|User $parent): File
+    private function attachFile(Quote|Work|Issue|User $parent): File
     {
         $file = $parent->files()->save(File::factory()->make());
         Storage::disk()->put($file->path, 'attachment contents');
@@ -207,9 +205,9 @@ class ParentFileCleanupTest extends FeatureTestCase
         return $file;
     }
 
-    private function deleteParent(Quote|Work|User $parent): void
+    private function deleteParent(Quote|Work|Issue|User $parent): void
     {
-        if ($parent instanceof Quote || $parent instanceof Work) {
+        if ($parent instanceof Quote || $parent instanceof Work || $parent instanceof Issue) {
             $parent->forceDelete();
         } else {
             $parent->delete();

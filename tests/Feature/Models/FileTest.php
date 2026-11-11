@@ -4,6 +4,7 @@ namespace Tests\Feature\Models;
 
 use App\Contracts\OwnsFiles;
 use App\Models\File;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
@@ -16,7 +17,7 @@ class FileTest extends FeatureTestCase
 {
     public static function parents(): array
     {
-        return ['quote' => [Quote::class, 'quotes'], 'work' => [Work::class, 'works'], 'user' => [User::class, 'users']];
+        return ['quote' => [Quote::class, 'issues'], 'work' => [Work::class, 'issues'], 'issue' => [Issue::class, 'issues'], 'user' => [User::class, 'users']];
     }
 
     #[DataProvider('parents')]
@@ -63,7 +64,7 @@ class FileTest extends FeatureTestCase
         $this->assertTrue($file->isExclusivelyOwnedBy($user));
     }
 
-    public function test_archiving_preserves_links_but_force_deleting_a_parent_only_detaches_it(): void
+    public function test_archiving_and_force_deleting_a_quote_preserve_issue_files(): void
     {
         $quote = Quote::factory()->create();
         $work = Work::factory()->create();
@@ -75,7 +76,7 @@ class FileTest extends FeatureTestCase
         $this->assertTrue($quote->files()->sole()->is($file));
         $quote->forceDelete();
 
-        $this->assertFalse($file->isAttachedTo($quote));
+        $this->assertTrue($file->isAttachedTo($quote->issue));
         $this->assertTrue($file->isAttachedTo($work));
         $this->assertModelExists($file);
         $file->delete();

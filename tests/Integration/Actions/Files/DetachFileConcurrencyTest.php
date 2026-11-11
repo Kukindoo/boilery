@@ -47,8 +47,8 @@ class DetachFileConcurrencyTest extends TestCase
             DB::table('fileables')->where('file_id', $file->id)->get();
             $writer->table('fileables')->insert([
                 'file_id' => $file->id,
-                'fileable_type' => $other->getMorphClass(),
-                'fileable_id' => $other->id,
+                'fileable_type' => $other->issue->getMorphClass(),
+                'fileable_id' => $other->issue_id,
                 'created_at' => now(), 'updated_at' => now(),
             ]);
             $linked = true;
