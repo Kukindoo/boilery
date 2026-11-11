@@ -7,7 +7,6 @@ use App\Models\Quote;
 use App\Traits\LogsActionActivity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class AcceptQuote
@@ -24,20 +23,16 @@ class AcceptQuote
                 $quote->refreshForUpdate();
                 Gate::authorize('accept', $quote);
 
-                if ($quote->user_id === null) {
-                    throw ValidationException::withMessages([
-                        'quote' => 'A quote must have a customer before it can be accepted.',
-                    ]);
-                }
-
                 if ($quote->status !== QuoteStatus::ACCEPTED) {
                     $quote->update(['status' => QuoteStatus::ACCEPTED]);
 
                     $this->logActionCompleted('quotes', $quote, 'Quote accepted');
                 }
 
+                $issue = $quote->issue;
+
                 $work = $quote->work()->withTrashed()->firstOrCreate([], [
-                    'user_id' => $quote->user_id,
+                    'issue_id' => $issue->id,
                     'order_id' => 'QUOTE-' . $quote->id,
                     'boiler_manufacturer' => $quote->boiler_manufacturer,
                     'type_number' => $quote->boiler_type,
