@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -20,7 +21,6 @@ use Spatie\Activitylog\Support\LogOptions;
 /**
  * @property int $issue_id
  * @property int $id
- * @property int $user_id
  * @property ?int $quote_id
  * @property string $order_id
  * @property ?PdfGenerationStatus $pdf_generation_status
@@ -56,7 +56,6 @@ class Work extends Model implements OwnsFiles
 
     protected $fillable = [
         'issue_id',
-        'user_id',
         'quote_id',
         'order_id',
         'status',
@@ -96,11 +95,11 @@ class Work extends Model implements OwnsFiles
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @return HasOneThrough<User, Issue, $this>
      */
-    public function user(): BelongsTo
+    public function user(): HasOneThrough
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->hasOneThrough(User::class, Issue::class, 'id', 'id', 'issue_id', 'user_id')->withTrashedParents();
     }
 
     /**
@@ -149,13 +148,13 @@ class Work extends Model implements OwnsFiles
 
     public function isFileOwner(User $user): bool
     {
-        return $this->user_id === $user->id;
+        return $this->issue()->where('user_id', $user->id)->exists();
     }
 
     /** @return BelongsTo<Issue, $this> */
     public function issue(): BelongsTo
     {
-        return $this->belongsTo(Issue::class);
+        return $this->belongsTo(Issue::class)->withTrashed();
     }
 
     protected function casts(): array
