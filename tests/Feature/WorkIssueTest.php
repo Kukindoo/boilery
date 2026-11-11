@@ -33,12 +33,12 @@ class WorkIssueTest extends FeatureTestCase
         $this->actingAs(User::factory()->admin()->create());
         $quote = Quote::factory()->create();
         app(AcceptQuote::class)->handle($quote);
-        $this->assertSame($quote->fresh()->issue_id, $quote->work->issue_id);
+        $this->assertSame($quote->fresh()->issue_id, $quote->issue->works()->sole()->issue_id);
         $this->assertNotNull($quote->fresh()->issue_id);
         $issue = Issue::factory()->create();
         $linked = Quote::factory()->for($issue)->create();
         app(AcceptQuote::class)->handle($linked);
-        $this->assertSame($issue->id, $linked->work->issue_id);
+        $this->assertSame($issue->id, $linked->issue->works()->sole()->issue_id);
         $this->assertSame(2, Issue::query()->count());
     }
 

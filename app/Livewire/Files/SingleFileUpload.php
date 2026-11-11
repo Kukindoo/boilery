@@ -5,6 +5,7 @@ namespace App\Livewire\Files;
 use App\Actions\Files\UploadFile;
 use App\Contracts\OwnsFiles;
 use App\Livewire\Forms\Files\SingleFileUploadForm;
+use App\Models\Issue;
 use App\Models\Quote;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Model;
@@ -47,6 +48,7 @@ class SingleFileUpload extends Component
 
         $route = match (true) {
             $this->model instanceof Quote => 'quotes.show',
+            $this->model instanceof Issue => 'issues.show',
             $this->model instanceof OwnsFiles => 'works.show',
         };
 

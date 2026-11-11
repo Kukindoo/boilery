@@ -49,8 +49,8 @@ class PolymorphicFilesMigrationTest extends TestCase
         $this->assertFalse(Schema::hasColumn('files', 'work_id'));
         $this->assertDatabaseHas('files', ['id' => $id, ...$attributes]);
         $file = File::findOrFail($id);
-        $this->assertTrue($file->isAttachedTo($quote));
-        $this->assertTrue($file->isAttachedTo($work));
+        $this->assertDatabaseHas('fileables', ['file_id' => $file->id, 'fileable_type' => $quote->getMorphClass(), 'fileable_id' => $quote->id]);
+        $this->assertDatabaseHas('fileables', ['file_id' => $file->id, 'fileable_type' => $work->getMorphClass(), 'fileable_id' => $work->id]);
         $this->assertDatabaseHas('fileables', [
             'file_id' => $id, 'fileable_type' => $quote->getMorphClass(), 'fileable_id' => $quote->id,
             'created_at' => '2026-11-01 12:00:00', 'updated_at' => '2026-11-02 12:00:00',

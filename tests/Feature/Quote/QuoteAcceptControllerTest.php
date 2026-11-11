@@ -37,12 +37,12 @@ class QuoteAcceptControllerTest extends FeatureTestCase
 
         $quote->refresh();
         $response->assertRedirectToRoute($destination, match ($destination) {
-            'works.show' => $quote->work,
+            'works.show' => $quote->issue->works()->sole(),
             'quotes.show' => $quote,
             default => [],
         });
         $this->assertSame(QuoteStatus::ACCEPTED, $quote->status);
-        $this->assertDatabaseHas('works', ['quote_id' => $quote->id, 'issue_id' => $quote->issue_id]);
+        $this->assertDatabaseHas('works', ['issue_id' => $quote->issue_id]);
         $this->get($response->headers->get('Location'))->assertOk();
     }
 

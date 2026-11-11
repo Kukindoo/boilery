@@ -44,7 +44,7 @@ class IssueRecordCreateTest extends FeatureTestCase
         $component->assertRedirect(route('works.show', $work));
         $this->assertDatabaseHas('works', [
             'id' => $work->id, 'issue_id' => $issue->id,
-            'quote_id' => null, 'reported_problem' => null,
+            'reported_problem' => null,
         ]);
         $this->assertNotEmpty($work->order_id);
         $this->assertDatabaseCount('issues', 1);

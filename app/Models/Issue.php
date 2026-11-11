@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Contracts\OwnsFiles;
 use App\Enums\IssueStatus;
+use App\Traits\HasFiles;
 use Database\Factories\IssueFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,10 +23,10 @@ use Illuminate\Support\Carbon;
  * @property ?Carbon $updated_at
  * @property ?Carbon $deleted_at
  */
-class Issue extends Model
+class Issue extends Model implements OwnsFiles
 {
     /** @use HasFactory<IssueFactory> */
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasFiles, SoftDeletes;
 
     protected $attributes = [
         'status' => IssueStatus::OPEN->value,
@@ -48,6 +50,11 @@ class Issue extends Model
     public function works(): HasMany
     {
         return $this->hasMany(Work::class);
+    }
+
+    public function isFileOwner(User $user): bool
+    {
+        return $this->user_id === $user->id;
     }
 
     protected function casts(): array

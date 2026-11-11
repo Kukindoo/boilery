@@ -244,16 +244,16 @@ class WorksCrudTest extends FeatureTestCase
         }
 
         $this->assertDatabaseCount('works', 2);
-        $this->assertSame(2, Work::query()->whereNull('quote_id')->count());
+        $this->assertSame(2, Work::query()->count());
         $this->assertNull(Work::query()->firstOrFail()->quote);
     }
 
-    public function test_edit_preserves_the_origin_quote_without_quote_view_permission(): void
+    public function test_edit_preserves_the_issue_without_quote_view_permission(): void
     {
         $user = User::factory()->create();
         $user->givePermissionTo(Permissions::WORK_EDIT_OWN);
         $quote = Quote::factory()->forCustomer($user)->create();
-        $work = Work::factory()->for($quote)->create();
+        $work = Work::factory()->for($quote->issue)->create();
 
         Livewire::actingAs($user)->test(WorkEdit::class, ['work' => $work])
             ->assertDontSee('form.quoteId', false)
@@ -261,7 +261,7 @@ class WorksCrudTest extends FeatureTestCase
             ->set('form.notes', 'Repaired')->call('submit')->assertHasNoErrors();
 
         $this->assertDatabaseHas('works', [
-            'id' => $work->id, 'quote_id' => $quote->id, 'issue_id' => $quote->issue_id, 'notes' => 'Repaired',
+            'id' => $work->id, 'issue_id' => $quote->issue_id, 'notes' => 'Repaired',
         ]);
     }
 
@@ -270,24 +270,24 @@ class WorksCrudTest extends FeatureTestCase
         $user = User::factory()->create();
         $user->givePermissionTo(Permissions::WORK_CREATE_OWN);
         $quote = Quote::factory()->forCustomer($user)->create();
-        $archived = Work::factory()->for($quote)->trashed()->create();
+        $archived = Work::factory()->for($quote->issue)->trashed()->create();
 
         Livewire::actingAs($user)->test(WorkCreate::class)
             ->set('form.issueId', $quote->issue_id)->set('form.orderId', 'ISSUE-WORK')
             ->call('submit')->assertHasNoErrors();
 
-        $this->assertDatabaseHas('works', ['order_id' => 'ISSUE-WORK', 'issue_id' => $quote->issue_id, 'quote_id' => null]);
-        $this->assertSame($quote->id, $archived->fresh()->quote_id);
+        $this->assertDatabaseHas('works', ['order_id' => 'ISSUE-WORK', 'issue_id' => $quote->issue_id]);
+        $this->assertSame($quote->issue_id, $archived->fresh()->issue_id);
     }
 
-    public function test_database_rejects_duplicate_quote_assignments(): void
+    public function test_multiple_works_can_share_the_same_issue(): void
     {
         $quote = Quote::factory()->create();
-        Work::factory()->for($quote)->create();
+        Work::factory()->for($quote->issue)->create();
 
-        $this->expectException(\Illuminate\Database\UniqueConstraintViolationException::class);
+        Work::factory()->for($quote->issue)->create();
 
-        Work::factory()->for($quote)->create();
+        $this->assertSame(2, $quote->issue->works()->count());
     }
 
     public function test_updates_own_work_without_rejecting_its_unchanged_order_number(): void

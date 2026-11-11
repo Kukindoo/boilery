@@ -97,9 +97,9 @@ class ChangeFileTypeTest extends IntegrationTestCase
     public function test_uses_the_current_file_and_discards_stale_loaded_relations(): void
     {
         $actor = $this->actor(Permissions::FILE_EDIT_OWN);
-        $file = $this->attachment('quote', $actor)->load('quotes');
+        $file = $this->attachment('quote', $actor)->load('issues');
         $otherQuote = Quote::factory()->forCustomer(User::factory())->create();
-        $file->quotes()->sync([$otherQuote->id]);
+        $file->issues()->sync([$otherQuote->issue_id]);
 
         $this->expectException(AuthorizationException::class);
 
@@ -132,9 +132,9 @@ class ChangeFileTypeTest extends IntegrationTestCase
 
         app(ChangeFileType::class)->handle($file, FileTypes::WARRANTY);
 
-        $this->assertSame('Jan_Novak_42_kupni_smlouva.pdf', $file->quotes()->sole()->files()->sole()->label);
+        $this->assertSame('Jan_Novak_42_kupni_smlouva.pdf', $file->issues()->firstOrFail()->files()->sole()->label);
         $this->assertSame('Jan_Novak_42_kupni_smlouva.pdf', $work->files()->sole()->label);
-        $this->assertSame(FileTypes::WARRANTY, $file->quotes()->sole()->files()->sole()->file_type);
+        $this->assertSame(FileTypes::WARRANTY, $file->issues()->firstOrFail()->files()->sole()->file_type);
         $this->assertSame(FileTypes::WARRANTY, $work->files()->sole()->file_type);
         $this->assertSame(2, $file->attachments()->count());
     }

@@ -7,7 +7,7 @@ use App\Enums\BoilerManufacturers;
 use App\Enums\FileTypes;
 use App\Enums\PdfGenerationStatus;
 use App\Enums\WorkStatus;
-use App\Traits\HasFiles;
+use App\Traits\HasIssueFiles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +21,6 @@ use Spatie\Activitylog\Support\LogOptions;
 /**
  * @property int $issue_id
  * @property int $id
- * @property ?int $quote_id
  * @property string $order_id
  * @property ?PdfGenerationStatus $pdf_generation_status
  * @property ?string $pdf_generation_id
@@ -52,11 +51,10 @@ use Spatie\Activitylog\Support\LogOptions;
 class Work extends Model implements OwnsFiles
 {
     use HasFactory, LogsActivity, SoftDeletes;
-    use HasFiles;
+    use HasIssueFiles;
 
     protected $fillable = [
         'issue_id',
-        'quote_id',
         'order_id',
         'status',
         'type_of_product',
@@ -100,14 +98,6 @@ class Work extends Model implements OwnsFiles
     public function user(): HasOneThrough
     {
         return $this->hasOneThrough(User::class, Issue::class, 'id', 'id', 'issue_id', 'user_id')->withTrashedParents();
-    }
-
-    /**
-     * @return BelongsTo<Quote, $this>
-     */
-    public function quote(): BelongsTo
-    {
-        return $this->belongsTo(Quote::class, 'quote_id');
     }
 
     /** @return BelongsToMany<AssemblyAction, $this> */

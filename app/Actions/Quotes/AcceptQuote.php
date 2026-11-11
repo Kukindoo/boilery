@@ -4,6 +4,7 @@ namespace App\Actions\Quotes;
 
 use App\Enums\QuoteStatus;
 use App\Models\Quote;
+use App\Models\Work;
 use App\Traits\LogsActionActivity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -16,10 +17,10 @@ class AcceptQuote
     /**
      * @throws Throwable
      */
-    public function handle(Quote $quote): Quote
+    public function handle(Quote $quote): Work
     {
         try {
-            return DB::transaction(function () use ($quote): Quote {
+            return DB::transaction(function () use ($quote): Work {
                 $quote->refreshForUpdate();
                 Gate::authorize('accept', $quote);
 
@@ -31,8 +32,7 @@ class AcceptQuote
 
                 $issue = $quote->issue;
 
-                $work = $quote->work()->withTrashed()->firstOrCreate([], [
-                    'issue_id' => $issue->id,
+                $work = $issue->works()->create([
                     'order_id' => 'QUOTE-' . $quote->id,
                     'boiler_manufacturer' => $quote->boiler_manufacturer,
                     'type_number' => $quote->boiler_type,
@@ -41,13 +41,9 @@ class AcceptQuote
                     'work_accepted_at' => now(),
                 ]);
 
-                $work->files()->syncWithoutDetaching($quote->files()->pluck('files.id')->all());
+                $this->logActionCompleted('works', $work, 'Work created from accepted quote', ['quote_id' => $quote->id]);
 
-                if ($work->wasRecentlyCreated) {
-                    $this->logActionCompleted('works', $work, 'Work created from accepted quote', ['quote_id' => $quote->id]);
-                }
-
-                return $quote->fresh()->load('work');
+                return $work;
             });
         } catch (Throwable $exception) {
             $this->logActionAttempt('quotes', $quote, $exception);

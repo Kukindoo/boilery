@@ -38,10 +38,15 @@ class WorkIssueMigrationTest extends TestCase
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('issue_id')->references('id')->on('issues')->nullOnDelete();
         });
+        Schema::table('works', function (Blueprint $table): void {
+            $table->foreignId('quote_id')->nullable()->constrained();
+        });
         $quote = Quote::factory()->create();
-        $work = Work::factory()->for($quote)->create(['work_started_at' => '2026-11-01', 'work_completed_at' => '2026-11-02']);
+        $work = Work::factory()->for($quote->issue)->create(['work_started_at' => '2026-11-01', 'work_completed_at' => '2026-11-02']);
         $archivedQuote = Quote::factory()->trashed()->create();
-        $archived = Work::factory()->for($archivedQuote)->trashed()->create();
+        $archived = Work::factory()->for($archivedQuote->issue)->trashed()->create();
+        DB::table('works')->where('id', $work->id)->update(['quote_id' => $quote->id]);
+        DB::table('works')->where('id', $archived->id)->update(['quote_id' => $archivedQuote->id]);
         $withoutQuote = Work::factory()->create();
         $owners = [];
         foreach ([$work, $archived, $withoutQuote] as $record) {

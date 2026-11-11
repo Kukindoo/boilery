@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Issue;
-use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -16,10 +15,7 @@ class WorkFactory extends Factory
     public function definition(): array
     {
         return [
-            'quote_id' => null,
-            'issue_id' => fn (array $attributes) => $attributes['quote_id'] === null
-                ? Issue::factory()->create()->id
-                : Quote::withTrashed()->findOrFail($attributes['quote_id'])->issue_id,
+            'issue_id' => Issue::factory(),
             'order_id' => $this->faker->unique()->uuid(),
         ];
     }

@@ -16,10 +16,10 @@ class QuoteAcceptController extends Controller
      */
     public function __invoke(Quote $quote, AcceptQuote $acceptQuote): RedirectResponse
     {
-        $quote = $acceptQuote->handle($quote);
+        $work = $acceptQuote->handle($quote);
 
-        if ($quote->work !== null && Gate::allows('view', $quote->work)) {
-            return redirect()->route('works.show', $quote->work);
+        if (Gate::allows('view', $work)) {
+            return redirect()->route('works.show', $work);
         }
 
         if (Gate::allows('view', $quote)) {

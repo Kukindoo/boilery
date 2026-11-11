@@ -72,14 +72,14 @@ class WorkOwnershipTest extends FeatureTestCase
     {
         $admin = User::factory()->admin()->create();
         $quote = Quote::factory()->create();
-        $work = Work::factory()->for($quote)->create();
+        $work = Work::factory()->for($quote->issue)->create();
 
         Livewire::actingAs($admin)->test(WorkEdit::class, ['work' => $work])
             ->assertDontSee('form.quoteId', false)
             ->set('form.notes', 'Updated through issue')->call('submit')->assertHasNoErrors();
 
         $this->assertDatabaseHas('works', [
-            'id' => $work->id, 'issue_id' => $quote->issue_id, 'quote_id' => $quote->id, 'notes' => 'Updated through issue',
+            'id' => $work->id, 'issue_id' => $quote->issue_id, 'notes' => 'Updated through issue',
         ]);
     }
 }
