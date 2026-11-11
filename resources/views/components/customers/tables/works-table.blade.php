@@ -1,6 +1,6 @@
-@props(['works'])
+@props(['works', 'heading' => 'Zakázky zákazníka', 'paginate' => true])
 
-<x-stellaris.container.index-card heading="Zakázky zákazníka">
+<x-stellaris.livewire.table.wrapper :heading="$heading">
     <flux:table class="w-full min-w-160 table-fixed">
         <flux:table.columns>
             <flux:table.column class="w-1/4">
@@ -49,5 +49,7 @@
             @endforelse
         </flux:table.rows>
     </flux:table>
-    {{ $works->links() }}
-</x-stellaris.container.index-card>
+    @if ($paginate)
+        {{ $works->links() }}
+    @endif
+</x-stellaris.livewire.table.wrapper>
