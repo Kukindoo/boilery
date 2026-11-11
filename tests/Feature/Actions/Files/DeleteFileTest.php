@@ -55,7 +55,7 @@ class DeleteFileTest extends FeatureTestCase
         Storage::fake('file-documents');
         Queue::fake([DeleteStoredFile::class]);
         $user = $this->operator($permission);
-        $quote = Quote::factory()->for($ownsQuote ? $user : User::factory())->create();
+        $quote = Quote::factory()->forCustomer($ownsQuote ? $user : User::factory())->create();
         $file = $this->upload($quote);
         $otherFile = $this->upload($quote);
         $this->actingAs($user);
@@ -79,7 +79,7 @@ class DeleteFileTest extends FeatureTestCase
         Storage::fake('file-documents');
         Queue::fake([DeleteStoredFile::class]);
         $user = $this->operator($permission);
-        $quote = Quote::factory()->for($ownsQuote ? $user : User::factory())->create();
+        $quote = Quote::factory()->forCustomer($ownsQuote ? $user : User::factory())->create();
         $file = $this->upload($quote);
 
         if ($authenticated) {
@@ -101,7 +101,7 @@ class DeleteFileTest extends FeatureTestCase
     {
         Storage::fake('file-documents');
         config(['queue.default' => 'database']);
-        $file = $this->upload(Quote::factory()->for(User::factory())->create());
+        $file = $this->upload(Quote::factory()->forCustomer(User::factory())->create());
         $this->actingAs($this->operator(Permissions::FILE_DELETE_ALL));
 
         DB::transaction(function () use ($file): void {
@@ -123,7 +123,7 @@ class DeleteFileTest extends FeatureTestCase
     {
         Storage::fake('file-documents');
         config(['queue.default' => 'database']);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $file = $this->upload($quote);
         $this->actingAs($this->operator(Permissions::FILE_DELETE_ALL));
 
@@ -148,7 +148,7 @@ class DeleteFileTest extends FeatureTestCase
     {
         Storage::fake('file-documents');
         Queue::fake([DeleteStoredFile::class]);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $file = $this->upload($quote);
         $this->actingAs($this->operator(Permissions::FILE_DELETE_ALL));
         Activity::creating(function (Activity $activity): void {
@@ -173,7 +173,7 @@ class DeleteFileTest extends FeatureTestCase
     {
         Storage::fake('file-documents');
         Queue::fake([DeleteStoredFile::class]);
-        $file = $this->upload(Quote::factory()->for(User::factory())->create());
+        $file = $this->upload(Quote::factory()->forCustomer(User::factory())->create());
         $this->actingAs($this->operator(Permissions::FILE_DELETE_ALL));
         File::deleting(fn (File $file): bool => false);
         $this->expectException(RuntimeException::class);
@@ -191,7 +191,7 @@ class DeleteFileTest extends FeatureTestCase
     public function test_record_deletion_failure_preserves_the_stored_file_and_record(): void
     {
         Storage::fake('file-documents');
-        $file = $this->upload(Quote::factory()->for(User::factory())->create());
+        $file = $this->upload(Quote::factory()->forCustomer(User::factory())->create());
         $this->actingAs($this->operator(Permissions::FILE_DELETE_ALL));
         File::deleting(function (File $file): void {
             throw new RuntimeException('File record could not be deleted.');
@@ -211,7 +211,7 @@ class DeleteFileTest extends FeatureTestCase
     {
         Storage::fake('file-documents');
         Queue::fake([DeleteStoredFile::class]);
-        $file = $this->upload(Quote::factory()->for(User::factory())->create());
+        $file = $this->upload(Quote::factory()->forCustomer(User::factory())->create());
         Storage::disk()->delete($file->path);
         $this->actingAs($this->operator(Permissions::FILE_DELETE_ALL));
 

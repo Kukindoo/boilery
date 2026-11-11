@@ -62,7 +62,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
         Storage::fake('local');
         config(['queue.default' => 'database']);
         Http::fake([self::ENDPOINT => Http::response('%PDF-1.7 queued summary', 200)]);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $this->actingAs(User::factory()->admin()->create());
 
         app(QueuePdf::class)->handle($quote);
@@ -140,7 +140,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
 
     private function queuedQuote(): Quote
     {
-        return Quote::factory()->for(User::factory())->create([
+        return Quote::factory()->forCustomer(User::factory())->create([
             'pdf_generation_status' => PdfGenerationStatus::QUEUED,
             'pdf_generation_id' => self::GENERATION_ID,
         ]);

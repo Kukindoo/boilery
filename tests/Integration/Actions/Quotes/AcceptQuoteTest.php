@@ -31,7 +31,7 @@ class AcceptQuoteTest extends IntegrationTestCase
     {
         $admin = User::factory()->admin()->create();
         $this->actingAs($admin);
-        $quote = Quote::factory()->for(User::factory()->customer())->create();
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
         $action = app(AcceptQuote::class);
 
         $action->handle($quote);
@@ -62,7 +62,7 @@ class AcceptQuoteTest extends IntegrationTestCase
         $user = User::factory()->create();
         $user->assignRole($role);
         $this->actingAs($user);
-        $quote = Quote::factory()->for(User::factory()->customer())->create([
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create([
             'boiler_manufacturer' => BoilerManufacturers::DRAZICE,
             'boiler_type' => 'OKCE 125',
             'boiler_serial_number' => 'SERIAL-123',
@@ -76,7 +76,7 @@ class AcceptQuoteTest extends IntegrationTestCase
         $this->assertSame(QuoteStatus::ACCEPTED, $quote->fresh()->status);
         $this->assertDatabaseHas('works', [
             'quote_id' => $quote->id,
-            'user_id' => $quote->user_id,
+            'issue_id' => $quote->issue_id,
             'order_id' => 'QUOTE-' . $quote->id,
             'type_of_product' => null,
             'boiler_manufacturer' => 'drazice',
@@ -92,7 +92,7 @@ class AcceptQuoteTest extends IntegrationTestCase
     public function test_acceptance_keeps_unknown_manufacturer_and_product_type_nullable(): void
     {
         $this->actingAs(User::factory()->admin()->create());
-        $quote = Quote::factory()->for(User::factory()->customer())->create(['boiler_manufacturer' => null]);
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create(['boiler_manufacturer' => null]);
 
         $accepted = app(AcceptQuote::class)->handle($quote);
 
@@ -103,7 +103,7 @@ class AcceptQuoteTest extends IntegrationTestCase
     public function test_acceptance_links_all_quote_files_to_its_work_and_preserves_other_quote_files(): void
     {
         $this->actingAs(User::factory()->admin()->create());
-        $quote = Quote::factory()->for(User::factory()->customer())->create();
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
         $otherQuote = Quote::factory()->create();
         $attributes = [
             'original_name' => 'receipt.jpg',
@@ -136,7 +136,7 @@ class AcceptQuoteTest extends IntegrationTestCase
         if ($authenticated) {
             $this->actingAs(User::factory()->customer()->create());
         }
-        $quote = Quote::factory()->for(User::factory()->customer())->create();
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
 
         try {
             app(AcceptQuote::class)->handle($quote);
@@ -150,7 +150,7 @@ class AcceptQuoteTest extends IntegrationTestCase
     public function test_repeated_acceptance_is_forbidden_and_preserves_archived_work(): void
     {
         $this->actingAs(User::factory()->admin()->create());
-        $quote = Quote::factory()->for(User::factory()->customer())->create();
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
         $action = app(AcceptQuote::class);
         $action->handle($quote);
         $work = $quote->work()->firstOrFail();
@@ -173,7 +173,7 @@ class AcceptQuoteTest extends IntegrationTestCase
     public function test_work_creation_failure_rolls_back_quote_acceptance(): void
     {
         $this->actingAs(User::factory()->admin()->create());
-        $quote = Quote::factory()->for(User::factory()->customer())->create();
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
         Work::factory()->create(['order_id' => 'QUOTE-' . $quote->id]);
 
         try {
@@ -191,7 +191,7 @@ class AcceptQuoteTest extends IntegrationTestCase
     public function test_admin_cannot_accept_archived_quote(): void
     {
         $this->actingAs(User::factory()->admin()->create());
-        $quote = Quote::factory()->for(User::factory()->customer())->create();
+        $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
         $quote->delete();
 
         $this->expectException(AuthorizationException::class);

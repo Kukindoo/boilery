@@ -70,8 +70,8 @@ class FileTypeAuthorizationTest extends FeatureTestCase
             Permissions::WORK_VIEW_OWN, Permissions::WORK_EDIT_OWN, Permissions::FILE_CREATE_OWN,
         ]);
         $parent = $parentType === 'quote'
-            ? Quote::factory()->for($actor)->create()
-            : Work::factory()->for($actor)->create();
+            ? Quote::factory()->forCustomer($actor)->create()
+            : Work::factory()->forCustomer($actor)->create();
         $component = Livewire::actingAs($actor)->test(SingleFileUpload::class, ['model' => $parent]);
         $denied = $role === Roles::CUSTOMER && $type !== FileTypes::RECEIPT;
 
@@ -101,7 +101,7 @@ class FileTypeAuthorizationTest extends FeatureTestCase
     public function test_public_quote_upload_cannot_bypass_reserved_type_authorization(FileTypes $type): void
     {
         Storage::fake();
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $this->expectException(AuthorizationException::class);
 
         try {
@@ -121,7 +121,7 @@ class FileTypeAuthorizationTest extends FeatureTestCase
             $actor->assignRole($role);
         }
         $actor->givePermissionTo([Permissions::FILE_EDIT_ALL, Permissions::QUOTE_VIEW_OWN, Permissions::QUOTE_EDIT_OWN]);
-        $quote = Quote::factory()->for($actor)->create();
+        $quote = Quote::factory()->forCustomer($actor)->create();
         $file = $quote->files()->save(File::factory()->make(['file_type' => FileTypes::UNKNOWN]));
 
         Livewire::actingAs($actor)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file])
@@ -138,7 +138,7 @@ class FileTypeAuthorizationTest extends FeatureTestCase
     {
         $actor = User::factory()->admin()->create();
         $actor->givePermissionTo([Permissions::QUOTE_VIEW_OWN, Permissions::QUOTE_EDIT_OWN, Permissions::FILE_EDIT_ALL]);
-        $quote = Quote::factory()->for($actor)->create();
+        $quote = Quote::factory()->forCustomer($actor)->create();
         $file = $quote->files()->save(File::factory()->make());
         $originalType = $file->file_type;
         $component = Livewire::actingAs($actor)->test(FilePreviewCard::class, ['model' => $quote, 'file' => $file]);

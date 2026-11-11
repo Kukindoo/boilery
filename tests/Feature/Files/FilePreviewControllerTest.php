@@ -55,7 +55,7 @@ class FilePreviewControllerTest extends FeatureTestCase
     {
         Storage::fake();
         $user = User::factory()->create();
-        $work = Work::factory()->for($user)->create();
+        $work = Work::factory()->forCustomer($user)->create();
         $file = File::factory()->create();
         $work->files()->attach($file);
         Storage::put($file->path, 'attachment');

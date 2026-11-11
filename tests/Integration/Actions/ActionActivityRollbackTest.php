@@ -32,7 +32,7 @@ class ActionActivityRollbackTest extends TestCase
         $this->assertSame(0, DB::transactionLevel());
         $actor = User::factory()->admin()->create();
         $this->actingAs($actor);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $before = $quote->fresh()->getRawOriginal();
         $failure = new RuntimeException('The success trace could not be stored.');
         Activity::creating(function (Activity $activity) use ($failure): void {

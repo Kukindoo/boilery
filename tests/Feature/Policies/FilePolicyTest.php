@@ -40,7 +40,11 @@ class FilePolicyTest extends FeatureTestCase
                 $file = File::factory()->create();
                 if ($owned !== null) {
                     $owner = $owned ? $user : User::factory()->create();
-                    $parent = $type === User::class ? $owner : $type::factory()->for($owner)->create();
+                    $parent = match ($type) {
+                        User::class => $owner,
+                        Quote::class => Quote::factory()->forCustomer($owner)->create(),
+                        Work::class => Work::factory()->forCustomer($owner)->create(),
+                    };
                     $parent->files()->attach($file->id);
                 }
                 foreach ([
@@ -59,8 +63,8 @@ class FilePolicyTest extends FeatureTestCase
     {
         $owner = User::factory()->create();
         $owner->givePermissionTo([Permissions::FILE_VIEW_OWN, Permissions::FILE_EDIT_OWN, Permissions::FILE_DELETE_OWN, Permissions::FILE_FORCE_DELETE_OWN]);
-        $quote = Quote::factory()->for($owner)->create();
-        $otherQuote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer($owner)->create();
+        $otherQuote = Quote::factory()->forCustomer(User::factory())->create();
         $file = $quote->files()->save(File::factory()->make());
         $otherQuote->files()->attach($file->id);
 

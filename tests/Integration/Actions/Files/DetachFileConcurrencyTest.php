@@ -34,8 +34,8 @@ class DetachFileConcurrencyTest extends TestCase
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::QUOTE_VIEW_OWN, Permissions::FILE_DELETE_OWN]);
         $this->actingAs($user);
-        $quote = Quote::factory()->for($user)->create();
-        $other = Quote::factory()->for($user)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
+        $other = Quote::factory()->forCustomer($user)->create();
         $file = $quote->files()->save(File::factory()->make());
         Storage::put($file->path, 'shared content');
         $writer = DB::build([...DB::connection()->getConfig(), 'name' => 'detach-concurrent-writer']);

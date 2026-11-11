@@ -2,11 +2,12 @@
 
 namespace Tests\Integration\Actions\Quotes;
 
-use App\Actions\Files\UploadQuoteFile;
 use App\Actions\Quotes\CreateQuote;
+use App\Dtos\Quotes\QuoteDto;
 use App\Enums\BoilerManufacturers;
 use App\Enums\FileTypes;
 use App\Enums\QuoteStatus;
+use App\Models\File;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
@@ -29,14 +30,12 @@ class CreateQuoteTest extends IntegrationTestCase
 
     public function test_creates_public_quote_for_supplied_customer_without_attachments(): void
     {
-        $customer = User::factory()->customer()->create();
         $form = $this->form();
-        $form->userId = User::factory()->create()->id;
 
-        $quote = app(CreateQuote::class)->handle($form, $customer);
+        $quote = app(CreateQuote::class)->handle($form);
 
         $this->assertDatabaseHas('quotes', [
-            'id' => $quote->id, 'user_id' => $customer->id,
+            'id' => $quote->id, 'issue_id' => $quote->issue_id,
             'first_name' => 'Jan', 'last_name' => 'Novak',
             'email' => 'jan@example.test', 'phone' => '+420123456789',
             'message' => 'No hot water', 'address' => null,
@@ -52,15 +51,16 @@ class CreateQuoteTest extends IntegrationTestCase
     {
         $this->travelTo(Carbon::create(2026, 11, 8, 9, 42, 0, 'UTC'));
         Storage::fake(config('filesystems.default'));
-        $customer = User::factory()->customer()->create(['name' => 'Jiří Novák-Svoboda']);
+        $customer = User::factory()->customer()->create(['name' => 'Jiří Novák-Svoboda', 'email' => 'jan@example.test']);
+        $this->actingAs($customer);
         $form = $this->form();
-        $form->boilerUnderWarranty = 'yes';
+        $form->underWarranty = true;
         $form->address = 'Prague';
         $form->boilerSerialNumber = 'SERIAL-1';
         $form->boilerType = 'OKCE 125';
-        $form->{$field} = UploadedFile::fake()->create('document.pdf', 10, 'application/pdf');
+        $fileUpload = UploadedFile::fake()->create('document.pdf', 10, 'application/pdf');
 
-        $quote = app(CreateQuote::class)->handle($form, $customer);
+        $quote = app(CreateQuote::class)->handle($form, ...[$field => $fileUpload]);
 
         $file = $quote->files()->sole();
         $this->assertMatchesRegularExpression('/^2026-11-08_10-42_Jiri_Novak_Svoboda_' . $labelType . '_[a-z0-9]{4}\.pdf$/', $file->label);
@@ -76,38 +76,41 @@ class CreateQuoteTest extends IntegrationTestCase
         ]);
         Storage::disk(config('filesystems.default'))->assertExists($file->path);
         $this->assertDatabaseHas('quotes', [
-            'id' => $quote->id, 'user_id' => $customer->id, 'under_warranty' => true,
+            'id' => $quote->id, 'issue_id' => $quote->issue_id, 'under_warranty' => true,
             'address' => 'Prague', 'boiler_serial_number' => 'SERIAL-1', 'boiler_type' => 'OKCE 125',
         ]);
     }
 
     public function test_upload_failure_rolls_back_quote_creation(): void
     {
-        $customer = User::factory()->customer()->create();
         $form = $this->form();
-        $form->fileLabel = UploadedFile::fake()->create('document.pdf');
-        $this->mock(UploadQuoteFile::class)->shouldReceive('handle')->once()
-            ->andThrow(new RuntimeException('Upload failed'));
+        $upload = UploadedFile::fake()->create('document.pdf');
+        $usersBefore = User::count();
+        Storage::fake(config('filesystems.default'));
+        $failure = new RuntimeException('Upload failed');
+        File::creating(function () use ($failure): void {
+            throw $failure;
+        });
 
         try {
-            app(CreateQuote::class)->handle($form, $customer);
+            app(CreateQuote::class)->handle($form, fileLabel: $upload);
             $this->fail('Upload failure should propagate.');
         } catch (RuntimeException $exception) {
-            $this->assertSame('Upload failed', $exception->getMessage());
+            $this->assertSame($failure, $exception);
+            $this->assertDatabaseCount('users', $usersBefore);
+            $this->assertDatabaseCount('issues', 0);
             $this->assertDatabaseCount('quotes', 0);
             $this->assertDatabaseCount('files', 0);
+            $this->assertSame([], Storage::disk()->allFiles());
         }
     }
 
-    private function form(): object
+    private function form(): QuoteDto
     {
-        return (object) [
-            'firstName' => 'Jan', 'lastName' => 'Novak',
-            'email' => 'jan@example.test', 'phone' => '+420123456789',
-            'message' => 'No hot water', 'address' => null,
-            'boilerUnderWarranty' => 'no', 'boilerManufacturer' => BoilerManufacturers::DRAZICE,
-            'boilerSerialNumber' => null, 'boilerType' => null,
-            'fileLabel' => null, 'fileReceipt' => null, 'fileWarrantyDocument' => null,
-        ];
+        return new QuoteDto(
+            firstName: 'Jan', lastName: 'Novak',
+            email: 'jan@example.test', phone: '+420123456789',
+            message: 'No hot water', boilerManufacturer: BoilerManufacturers::DRAZICE,
+        );
     }
 }

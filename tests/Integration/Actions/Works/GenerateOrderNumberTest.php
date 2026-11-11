@@ -6,6 +6,7 @@ use App\Actions\Works\CreateWork;
 use App\Actions\Works\GenerateOrderNumber;
 use App\Dtos\Works\WorkDto;
 use App\Enums\BoilerManufacturers;
+use App\Models\Issue;
 use App\Models\User;
 use App\Models\Work;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -52,8 +53,9 @@ class GenerateOrderNumberTest extends IntegrationTestCase
     public function test_create_work_generates_and_persists_sequential_order_numbers(): void
     {
         $this->travelTo(now()->setDate(2026, 10, 22)->startOfDay());
+        $this->actingAs(User::factory()->admin()->create());
         $data = new WorkDto(
-            userId: User::factory()->create()->id,
+            issueId: Issue::factory()->create()->id,
             quoteId: null,
             orderId: null,
             typeOfProduct: 'Ohřívač vody',

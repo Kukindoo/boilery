@@ -32,7 +32,7 @@ class ActionActivityTest extends IntegrationTestCase
         $actor = User::factory()->admin()->create();
         $this->actingAs($actor);
         $customer = app(CreateCustomer::class)->handle(new NamePlate('Jan', 'Novák', 'jan@example.test', '123456789'));
-        $quote = Quote::factory()->for($customer)->create();
+        $quote = Quote::factory()->forCustomer($customer)->create();
 
         app(UpdateQuote::class)->handle($quote, $this->data());
 
@@ -52,7 +52,7 @@ class ActionActivityTest extends IntegrationTestCase
         config(['filesystems.default' => 'local']);
         $actor = User::factory()->admin()->create();
         $this->actingAs($actor);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $file = app(UploadQuoteFile::class)->handle(UploadedFile::fake()->create('receipt.pdf', 10, 'application/pdf'), $quote, FileTypes::RECEIPT);
 
         app(DeleteFile::class)->handle($file);
@@ -72,7 +72,7 @@ class ActionActivityTest extends IntegrationTestCase
     {
         $actor = User::factory()->admin()->create();
         $this->actingAs($actor);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $before = $quote->fresh()->getRawOriginal();
         $failure = new RuntimeException('Cannot store success activity.');
         Activity::creating(function (Activity $activity) use ($failure): void {

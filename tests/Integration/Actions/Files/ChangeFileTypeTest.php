@@ -98,7 +98,7 @@ class ChangeFileTypeTest extends IntegrationTestCase
     {
         $actor = $this->actor(Permissions::FILE_EDIT_OWN);
         $file = $this->attachment('quote', $actor)->load('quotes');
-        $otherQuote = Quote::factory()->for(User::factory())->create();
+        $otherQuote = Quote::factory()->forCustomer(User::factory())->create();
         $file->quotes()->sync([$otherQuote->id]);
 
         $this->expectException(AuthorizationException::class);
@@ -178,8 +178,8 @@ class ChangeFileTypeTest extends IntegrationTestCase
     {
         $file = File::factory()->create();
         $parent = match ($context) {
-            'quote' => Quote::factory()->for($owner)->create(),
-            'work' => Work::factory()->for($owner)->create(),
+            'quote' => Quote::factory()->forCustomer($owner)->create(),
+            'work' => Work::factory()->forCustomer($owner)->create(),
             default => null,
         };
         $parent?->files()->attach($file->id);

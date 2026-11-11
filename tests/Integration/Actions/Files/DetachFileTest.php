@@ -30,8 +30,12 @@ class DetachFileTest extends IntegrationTestCase
         $owner = User::factory()->create();
         $owner->givePermissionTo([Permissions::QUOTE_VIEW_OWN, Permissions::FILE_DELETE_OWN]);
         $this->actingAs($owner);
-        $quote = Quote::factory()->for($owner)->create();
-        $other = $model === User::class ? User::factory()->create() : $model::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer($owner)->create();
+        $other = match ($model) {
+            User::class => User::factory()->create(),
+            Quote::class => Quote::factory()->forCustomer(User::factory())->create(),
+            Work::class => Work::factory()->forCustomer(User::factory())->create(),
+        };
         $file = File::factory()->create();
         Storage::put($file->path, 'shared content');
         $quote->files()->attach($file->id);
@@ -55,7 +59,7 @@ class DetachFileTest extends IntegrationTestCase
         $owner = User::factory()->create();
         $owner->givePermissionTo([Permissions::QUOTE_VIEW_OWN, Permissions::FILE_DELETE_OWN]);
         $this->actingAs($owner);
-        $quote = Quote::factory()->for($owner)->create();
+        $quote = Quote::factory()->forCustomer($owner)->create();
         $file = $quote->files()->save(File::factory()->make());
         Storage::put($file->path, 'content');
 
@@ -77,7 +81,7 @@ class DetachFileTest extends IntegrationTestCase
         $owner = User::factory()->create();
         $owner->givePermissionTo([Permissions::QUOTE_VIEW_OWN, Permissions::FILE_DELETE_OWN]);
         $this->actingAs($owner);
-        $quote = Quote::factory()->for($owner)->create();
+        $quote = Quote::factory()->forCustomer($owner)->create();
         $file = $quote->files()->save(File::factory()->make());
         Storage::put($file->path, 'content');
 
@@ -100,7 +104,7 @@ class DetachFileTest extends IntegrationTestCase
         $user = User::factory()->create();
         $user->givePermissionTo(Permissions::QUOTE_VIEW_OWN);
         $this->actingAs($user);
-        $quote = Quote::factory()->for($user)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
         $file = $quote->files()->save(File::factory()->make());
         $this->expectException(AuthorizationException::class);
 
@@ -116,7 +120,7 @@ class DetachFileTest extends IntegrationTestCase
         $user = User::factory()->create();
         $user->givePermissionTo([Permissions::QUOTE_VIEW_OWN, Permissions::FILE_DELETE_OWN]);
         $this->actingAs($user);
-        $quote = Quote::factory()->for($user)->create();
+        $quote = Quote::factory()->forCustomer($user)->create();
         $file = $quote->files()->save(File::factory()->make());
         Activity::creating(function (Activity $activity): void {
             if ($activity->description === 'File detached') {

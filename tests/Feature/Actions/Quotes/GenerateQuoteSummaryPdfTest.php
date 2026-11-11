@@ -49,7 +49,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
             'name' => 'Jiří Novák', 'email' => 'current@example.test',
             'phone' => '+420111222333', 'address' => 'Aktuální adresa 42',
         ]);
-        $quote = Quote::factory()->for($customer)->create([
+        $quote = Quote::factory()->forCustomer($customer)->create([
             'first_name' => 'Jan',
             'last_name' => 'Svoboda',
             'email' => 'snapshot@example.test', 'phone' => '+420999888777',
@@ -78,7 +78,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
             'app.files.attachments_save_directory' => 'custom/attachments',
         ]);
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->for(User::factory()->state(['name' => 'Jiří Novák']))->create([
+        $quote = Quote::factory()->forCustomer(User::factory()->state(['name' => 'Jiří Novák']))->create([
             'first_name' => 'Jiří',
             'last_name' => 'Novák',
             'boiler_manufacturer' => BoilerManufacturers::DRAZICE,
@@ -116,7 +116,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->for(User::factory())->create(['address' => null]);
+        $quote = Quote::factory()->forCustomer(User::factory())->create(['address' => null]);
         $action = app(GenerateQuoteSummaryPdf::class);
 
         $first = $action->handle($quote);
@@ -133,12 +133,12 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $image = $this->createAttachment(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
         $image->update(['label' => '<script>attachment</script>.png']);
         $document = $this->createAttachment(UploadedFile::fake()->create('receipt.pdf', 10, 'application/pdf'), $quote, FileTypes::RECEIPT);
         $summary = $this->createAttachment(UploadedFile::fake()->create('old-summary.pdf', 10, 'application/pdf'), $quote, FileTypes::QUOTE_SUMMARY);
-        $otherQuote = Quote::factory()->for(User::factory())->create();
+        $otherQuote = Quote::factory()->forCustomer(User::factory())->create();
         $otherImage = $this->createAttachment(UploadedFile::fake()->image('other.png'), $otherQuote, FileTypes::BOILER_LABEL);
         $imageSource = 'data:image/png;base64,' . base64_encode(Storage::disk()->get($image->path));
         $quote->load('files');
@@ -159,7 +159,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
     public function test_missing_image_prevents_generating_an_incomplete_summary(): void
     {
         Storage::fake('local');
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $image = $this->createAttachment(UploadedFile::fake()->image('boiler.png'), $quote, FileTypes::BOILER_LABEL);
         Storage::disk()->delete($image->path);
 
@@ -179,7 +179,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response('Rendering failed', 500)]);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
 
         $this->expectException(CouldNotGeneratePdf::class);
 
@@ -194,7 +194,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
     public function test_storage_failure_does_not_create_a_database_record(): void
     {
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         $disk = Mockery::mock(FilesystemAdapter::class);
         $disk->shouldReceive('put')->once()->with(Mockery::type('string'), self::PDF_CONTENT)->andReturnFalse();
         Storage::shouldReceive('disk')->withNoArgs()->andReturn($disk);
@@ -213,7 +213,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         \App\Models\FileAttachment::creating(function (): void {
             throw new RuntimeException('Cannot attach PDF');
         });
@@ -233,7 +233,7 @@ class GenerateQuoteSummaryPdfTest extends FeatureTestCase
     {
         Storage::fake('local');
         Http::fake([self::ENDPOINT => Http::response(self::PDF_CONTENT, 200)]);
-        $quote = Quote::factory()->for(User::factory())->create();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
         File::creating(function (File $file): void {
             throw new RuntimeException('File record could not be saved.');
         });

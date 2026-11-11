@@ -47,7 +47,7 @@ class AssemblyActionsPagesTest extends FeatureTestCase
         $customer = User::factory()->create();
         $customer->assignRole(Role::findById(Roles::CUSTOMER->value));
         Role::findById(Roles::CUSTOMER->value)->givePermissionTo(Permissions::WORK_VIEW_OWN->label());
-        $work = Work::factory()->for($customer)->create();
+        $work = Work::factory()->forCustomer($customer)->create();
         $this->actingAs($customer);
         foreach (['index', 'create', 'show', 'edit'] as $page) {
             $this->get(route('assembly-actions.' . $page, $action))->assertForbidden();

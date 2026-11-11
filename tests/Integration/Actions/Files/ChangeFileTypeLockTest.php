@@ -48,8 +48,8 @@ class ChangeFileTypeLockTest extends TestCase
         ]);
         $this->actingAs($actor);
         $parent = match ($context) {
-            'quote' => Quote::factory()->for($actor)->create(),
-            'work' => Work::factory()->for($actor)->create(),
+            'quote' => Quote::factory()->forCustomer($actor)->create(),
+            'work' => Work::factory()->forCustomer($actor)->create(),
             default => null,
         };
         $file = File::create([
@@ -65,7 +65,7 @@ class ChangeFileTypeLockTest extends TestCase
         };
         $resources = [['files', $file->id, ['file_type' => FileTypes::BOILER_LABEL->value]]];
         if ($parent !== null) {
-            array_unshift($resources, [$parent->getTable(), $parent->id, ['user_id' => User::factory()->create()->id]]);
+            array_unshift($resources, [$parent->getTable(), $parent->id, ($parent instanceof Quote ? ['message' => 'Concurrent edit'] : ['notes' => 'Concurrent edit'])]);
         }
         $contender = DB::build([...DB::connection()->getConfig(), 'name' => 'file-type-lock-contender']);
         $this->assertNotSame(DB::connection()->getPdo(), $contender->getPdo());

@@ -27,8 +27,8 @@ class CustomerNameLinksTest extends FeatureTestCase
         ]);
         $customer = User::factory()->customer()->create();
         $record = $resource === 'quotes'
-            ? Quote::factory()->for($customer, 'user')->create()
-            : Work::factory()->for($customer, 'user')->create();
+            ? Quote::factory()->forCustomer($customer)->create()
+            : Work::factory()->forCustomer($customer)->create();
         $href = 'href="' . route('customers.show', $customer) . '"';
 
         $response = $this->actingAs($viewer)->get(route($resource . '.show', $record))->assertOk();
@@ -44,8 +44,8 @@ class CustomerNameLinksTest extends FeatureTestCase
         $viewer->givePermissionTo([Permissions::QUOTE_VIEW_ALL->label(), Permissions::WORK_VIEW_ALL->label()]);
         $customer = User::factory()->customer()->create();
         $record = $resource === 'quotes'
-            ? Quote::factory()->for($customer, 'user')->create()
-            : Work::factory()->for($customer, 'user')->create();
+            ? Quote::factory()->forCustomer($customer)->create()
+            : Work::factory()->forCustomer($customer)->create();
         $name = $customer->name;
 
         $this->actingAs($viewer)->get(route($resource . '.show', $record))
@@ -58,7 +58,7 @@ class CustomerNameLinksTest extends FeatureTestCase
         $viewer = User::factory()->create();
         $viewer->givePermissionTo([Permissions::QUOTE_VIEW_ALL, Permissions::QUOTE_EDIT_ALL]);
         $customer = User::factory()->customer()->create();
-        $quote = Quote::factory()->for($customer)->create();
+        $quote = Quote::factory()->forCustomer($customer)->create();
         $href = 'href="' . route('customers.edit', $customer) . '"';
 
         $this->actingAs($viewer)->get(route('quotes.show', $quote))

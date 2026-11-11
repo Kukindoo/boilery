@@ -134,7 +134,7 @@ class AssemblyActionsCrudTest extends FeatureTestCase
         Livewire::test(AssemblyActionCreate::class)->assertForbidden();
         Livewire::test(AssemblyActionEdit::class, ['assemblyAction' => AssemblyAction::factory()->create()])->assertForbidden();
         Livewire::test(AssemblyActionsTable::class)->assertForbidden();
-        Livewire::test(WorkAssemblyActionAdd::class, ['work' => Work::factory()->for($user)->create()])->assertForbidden();
+        Livewire::test(WorkAssemblyActionAdd::class, ['work' => Work::factory()->forCustomer($user)->create()])->assertForbidden();
     }
 
     public function test_table_search_sort_pagination_and_sort_injection(): void
