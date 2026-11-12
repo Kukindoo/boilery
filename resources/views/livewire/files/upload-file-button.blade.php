@@ -1,7 +1,7 @@
 <div class="ml-4 shrink-0 print:hidden">
     @can('uploadFile', $model)
         <flux:modal.trigger :name="$modalName">
-            <flux:button icon="arrow-up-tray">
+            <flux:button icon="arrow-up-tray" size="sm">
                 Nahrát
             </flux:button>
         </flux:modal.trigger>
