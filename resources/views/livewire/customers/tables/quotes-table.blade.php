@@ -6,7 +6,7 @@
     <flux:table class="w-full min-w-160 table-fixed">
         <flux:table.columns>
             <flux:table.column class="w-1/4">
-                Požadavek
+                Poptávka
             </flux:table.column>
             <flux:table.column class="w-1/4">
                 Status
@@ -24,10 +24,10 @@
                     <flux:table.cell class="whitespace-normal wrap-anywhere">
                         @can('view', $quote)
                             <flux:link :href="route('quotes.show', $quote)">
-                                #{{ $quote->id }}
+                                Poptávka #{{ $quote->id }}
                             </flux:link>
                         @else
-                            #{{ $quote->id }}
+                            Poptávka #{{ $quote->id }}
                         @endcan
                     </flux:table.cell>
                     <flux:table.cell>
