@@ -3,22 +3,33 @@
 @endphp
 
 <x-layouts::app :title="$role->name">
-    <div class="space-y-6">
-        <x-stellaris.container.show-card :title="$role->name">
-            <x-slot name="action">
-                <div class="flex gap-2">
-                    <flux:button size="sm" :href="route('roles.index')">
-                        Zpět
+    <x-stellaris.panel.container.base>
+        <x-slot:header>
+            <x-stellaris.panel.header.base :heading="__('Role :role_id', ['role_id' => $role->id])">
+            </x-stellaris.panel.header.base>
+        </x-slot:header>
+        <x-slot:actionsStrip>
+            <x-stellaris.panel.actions-strip.base>
+                <x-slot:slotLeft>
+                    <flux:button :href="route('roles.index')" icon="arrow-left" size="sm">
+                        {{ __('Zpět na Role') }}
                     </flux:button>
-                </div>
-            </x-slot>
-            <x-stellaris.container.show-row title="Název">
-                {{ $role->name }}
-            </x-stellaris.container.show-row>
-        </x-stellaris.container.show-card>
+                </x-slot:slotLeft>
+                @include('roles.partials.show-actions')
+            </x-stellaris.panel.actions-strip.base>
+        </x-slot:actionsStrip>
+
+        <x-stellaris.panel.base :header="__('Informace o zakazníkovi')">
+            <x-stellaris.panel.table.col-3-base>
+                <x-stellaris.container.show-row title="Název">
+                    {{ $role->name }}
+                </x-stellaris.container.show-row>
+            </x-stellaris.panel.table.col-3-base>
+        </x-stellaris.panel.base>
+
         <livewire:roles.role-permissions :role="$role" />
         @can('viewAny', User::class)
             <livewire:roles.role-users :role="$role" />
         @endcan
-    </div>
+    </x-stellaris.panel.container.base>
 </x-layouts::app>
