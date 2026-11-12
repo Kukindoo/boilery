@@ -5,6 +5,7 @@ namespace App\Livewire\Quotes;
 use App\Actions\Quotes\AcceptQuote;
 use App\Enums\QuoteStatus;
 use App\Models\Quote;
+use DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -47,21 +48,45 @@ class QuotesTable extends Component
             ->paginate(15);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function changeQuoteStatus(Quote $quote, QuoteStatus $status): void
     {
-        if (! auth()->user()->can('update', $quote)) {
-            abort(403);
+        if ($status === QuoteStatus::ACCEPTED) {
+            $this->acceptQuote($quote);
+
+            return;
         }
 
-        $quote->update([
-            'status' => $status,
-        ]);
+        abort_unless(in_array($status, [
+            QuoteStatus::CONTACTED,
+            QuoteStatus::REJECTED,
+        ], true), 422);
 
-        if ($quote->wasChanged('status')) {
+        DB::transaction(function () use ($quote, $status): void {
+            $quote->refreshForUpdate();
+
+            Gate::authorize('update', $quote);
+
+            $previousStatus = $quote->status;
+
+            if ($previousStatus === $status) {
+                return;
+            }
+
+            $quote->update(['status' => $status]);
+
             activity('quotes')
                 ->performedOn($quote)
-                ->log('Quote accepted');
-        }
+                ->withProperties([
+                    'from_status' => $previousStatus->value,
+                    'to_status' => $status->value,
+                ])
+                ->log(
+                    "Quote status changed from {$previousStatus->value} to {$status->value}"
+                );
+        });
     }
 
     /**
