@@ -10,9 +10,7 @@
 
     <x-stellaris.container.show-card :title="__('Oprávnění')">
         <x-slot name="action">
-            <flux:button size="sm" wire:click="sort">
-                {{ $sortDirection === 'asc' ? 'Název A–Z' : 'Název Z–A' }}
-            </flux:button>
+            @include('livewire.permissions.partials.permissions-table-actions')
         </x-slot>
 
         <flux:text class="col-span-3">
