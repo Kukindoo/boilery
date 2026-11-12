@@ -8,6 +8,7 @@
 @props([
     'model',
     'fileType',
+    'showTrigger' => true,
 ])
 
 @php
@@ -21,11 +22,13 @@
     };
 @endphp
 
-<flux:modal.trigger name="pdf-preview">
-    <flux:button size="sm" icon="document-text">
-        Náhled {{ $triggerName ?? 'PDF' }}
-    </flux:button>
-</flux:modal.trigger>
+@if ($showTrigger)
+    <flux:modal.trigger name="pdf-preview">
+        <flux:button size="sm" icon="document-text">
+            Náhled {{ $triggerName ?? 'PDF' }}
+        </flux:button>
+    </flux:modal.trigger>
+@endif
 
 <flux:modal name="pdf-preview" class="w-full max-w-5xl">
     <div class="space-y-4">
