@@ -6,7 +6,9 @@
     <flux:button size="sm" icon:trailing="chevron-down">Akce</flux:button>
     <flux:menu>
         <flux:modal.trigger name="pdf-preview">
-            <flux:menu.item icon="document-text">Náhled Servisního protokolu</flux:menu.item>
+            <flux:menu.item icon="document-text">
+                Náhled Servisního protokolu
+            </flux:menu.item>
         </flux:modal.trigger>
 
         @can('update', $work)
