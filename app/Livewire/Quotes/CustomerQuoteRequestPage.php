@@ -47,10 +47,8 @@ class CustomerQuoteRequestPage extends Component
     {
         $this->rateLimiter(RateLimiterNames::PUBLIC_QUOTE_SUBMISSION);
 
-        $quote = DB::transaction(function () {
+        DB::transaction(function (): void {
             $quote = $this->form->submit();
-
-            $this->submitted = true;
 
             activity('quotes')
                 ->performedOn($quote)
@@ -59,10 +57,13 @@ class CustomerQuoteRequestPage extends Component
             Notification::route('mail', $quote->email)
                 ->notify(new QuoteSubmittedCustomer($quote));
 
-            return $quote;
-        });
+            Notification::route('mail', config('contacts.admin_email'))
+                ->notify(new QuoteSubmittedAdmin($quote)->afterCommit());
 
-        Notification::route('mail', config('contacts.admin_email'))
-            ->notify(new QuoteSubmittedAdmin($quote));
+            DB::afterCommit(function (): void {
+                $this->form->reset();
+                $this->submitted = true;
+            });
+        });
     }
 }

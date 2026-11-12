@@ -17,7 +17,9 @@ class QuoteSubmittedAdmin extends Notification implements ShouldQueue
      */
     public function __construct(
         public Quote $quote,
-    ) {}
+    ) {
+        $this->afterCommit();
+    }
 
     /**
      * Get the notification's delivery channels.

@@ -118,8 +118,6 @@ class QuoteForm extends Form
             );
         }
 
-        $this->reset();
-
         return $quote;
     }
 
