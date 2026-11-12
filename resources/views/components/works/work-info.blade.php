@@ -9,7 +9,7 @@
     ];
 @endphp
 
-<x-stellaris.container.show-card :title="__('Informace o Zakázce')">
+<x-stellaris.panel.base :header="__('Informace o Zakázce')">
     <x-slot:action>
         @can('update', $work)
             <flux:button size="sm" :href="route('works.edit', $work)">
@@ -17,30 +17,31 @@
             </flux:button>
         @endcan
     </x-slot:action>
-
-    <x-stellaris.container.show-row :title="__('Status')">
-        <flux:badge size="sm" :color="$work->status->colour()">
-            {{ $work->status->label() }}
-        </flux:badge>
-    </x-stellaris.container.show-row>
-
-    <x-stellaris.container.show-row title="Zákazník">
-        <x-customers.customer-name :customer="$work->user" />
-    </x-stellaris.container.show-row>
-
-    <x-stellaris.container.show-row title="Případ">
-        @if ($work->issue && auth()->user()->can('view', $work->issue))
-            <flux:link :href="route('issues.show', $work->issue)" wire:navigate>
-                Případ #{{ $work->issue_id }}
-            </flux:link>
-        @else
-            —
-        @endif
-    </x-stellaris.container.show-row>
-
-    @foreach ($fields as $label => $value)
-        <x-stellaris.container.show-row :title="$label">
-            {{ $value }}
+    <x-stellaris.panel.table.col-3-base>
+        <x-stellaris.container.show-row :title="__('Status')">
+            <flux:badge size="sm" :color="$work->status->colour()">
+                {{ $work->status->label() }}
+            </flux:badge>
         </x-stellaris.container.show-row>
-    @endforeach
-</x-stellaris.container.show-card>
+
+        <x-stellaris.container.show-row title="Zákazník">
+            <x-customers.customer-name :customer="$work->user"/>
+        </x-stellaris.container.show-row>
+
+        <x-stellaris.container.show-row title="Případ">
+            @if ($work->issue && auth()->user()->can('view', $work->issue))
+                <flux:link :href="route('issues.show', $work->issue)" wire:navigate>
+                    Případ #{{ $work->issue_id }}
+                </flux:link>
+            @else
+                —
+            @endif
+        </x-stellaris.container.show-row>
+
+        @foreach ($fields as $label => $value)
+            <x-stellaris.container.show-row :title="$label">
+                {{ $value }}
+            </x-stellaris.container.show-row>
+        @endforeach
+    </x-stellaris.panel.table.col-3-base>
+</x-stellaris.panel.base>

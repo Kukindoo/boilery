@@ -1,50 +1,27 @@
 @php
     use App\Enums\FileTypes;
-    use App\Enums\WorkStatus;
 @endphp
 
 <x-layouts::app :title="__('Zakázky')">
-    <div class="space-y-6">
-        <x-stellaris.container.index-card
-                :heading="__('Zakázka :order_id', ['order_id' => $work->order_id])">
-            <x-slot name="subheading">
-                <x-customers.customer-name :customer="$work->user"/>
-            </x-slot>
-
-            <x-slot name="actions">
-                <x-pdfs.pdf-modal-preview :model="$work"
-                                          :file-type="FileTypes::SERVICE_PROTOCOL->value"/>
-
-                @can('update', $work)
-                    <flux:button size="sm" icon="pencil" :href="route('works.edit', $work)">
-                        Upravit
+    <x-stellaris.panel.container.base>
+        <x-slot:header>
+            <x-stellaris.panel.header.base :heading="__('Zakázka #:work_id', ['work_id' => $work->id])">
+                <x-slot:subheading>
+                    <x-customers.customer-name :customer="$work->user" />
+                </x-slot>
+            </x-stellaris.panel.header.base>
+        </x-slot:header>
+        <x-slot:actionsStrip>
+            <x-stellaris.panel.actions-strip.base>
+                <x-slot:slotLeft>
+                    <flux:button :href="route('works.index')" icon="arrow-left" size="sm">
+                        {{ __('Zpět na Zakázky') }}
                     </flux:button>
-                @endcan
+                </x-slot:slotLeft>
+                @include('works.partials.show-actions')
+            </x-stellaris.panel.actions-strip.base>
+        </x-slot:actionsStrip>
 
-                @if( auth()->user()->can('start', $work) )
-                    <form method="POST" action="{{ route('works.start', $work) }}">
-                        @csrf
-                        <flux:button type="submit" icon="check" size="sm">
-                            {{ $work->status === WorkStatus::NEW ? 'Zahájit zakázku' : 'Restartovat zakázku' }}
-                        </flux:button>
-                    </form>
-                @endif
-
-                @if( auth()->user()->can('end', $work) )
-                    <form method="POST" action="{{ route('works.end', $work) }}">
-                        @csrf
-                        <flux:button type="submit" icon="check" size="sm">
-                            Dokončit zakázku
-                        </flux:button>
-                    </form>
-                    <form method="POST" action="{{ route('works.cancel', $work) }}">
-                        @csrf
-                        <flux:button type="submit" icon="x-mark" size="sm">
-                            Zrušit zakázku
-                        </flux:button>
-                    </form>
-                @endif
-            </x-slot>
 
             <x-works.work-info :work="$work"/>
             <x-works.work-boiler-info :work="$work"/>
@@ -54,6 +31,10 @@
             <x-works.work-transport-info :work="$work"/>
             <x-files.attachment-card :model="$work"/>
 
-        </x-stellaris.container.index-card>
-    </div>
+            <x-pdfs.pdf-modal-preview
+                :model="$work"
+                :file-type="FileTypes::SERVICE_PROTOCOL->value"
+                :show-trigger="false"
+            />
+    </x-stellaris.panel.container.base>
 </x-layouts::app>
