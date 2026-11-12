@@ -1,5 +1,6 @@
 @php
     use App\Enums\FileTypes;
+    use App\Enums\WorkStatus;
 @endphp
 
 <x-layouts::app :title="__('Zakázky')">
@@ -24,7 +25,7 @@
                     <form method="POST" action="{{ route('works.start', $work) }}">
                         @csrf
                         <flux:button type="submit" icon="check" size="sm">
-                            Zahájit zakázku
+                            {{ $work->status === WorkStatus::NEW ? 'Zahájit zakázku' : 'Restartovat zakázku' }}
                         </flux:button>
                     </form>
                 @endif

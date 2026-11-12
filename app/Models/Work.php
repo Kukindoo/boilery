@@ -120,6 +120,7 @@ class Work extends Model implements OwnsFiles
     {
         $this->status = WorkStatus::PROCESSING;
         $this->work_started_at = now();
+        $this->work_completed_at = null;
         $this->save();
     }
 

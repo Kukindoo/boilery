@@ -4,8 +4,10 @@ namespace Tests\Feature\Works;
 
 use App\Enums\Permissions;
 use App\Enums\WorkStatus;
+use App\Livewire\Works\WorkEdit;
 use App\Models\User;
 use App\Models\Work;
+use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Activitylog\Models\Activity;
 use Tests\Feature\FeatureTestCase;
@@ -42,7 +44,8 @@ class WorkLifecycleTest extends FeatureTestCase
         $work = Work::factory()->create([
             'status' => $initial,
             'work_accepted_at' => '2026-11-01',
-            'work_started_at' => $initial === WorkStatus::PROCESSING ? '2026-11-02' : null,
+            'work_started_at' => $initial === WorkStatus::NEW ? null : '2026-11-02',
+            'work_completed_at' => in_array($initial, [WorkStatus::FINISHED, WorkStatus::CANCELLED], true) ? '2026-11-02' : null,
             'notes' => 'Keep these notes',
         ]);
 
@@ -98,6 +101,40 @@ class WorkLifecycleTest extends FeatureTestCase
         $this->assertSame($activityCount, Activity::forSubject($work)->count());
     }
 
+    public function test_restarting_finished_work_clears_completion_and_allows_editing_notes(): void
+    {
+        $this->travelTo(now()->setDate(2026, 11, 3)->setTime(14, 30));
+        $user = User::factory()->create();
+        $user->givePermissionTo([Permissions::WORK_EDIT_ALL, Permissions::WORK_VIEW_ALL]);
+        $work = Work::factory()->create([
+            'status' => WorkStatus::PROCESSING,
+            'work_accepted_at' => '2026-11-01',
+            'work_started_at' => '2026-11-02',
+        ]);
+
+        $this->actingAs($user)->post(route('works.end', $work))
+            ->assertRedirect(route('works.show', $work));
+        $this->assertSame('2026-11-03', $work->refresh()->work_completed_at->toDateString());
+        $this->travel(8)->days();
+
+        $this->post(route('works.start', $work))->assertRedirect(route('works.show', $work));
+
+        $work->refresh();
+        $this->assertSame(WorkStatus::PROCESSING, $work->status);
+        $this->assertSame('2026-11-11', $work->work_started_at->toDateString());
+        $this->assertNull($work->work_completed_at);
+
+        Livewire::test(WorkEdit::class, ['work' => $work])
+            ->set('form.notes', 'Updated after restart')
+            ->call('submit')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('works.show', $work));
+
+        $this->assertSame('Updated after restart', $work->refresh()->notes);
+        $this->assertSame(WorkStatus::PROCESSING, $work->status);
+        $this->assertNull($work->work_completed_at);
+    }
+
     public function test_show_exposes_only_the_available_transition_to_authorized_users(): void
     {
         $user = User::factory()->create();
@@ -109,18 +146,18 @@ class WorkLifecycleTest extends FeatureTestCase
         $work = Work::factory()->create();
 
         $this->actingAs($user)->get(route('works.show', $work))->assertOk()
-            ->assertSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
+            ->assertSee('Zahájit zakázku')->assertDontSee('Restartovat zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
         $this->post(route('works.start', $work));
         $this->get(route('works.show', $work))->assertOk()
             ->assertDontSee('Zahájit zakázku')->assertSee('Dokončit zakázku')->assertSee('Zrušit zakázku');
         $this->post(route('works.end', $work));
         $this->get(route('works.show', $work))->assertOk()
-            ->assertSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
+            ->assertSee('Restartovat zakázku')->assertDontSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
 
         $this->post(route('works.start', $work))->assertRedirect(route('works.show', $work));
         $this->post(route('works.cancel', $work))->assertRedirect(route('works.show', $work));
         $this->get(route('works.show', $work))->assertOk()
-            ->assertSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
+            ->assertSee('Restartovat zakázku')->assertDontSee('Zahájit zakázku')->assertDontSee('Dokončit zakázku')->assertDontSee('Zrušit zakázku');
 
         $user->revokePermissionTo(Permissions::WORK_EDIT_ALL);
         $newWork = Work::factory()->create();
