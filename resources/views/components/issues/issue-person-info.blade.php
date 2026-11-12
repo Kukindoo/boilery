@@ -9,7 +9,6 @@
 @endphp
 
 <x-stellaris.panel.base :header="__('Informace o zakazníkovi')">
-
     <x-stellaris.panel.table.col-3-base>
         <x-stellaris.container.show-row title="Zákazník">
             <x-customers.customer-name :customer="$issue->user" :name="$issue->user->name"/>
@@ -20,5 +19,4 @@
             </x-stellaris.container.show-row>
         @endforeach
     </x-stellaris.panel.table.col-3-base>
-
 </x-stellaris.panel.base>
