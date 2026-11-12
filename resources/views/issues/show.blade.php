@@ -1,49 +1,26 @@
 <x-layouts::app :title="'Případ #' . $issue->id">
-    <div class="space-y-6">
-        <x-stellaris.container.show-card :title="'Případ #' . $issue->id">
-            <x-slot name="action">
-                <flux:button :href="route('issues.index')">
-                    Zpět
-                </flux:button>
-                @can('update', $issue)
-                    <flux:button :href="route('issues.edit', $issue)">
-                        Upravit
+    <x-stellaris.panel.container.base>
+        <x-slot:header>
+            <x-stellaris.panel.header.base :heading="__('Případ #:issue_id', ['issue_id' => $issue->id])">
+                <x-slot:subheading>
+                    <x-customers.customer-name :customer="$issue->user" />
+                </x-slot>
+            </x-stellaris.panel.header.base>
+        </x-slot:header>
+        <x-slot:actionsStrip>
+            <x-stellaris.panel.actions-strip.base>
+                <x-slot:slotLeft>
+                    <flux:button :href="route('issues.index')" icon="arrow-left" size="sm">
+                        {{ __('Zpět na Případy') }}
                     </flux:button>
-                @endcan
-            </x-slot>
-            <x-stellaris.container.show-row title="Status">
-            <flux:badge :color="$issue->status->colour()">
-                {{ $issue->status->label() }}
-            </flux:badge>
-        </x-stellaris.container.show-row>
-        <x-stellaris.container.show-row title="Zákazník">
-                <x-customers.customer-name :customer="$issue->user" />
-            </x-stellaris.container.show-row>
-            <x-stellaris.container.show-row title="E-mail">
-                {{ $issue->user?->email ?: '—' }}
-            </x-stellaris.container.show-row>
-            <x-stellaris.container.show-row title="Telefon">
-                {{ $issue->user?->phone ?: '—' }}
-            </x-stellaris.container.show-row>
-            <x-stellaris.container.show-row title="Adresa">
-                {{ $issue->user?->address ?: '—' }}
-            </x-stellaris.container.show-row>
-            <x-stellaris.container.show-row title="Zahájeno">
-                {{ $issue->started_at?->format('d-m-Y H:i') ?? '—' }}
-            </x-stellaris.container.show-row>
-            <x-stellaris.container.show-row title="Dokončeno">
-                {{ $issue->finished_at?->format('d-m-Y H:i') ?? '—' }}
-            </x-stellaris.container.show-row>
-            <x-stellaris.container.show-row title="Vytvořeno">
-                {{ $issue->created_at?->format('d-m-Y H:i') ?? '—' }}
-            </x-stellaris.container.show-row>
-            <x-stellaris.container.show-row title="Aktualizováno">
-                {{ $issue->updated_at?->format('d-m-Y H:i') ?? '—' }}
-            </x-stellaris.container.show-row>
-        </x-stellaris.container.show-card>
+                </x-slot:slotLeft>
+                @include('issues.partials.show-actions')
+            </x-stellaris.panel.actions-strip.base>
+        </x-slot:actionsStrip>
 
-        <livewire:customers.tables.quotes-table :issue="$issue" heading="Poptávky případu" :paginate="false" />
-
-        <livewire:customers.tables.works-table :issue="$issue" heading="Zakázky případu" :paginate="false" />
-    </div>
+        <x-issues.issue-summary :issue="$issue" />
+        <x-issues.issue-person-info :issue="$issue" />
+        <livewire:customers.tables.quotes-table :issue="$issue" heading="Poptávky případu" />
+        <livewire:customers.tables.works-table :issue="$issue" heading="Zakázky případu" />
+    </x-stellaris.panel.container.base>
 </x-layouts::app>
