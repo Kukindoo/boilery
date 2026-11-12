@@ -1,6 +1,6 @@
 @props(['model'])
 
-<x-stellaris.container.show-card :title="__('Přílohy')">
+<x-stellaris.panel.base :header="__('Přílohy')">
     <x-slot:action>
         <livewire:files.upload-file-button :model="$model" />
     </x-slot:action>
@@ -17,4 +17,4 @@
             </ul>
         @endif
     </div>
-</x-stellaris.container.show-card>
+</x-stellaris.panel.base>

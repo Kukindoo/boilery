@@ -3,27 +3,35 @@
 @endphp
 
 <x-layouts::app :title="__('Poptávky')">
-    <x-stellaris.container.index-card :heading="__('Poptávka :quote_id', ['quote_id' => $quote->id])">
-        <x-slot:subheading>
-            <x-customers.customer-name :customer="$quote->user" :name="$quote->user?->name ?? $quote->first_name . ' ' . $quote->last_name" />
-        </x-slot>
-        <x-slot:actions>
-            <x-pdfs.pdf-modal-preview :model="$quote"
-                                      :pdf-content="$pdfContent"
-                                      :file-type="FileTypes::QUOTE_SUMMARY->value"/>
+    <x-stellaris.panel.container.base>
+        <x-slot:header>
+            <x-stellaris.panel.header.base :heading="__('Poptávka :quote_id', ['quote_id' => $quote->id])">
+                <x-slot:subheading>
+                    <x-customers.customer-name :customer="$quote->user" />
+                </x-slot>
+            </x-stellaris.panel.header.base>
+        </x-slot:header>
 
-        @if( auth()->user()->can('accept', $quote) )
-                    <form method="POST" action="{{ route('quotes.accept', $quote) }}" class="inline-block">
-                        @csrf
-                        <flux:button type="submit" icon="check" size="sm">
-                            Přijmout poptávku
-                        </flux:button>
-                    </form>
-                @endif
-        </x-slot:actions>
+        <x-slot:actionsStrip>
+            <x-stellaris.panel.actions-strip.base>
+                <x-slot:slotLeft>
+                    <flux:button :href="route('quotes.index')" icon="arrow-left" size="sm">
+                        {{ __('Zpět na Poptávky') }}
+                    </flux:button>
+                </x-slot:slotLeft>
+                @include('quotes.partials.show-actions')
+            </x-stellaris.panel.actions-strip.base>
+        </x-slot:actionsStrip>
 
         <x-quotes.quote-person-info :quote="$quote" />
         <x-quotes.quote-boiler-info :quote="$quote" />
         <x-files.attachment-card :model="$quote" />
-    </x-stellaris.container.index-card>
+    </x-stellaris.panel.container.base>
+
+    <x-pdfs.pdf-modal-preview
+            :model="$quote"
+            :pdf-content="$pdfContent"
+            :file-type="FileTypes::QUOTE_SUMMARY->value"
+            :show-trigger="false"
+    />
 </x-layouts::app>

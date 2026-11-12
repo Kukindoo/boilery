@@ -20,7 +20,7 @@
     ];
 @endphp
 
-<x-stellaris.container.show-card :title="__('Informace o poptávce')">
+<x-stellaris.panel.base :header="__('Informace o poptávce')">
     <x-slot:action>
         @can('update', $quote)
             <flux:modal.trigger name="edit-personal-info">
@@ -30,20 +30,23 @@
             </flux:modal.trigger>
         @endcan
     </x-slot:action>
+    <x-stellaris.panel.table.col-3-base>
+        @foreach ($fields as $label => $value)
+            <x-stellaris.container.show-row :title="$label">
+                {{ $value }}
+            </x-stellaris.container.show-row>
+        @endforeach
+    </x-stellaris.panel.table.col-3-base>
 
-    @foreach ($fields as $label => $value)
-        <x-stellaris.container.show-row :title="$label">
-            {{ $value }}
-        </x-stellaris.container.show-row>
-    @endforeach
-</x-stellaris.container.show-card>
 
-<flux:modal name="edit-personal-info" class="w-full max-w-5xl">
-    <div class="space-y-6">
-        <flux:heading size="lg">
-            Upravit informace o poptávce
-        </flux:heading>
+    <flux:modal name="edit-personal-info" class="w-full max-w-5xl">
+        <div class="space-y-6">
+            <flux:heading size="lg">
+                Upravit informace o poptávce
+            </flux:heading>
 
-        <livewire:quotes.quote-edit :quote="$quote"/>
-    </div>
-</flux:modal>
+            <livewire:quotes.quote-edit :quote="$quote"/>
+        </div>
+    </flux:modal>
+</x-stellaris.panel.base>
+
