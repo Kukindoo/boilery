@@ -1,18 +1,3 @@
-@php
-//  {{-- All logs --}}
-//  <livewire:activity-logs.activity-logs-table />
-//
-//  {{-- Logs for a model type --}}
-//  <livewire:activity-logs.activity-logs-table
-//          :subject-type="\App\Models\Work::class"
-//  />
-//
-//  {{-- Logs for one record --}}
-//  <livewire:activity-logs.activity-logs-table
-//          :subject-type="\App\Models\Work::class"
-//          :subject-id="$work->id"
-//  />
-@endphp
 <x-stellaris.livewire.table.wrapper heading="Aktivity">
     <flux:table :paginate="$this->activities">
         <flux:table.columns>
@@ -28,16 +13,19 @@
                 <flux:table.row :key="$activity->id">
                     <flux:table.cell>{{ $activity->created_at?->format('d. m. Y H:i:s') ?? '—' }}</flux:table.cell>
                     <flux:table.cell>@if ($activity->causer instanceof \App\Models\User)
-                            <x-customers.customer-name :customer="$activity->causer" />
+                            <x-customers.customer-name :customer="$activity->causer"/>
                         @else
                             {{ $activity->causer?->getAttribute('name') ?? 'Systém / neznámý' }}
                         @endif</flux:table.cell>
                     <flux:table.cell>{{ $activity->subject_type ? class_basename($activity->subject_type) : '—' }}</flux:table.cell>
-                    <flux:table.cell>{{ $activity->subject_id ?? '—' }}</flux:table.cell>
+                    <flux:table.cell>
+                        <x-activity-logs.model-link :model="$activity->subject" :label="$activity->subject_id ?? '—'"/>
+                    </flux:table.cell>
                     <flux:table.cell>{{ $activity->event ?? '—' }}</flux:table.cell>
                     <flux:table.cell class="min-w-56 max-w-80 whitespace-normal">
                         <flux:modal.trigger :name="'activity-detail-' . $this->getId() . '-' . $activity->id">
-                            <button type="button" class="line-clamp-2 cursor-pointer rounded text-left text-sm leading-6 capitalize wrap-anywhere underline decoration-zinc-300 underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-4 dark:decoration-zinc-600">
+                            <button type="button"
+                                    class="line-clamp-2 cursor-pointer rounded text-left text-sm leading-6 capitalize wrap-anywhere underline decoration-zinc-300 underline-offset-4 hover:decoration-current focus-visible:outline-2 focus-visible:outline-offset-4 dark:decoration-zinc-600">
                                 {{ $activity->description }}
                             </button>
                         </flux:modal.trigger>
@@ -51,16 +39,22 @@
         </flux:table.rows>
     </flux:table>
     @foreach ($this->activities as $activity)
-        <flux:modal :name="'activity-detail-' . $this->getId() . '-' . $activity->id" class="w-full max-w-xl">
+        <flux:modal :name="'activity-detail-' . $this->getId() . '-' . $activity->id"
+                    class="w-[calc(100vw-2rem)] max-w-none">
             <div class="flex flex-col gap-6">
                 <div class="flex flex-col gap-2 pr-8">
                     <flux:heading size="lg">Detail aktivity</flux:heading>
-                    <flux:text>Dne {{ $activity->created_at?->format('d. m. Y H:i:s') }} aktorem @if ($activity->causer instanceof \App\Models\User)
-                            <x-customers.customer-name :customer="$activity->causer" />
+                    <flux:text>Dne {{ $activity->created_at?->format('d. m. Y H:i:s') }}
+                        aktorem @if ($activity->causer instanceof \App\Models\User)
+                            <x-customers.customer-name :customer="$activity->causer"/>
                         @else
                             {{ $activity->causer?->getAttribute('name') ?? 'Systém / neznámý' }}
                         @endif</flux:text>
-                    <flux:text>{{ $activity->subject_type ? class_basename($activity->subject_type) : '—' }} #{{ $activity->subject_id ?? '—' }} · {{ $activity->event ?? '—' }}</flux:text>
+                    <flux:text>
+                        <x-activity-logs.model-link :model="$activity->subject"
+                                                    :label="($activity->subject_type ? class_basename($activity->subject_type) : '—') . ' #' . ($activity->subject_id ?? '—')"/>
+                        · {{ $activity->event ?? '—' }}
+                    </flux:text>
                 </div>
 
                 <x-stellaris.panel.base header="Popis">
@@ -75,10 +69,10 @@
                     <x-stellaris.panel.table.col-3-base>
                         <x-stellaris.container.show-row title="Uživatel">
                             @if ($activity->causer instanceof \App\Models\User)
-                            <x-customers.customer-name :customer="$activity->causer" />
-                        @else
-                            {{ $activity->causer?->getAttribute('name') ?? 'Systém / neznámý' }}
-                        @endif
+                                <x-customers.customer-name :customer="$activity->causer"/>
+                            @else
+                                {{ $activity->causer?->getAttribute('name') ?? 'Systém / neznámý' }}
+                            @endif
                         </x-stellaris.container.show-row>
                         @foreach ([
                             'ID aktivity' => $activity->id,
@@ -92,49 +86,60 @@
                             'Aktualizováno' => $activity->updated_at?->format('d. m. Y H:i:s'),
                         ] as $label => $value)
                             <x-stellaris.container.show-row :title="$label">
-                                {{ $value ?? '—' }}
+                                @if ($label === 'ID záznamu' || $label === 'Model')
+                                    <x-activity-logs.model-link :model="$activity->subject" :label="$value ?? '—'"/>
+                                @elseif ($label === 'ID původce')
+                                    <x-activity-logs.model-link :model="$activity->causer" :label="$value ?? '—'"/>
+                                @else
+                                    {{ $value ?? '—' }}
+                                @endif
                             </x-stellaris.container.show-row>
                         @endforeach
                     </x-stellaris.panel.table.col-3-base>
                 </x-stellaris.panel.base>
 
-                <div class="flex flex-col gap-4">
-                    <flux:heading>Změny</flux:heading>
+                <x-stellaris.panel.base header="Změny">
                     @php
                         $old = $activity->attribute_changes?->get('old', []) ?? [];
                         $new = $activity->attribute_changes?->get('attributes', []) ?? [];
                         $fields = array_unique(array_merge(array_keys($old), array_keys($new)));
                     @endphp
-                    @forelse ($fields as $field)
-                        <x-stellaris.panel.base :header="$field">
-                            <x-stellaris.panel.table.col-3-base>
-                                @foreach (['Před' => $old, 'Po' => $new] as $label => $values)
-                                    <x-stellaris.container.show-row :title="$label">
-                                        @if (! array_key_exists($field, $values))
-                                            —
-                                        @elseif ($values[$field] === null)
-                                            null
-                                        @elseif (is_bool($values[$field]))
-                                            {{ $values[$field] ? 'Ano' : 'Ne' }}
-                                        @elseif (is_array($values[$field]) || is_object($values[$field]))
-                                            <pre class="whitespace-pre-wrap text-sm leading-6 wrap-anywhere">{{ json_encode($values[$field], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
-                                        @else
-                                            <span class="whitespace-pre-wrap">{{ $values[$field] === '' ? 'Prázdný text' : $values[$field] }}</span>
-                                        @endif
-                                    </x-stellaris.container.show-row>
-                                @endforeach
-                            </x-stellaris.panel.table.col-3-base>
-                        </x-stellaris.panel.base>
-                    @empty
-                        <x-stellaris.panel.base header="Změny polí">
-                            <x-stellaris.panel.table.col-3-base>
-                                <x-stellaris.container.show-row title="Změny">
-                                    Žádné zaznamenané změny polí.
-                                </x-stellaris.container.show-row>
-                            </x-stellaris.panel.table.col-3-base>
-                        </x-stellaris.panel.base>
-                    @endforelse
-                </div>
+                    <flux:table class="table-fixed">
+                        <flux:table.columns>
+                            <flux:table.column class="w-1/4">Pole</flux:table.column>
+                            <flux:table.column>Před</flux:table.column>
+                            <flux:table.column>Po</flux:table.column>
+                        </flux:table.columns>
+                        <flux:table.rows>
+                            @forelse ($fields as $field)
+                                <flux:table.row>
+                                    <flux:table.cell
+                                            class="py-2 align-top whitespace-normal font-medium wrap-anywhere">{{ $field }}</flux:table.cell>
+                                    @foreach ([$old, $new] as $values)
+                                        <flux:table.cell class="py-2 align-top whitespace-normal wrap-anywhere">
+                                            @if (! array_key_exists($field, $values))
+                                                <span class="text-zinc-400 dark:text-zinc-500">—</span>
+                                            @elseif ($values[$field] === null)
+                                                <span class="text-zinc-400 dark:text-zinc-500">null</span>
+                                            @elseif (is_bool($values[$field]))
+                                                {{ $values[$field] ? 'Ano' : 'Ne' }}
+                                            @elseif (is_array($values[$field]) || is_object($values[$field]))
+                                                <pre class="whitespace-pre-wrap text-xs leading-5 wrap-anywhere">{{ json_encode($values[$field], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
+                                            @else
+                                                <span class="whitespace-pre-wrap">{{ $values[$field] === '' ? 'Prázdný text' : $values[$field] }}</span>
+                                            @endif
+                                        </flux:table.cell>
+                                    @endforeach
+                                </flux:table.row>
+                            @empty
+                                <flux:table.row>
+                                    <flux:table.cell colspan="3" class="py-2">Žádné zaznamenané změny polí.
+                                    </flux:table.cell>
+                                </flux:table.row>
+                            @endforelse
+                        </flux:table.rows>
+                    </flux:table>
+                </x-stellaris.panel.base>
 
                 <x-stellaris.panel.base header="Další vlastnosti">
                     <x-stellaris.panel.table.col-3-base>

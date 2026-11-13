@@ -176,6 +176,34 @@ class ActivityLogsTableTest extends FeatureTestCase
         $component->set('causer', null);
     }
 
+    public function test_links_subject_and_causer_ids_only_with_view_permission(): void
+    {
+        $causer = User::factory()->create();
+        $work = Work::factory()->forCustomer($causer)->create();
+        Activity::query()->create([
+            'description' => 'Linked record',
+            'subject_type' => $work->getMorphClass(), 'subject_id' => $work->id,
+            'causer_type' => $causer->getMorphClass(), 'causer_id' => $causer->id,
+        ]);
+        $viewer = User::factory()->create();
+        $viewer->givePermissionTo(Permissions::ACTIVITY_LOG_VIEW_ALL->label());
+
+        Livewire::actingAs($viewer)->test(ActivityLogsTable::class)
+            ->assertDontSee('href="' . route('works.show', $work) . '"', false)
+            ->assertDontSee('href="' . route('customers.show', $causer) . '"', false);
+
+        $viewer->givePermissionTo([Permissions::WORK_VIEW_ALL->label(), Permissions::USER_VIEW_ALL->label()]);
+        Livewire::actingAs($viewer)->test(ActivityLogsTable::class)
+            ->assertSee('href="' . route('works.show', $work) . '"', false)
+            ->assertSee('>' . $work->id . '</a>', false)
+            ->assertSee('>' . $causer->id . '</a>', false);
+
+        $work->delete();
+        Livewire::actingAs($viewer)->test(ActivityLogsTable::class)
+            ->assertSee('Linked record')
+            ->assertDontSee('href="' . route('works.show', $work) . '"', false);
+    }
+
     private function viewer(): User
     {
         return User::factory()->create()->assignRole(Roles::ADMIN->value);

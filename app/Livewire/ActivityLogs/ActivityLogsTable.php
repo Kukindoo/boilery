@@ -51,7 +51,7 @@ class ActivityLogsTable extends Component
         Gate::authorize('viewAny', Activity::class);
 
         return Activity::query()
-            ->with('causer')
+            ->with(['causer', 'subject'])
             ->when($this->causer !== null, fn ($query) => $query->causedBy($this->causer))
             ->when($this->subjectType !== null, fn ($query) => $query->where('subject_type', $this->subjectType))
             ->when($this->subjectId !== null, fn ($query) => $query->where('subject_id', $this->subjectId))
