@@ -5,6 +5,7 @@ namespace Tests\Feature\ActivityLogs;
 use App\Enums\Permissions;
 use App\Enums\Roles;
 use App\Livewire\ActivityLogs\ActivityLogsTable;
+use App\Models\File;
 use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
@@ -212,6 +213,74 @@ class ActivityLogsTableTest extends FeatureTestCase
         Livewire::actingAs($user)->test(ActivityLogsTable::class)->assertOk();
         $this->actingAs($user)->get(route('activity-logs.index'))
             ->assertOk()->assertSeeLivewire(ActivityLogsTable::class);
+    }
+
+    public function test_searches_activity_text_metadata_ids_and_causer(): void
+    {
+        $causer = User::factory()->create(['name' => 'Searchable actor', 'email' => 'searchable@example.test']);
+        $entry = Activity::query()->create([
+            'id' => 87654321, 'description' => 'Searchable upload', 'log_name' => 'files', 'event' => 'action_completed',
+            'subject_type' => Work::class, 'subject_id' => 987654,
+            'causer_type' => $causer->getMorphClass(), 'causer_id' => $causer->id,
+            'properties' => ['filename' => 'receipt-special.pdf'],
+            'attribute_changes' => ['attributes' => ['status' => 'special-status']],
+        ]);
+        Activity::query()->create(['description' => 'Unrelated entry']);
+        $component = Livewire::actingAs($this->viewer())->test(ActivityLogsTable::class)
+            ->set('selectedModel', Work::class);
+
+        foreach (['Searchable upload', 'Searchable actor', 'searchable@example.test', '987654', 'receipt-special.pdf', 'special-status', 'action_completed'] as $search) {
+            $component->set('search', $search);
+            $this->assertSame([$entry->id], $component->get('activities')->modelKeys());
+        }
+        $component->set('search', (string) $entry->id);
+        $this->assertCount(0, $component->get('activities'));
+        $component->set('search', 'no matching activity');
+        $this->assertCount(0, $component->get('activities'));
+    }
+
+    public function test_combines_select_filters_and_resets_pagination(): void
+    {
+        $actor = User::factory()->create();
+        $other = User::factory()->create();
+        foreach ([[$actor, Work::class, 'updated'], [$other, Work::class, 'updated'], [$actor, Quote::class, 'updated'], [$actor, Work::class, 'created']] as [$user, $model, $event]) {
+            $entry = Activity::query()->create(['description' => 'Filtered activity', 'causer_type' => $user->getMorphClass(), 'causer_id' => $user->id, 'subject_type' => $model, 'subject_id' => 99999, 'event' => $event]);
+            $expectedId ??= $entry->id;
+        }
+        $component = Livewire::actingAs($this->viewer())->test(ActivityLogsTable::class);
+        foreach (['selectedUser' => (string) $actor->id, 'selectedModel' => Work::class, 'selectedEvent' => 'updated'] as $filter => $value) {
+            $component->call('setPage', 2, 'activityPage')->set($filter, $value)->assertSet('paginators.activityPage', 1);
+        }
+        $this->assertSame([$expectedId], $component->get('activities')->modelKeys());
+    }
+
+    public function test_clearing_filters_preserves_subject_and_causer_scope(): void
+    {
+        $actor = User::factory()->create();
+        $entry = Activity::query()->create(['description' => 'In scope', 'subject_type' => Work::class, 'subject_id' => 99999, 'causer_type' => $actor->getMorphClass(), 'causer_id' => $actor->id, 'event' => 'updated']);
+        Activity::query()->create(['description' => 'Out of scope', 'subject_type' => Quote::class, 'subject_id' => 99999, 'event' => 'created']);
+        $component = Livewire::actingAs($this->viewer())->test(ActivityLogsTable::class, ['subjectType' => Work::class, 'subjectId' => 99999, 'causer' => $actor]);
+        $this->assertSame([Work::class], $component->get('filterModels')->all());
+        $this->assertSame(['updated'], $component->get('filterEvents')->all());
+        $this->assertSame([$actor->id], $component->get('filterUsers')->modelKeys());
+        $component->set('search', 'missing')->set('selectedUser', '999999')->set('selectedModel', Quote::class)->set('selectedEvent', 'created')
+            ->call('setPage', 2, 'activityPage')->call('clearFilters')
+            ->assertSet('search', '')->assertSet('selectedUser', null)->assertSet('selectedModel', null)->assertSet('selectedEvent', null)
+            ->assertSet('paginators.activityPage', 1);
+        $this->assertSame([$entry->id], $component->get('activities')->modelKeys());
+    }
+
+    public function test_numeric_search_matches_only_exact_subject_id_with_selected_model(): void
+    {
+        $entry = Activity::query()->create(['description' => 'Exact file', 'subject_type' => File::class, 'subject_id' => 100]);
+        Activity::query()->create(['description' => 'Partial ID', 'subject_type' => File::class, 'subject_id' => 1000]);
+        Activity::query()->create(['description' => 'Contains 100', 'subject_type' => File::class, 'subject_id' => 200, 'properties' => ['file_id' => 100], 'causer_type' => User::class, 'causer_id' => 100]);
+        Activity::query()->create(['description' => 'Other model', 'subject_type' => Work::class, 'subject_id' => 100]);
+
+        $component = Livewire::actingAs($this->viewer())->test(ActivityLogsTable::class)
+            ->set('selectedModel', File::class)->set('search', ' 100 ');
+
+        $this->assertSame([$entry->id], $component->get('activities')->modelKeys());
     }
 
     private function viewer(): User

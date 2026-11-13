@@ -1,4 +1,28 @@
 <x-stellaris.livewire.table.wrapper heading="Aktivity">
+    <x-slot name="filters">
+        <div class="flex flex-col gap-4">
+            <flux:input wire:model.live.debounce.300ms="search" type="search" label="Hledat aktivity"
+                placeholder="Popis, uživatel, model, ID nebo další údaje…" clearable />
+            <div class="grid grid-cols-1 items-end gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
+                <flux:select wire:model.live="selectedUser" variant="listbox" searchable clearable label="Uživatel" placeholder="Všichni uživatelé">
+                    @foreach ($this->filterUsers as $user)
+                        <flux:select.option :value="(string) $user->id" :keywords="$user->email">{{ $user->name }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <flux:select wire:model.live="selectedModel" variant="listbox" searchable clearable label="Model" placeholder="Všechny modely">
+                    @foreach ($this->filterModels as $model)
+                        <flux:select.option :value="$model" :keywords="$model">{{ class_basename($model) }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <flux:select wire:model.live="selectedEvent" variant="listbox" searchable clearable label="Událost" placeholder="Všechny události">
+                    @foreach ($this->filterEvents as $event)
+                        <flux:select.option :value="$event">{{ $event }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <flux:button wire:click="clearFilters">Vymazat filtry</flux:button>
+            </div>
+        </div>
+    </x-slot>
     <flux:table :paginate="$this->activities">
         <flux:table.columns>
             <flux:table.column>Datum</flux:table.column>
