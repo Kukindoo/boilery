@@ -85,11 +85,7 @@ readonly class UploadFile
                 $storedFile->label = $this->generateFileLabel->handle($customer, $fileType, $storedFile);
                 $issue->files()->save($storedFile);
 
-                $this->logActionCompleted('files', $storedFile, 'File uploaded', [
-                    'issue_id' => $issue->id,
-                ]);
-
-                $this->logActionCompleted($lockedParent->getTable(), $lockedParent, 'File uploaded to ' . mb_strtolower(class_basename($lockedParent)), [
+                $this->logActionCompleted('issues', $issue, 'File uploaded', [
                     'file_id' => $storedFile->id,
                     'original_name' => $storedFile->original_name,
                     'file_type' => $fileType->value,

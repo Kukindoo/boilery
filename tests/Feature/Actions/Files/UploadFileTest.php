@@ -32,7 +32,7 @@ class UploadFileTest extends FeatureTestCase
     }
 
     #[DataProvider('uploadOrigins')]
-    public function test_upload_is_logged_against_its_origin_and_file(string $origin): void
+    public function test_upload_is_logged_only_against_the_issue(string $origin): void
     {
         Storage::fake();
         $actor = User::factory()->admin()->create();
@@ -45,23 +45,25 @@ class UploadFileTest extends FeatureTestCase
 
         $file = app(UploadFile::class)->handle(UploadedFile::fake()->image('receipt.jpg'), $parent, FileTypes::RECEIPT);
 
-        $activity = Activity::forSubject($parent)->where('description', 'File uploaded to ' . $origin)->sole();
+        $issue = $parent instanceof Issue ? $parent : $parent->issue;
+        $activity = Activity::forSubject($issue)->where('description', 'File uploaded')->sole();
         $this->assertTrue($activity->causer->is($actor));
         $this->assertSame('action_completed', $activity->event);
         $this->assertSame($file->id, $activity->getProperty('file_id'));
         $this->assertSame('receipt.jpg', $activity->getProperty('original_name'));
         $this->assertSame(FileTypes::RECEIPT->value, $activity->getProperty('file_type'));
-        $this->assertSame(1, Activity::forSubject($file)->where('description', 'File uploaded')->count());
+        $this->assertSame(1, Activity::query()->where('event', 'action_completed')->where('properties->action', UploadFile::class)->count());
+        $this->assertSame('issues', $activity->log_name);
     }
 
-    public function test_quote_activity_failure_rolls_back_upload_and_file_activity(): void
+    public function test_issue_activity_failure_rolls_back_upload(): void
     {
         Storage::fake();
         $this->actingAs(User::factory()->admin()->create());
         $quote = Quote::factory()->forCustomer(User::factory())->create();
         Activity::creating(function (Activity $activity): void {
-            if ($activity->description === 'File uploaded to quote') {
-                throw new RuntimeException('Cannot log quote upload');
+            if ($activity->description === 'File uploaded') {
+                throw new RuntimeException('Cannot log issue upload');
             }
         });
 
@@ -69,7 +71,7 @@ class UploadFileTest extends FeatureTestCase
             app(UploadFile::class)->handle(UploadedFile::fake()->image('receipt.jpg'), $quote, FileTypes::RECEIPT);
             $this->fail('Logging failure must propagate.');
         } catch (RuntimeException $exception) {
-            $this->assertSame('Cannot log quote upload', $exception->getMessage());
+            $this->assertSame('Cannot log issue upload', $exception->getMessage());
             $this->assertDatabaseCount('files', 0);
             $this->assertSame(0, Activity::query()->where('event', 'action_completed')->where('properties->action', UploadFile::class)->count());
             Storage::disk()->assertEmpty();

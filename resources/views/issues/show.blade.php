@@ -22,5 +22,11 @@
         <x-issues.issue-person-info :issue="$issue" />
         <livewire:customers.tables.quotes-table :issue="$issue" heading="Poptávky případu" />
         <livewire:customers.tables.works-table :issue="$issue" heading="Zakázky případu" />
+        @can('viewAny', \Spatie\Activitylog\Models\Activity::class)
+            <livewire:activity-logs.activity-logs-table
+                :subject-type="\App\Models\Issue::class"
+                :subject-id="$issue->id"
+            />
+        @endcan
     </x-stellaris.panel.container.base>
 </x-layouts::app>

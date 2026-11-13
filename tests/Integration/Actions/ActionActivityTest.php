@@ -46,7 +46,7 @@ class ActionActivityTest extends IntegrationTestCase
         $this->assertSame(UpdateQuote::class, $quoteActivity->getProperty('action'));
     }
 
-    public function test_file_actions_log_to_files_including_the_deleted_subject(): void
+    public function test_upload_logs_to_issue_and_deletion_logs_to_deleted_file(): void
     {
         Storage::fake('local');
         config(['filesystems.default' => 'local']);
@@ -58,8 +58,12 @@ class ActionActivityTest extends IntegrationTestCase
         app(DeleteFile::class)->handle($file);
 
         $entries = Activity::inLog('files')->where('event', 'action_completed')->orderBy('id')->get();
-        $this->assertCount(2, $entries);
-        $this->assertSame([UploadFile::class, DeleteFile::class], $entries->map(fn (Activity $activity) => $activity->getProperty('action'))->all());
+        $uploadEntry = Activity::forSubject($quote->issue)->where('description', 'File uploaded')->sole();
+        $this->assertTrue($uploadEntry->causer->is($actor));
+        $this->assertSame(UploadFile::class, $uploadEntry->getProperty('action'));
+        $this->assertSame($file->id, $uploadEntry->getProperty('file_id'));
+        $this->assertCount(1, $entries);
+        $this->assertSame([DeleteFile::class], $entries->map(fn (Activity $activity) => $activity->getProperty('action'))->all());
         foreach ($entries as $entry) {
             $this->assertSame($file->id, $entry->subject_id);
             $this->assertSame($file->getMorphClass(), $entry->subject_type);
