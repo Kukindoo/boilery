@@ -17,6 +17,6 @@
                 </div>
             </div>
         </div>
-        @fluxScripts
+        @include('partials.footer')
     </body>
 </html>
