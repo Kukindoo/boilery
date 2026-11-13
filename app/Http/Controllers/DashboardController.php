@@ -28,7 +28,9 @@ class DashboardController extends Controller
                 $canView = $request->user()->can('viewAny', $model);
                 /** @var Model $model */
                 $counts = $canView
-                    ? $model::query()->selectRaw('status, COUNT(*) as total')->groupBy('status')->toBase()->pluck('total', 'status')
+                    ? $model::query()->selectRaw('status, COUNT(*) as total')->groupBy('status')
+                        ->toBase()
+                        ->pluck('total', 'status')
                     : collect();
                 $statistics[$key] = [
                     'heading' => $heading,
