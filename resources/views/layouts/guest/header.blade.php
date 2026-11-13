@@ -50,6 +50,6 @@
 
 {{ $slot }}
 
-@fluxScripts
+@include('partials.footer')
 </body>
 </html>
