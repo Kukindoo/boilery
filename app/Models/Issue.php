@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * @property int $id
@@ -26,13 +28,21 @@ use Illuminate\Support\Carbon;
 class Issue extends Model implements OwnsFiles
 {
     /** @use HasFactory<IssueFactory> */
-    use HasFactory, HasFiles, SoftDeletes;
+    use HasFactory, HasFiles, LogsActivity, SoftDeletes;
 
     protected $attributes = [
         'status' => IssueStatus::OPEN->value,
     ];
 
     protected $fillable = ['user_id', 'status', 'started_at', 'finished_at'];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('issues')
+            ->logAll()
+            ->logOnlyDirty();
+    }
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
