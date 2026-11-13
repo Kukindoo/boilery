@@ -148,6 +148,8 @@ enum Permissions: int
 
     case ISSUE_FORCE_DELETE_ALL = 82;
 
+    case ACTIVITY_LOG_VIEW_ALL = 83;
+
     public static function fromLabel(string $label): ?self
     {
         foreach (self::cases() as $permission) {
@@ -171,6 +173,7 @@ enum Permissions: int
     public function modelType(): string
     {
         return match (true) {
+            str_starts_with($this->name, 'ACTIVITY_LOG') => 'activity logs',
             str_starts_with($this->name, 'ASSEMBLY_ACTION') => 'assembly actions',
             str_starts_with($this->name, 'SPARE_PART') => 'spare parts',
             str_starts_with($this->name, 'USER') => 'users',
@@ -208,6 +211,8 @@ enum Permissions: int
             self::ISSUE_RESTORE_ALL => 'Restore all issues',
             self::ISSUE_RESTORE_OWN => 'Restore own issues',
             self::ISSUE_FORCE_DELETE_ALL => 'Force delete all issues',
+
+            self::ACTIVITY_LOG_VIEW_ALL => 'View all activity logs',
 
             self::ROLE_VIEW_ALL => 'View all roles',
             self::ROLE_EDIT_ALL => 'Edit all roles',

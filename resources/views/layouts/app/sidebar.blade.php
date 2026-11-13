@@ -64,6 +64,12 @@
 
     <flux:spacer/>
     <flux:navlist.group :heading="__('Modely')" class="grid">
+        @can('viewAny', \Spatie\Activitylog\Models\Activity::class)
+            <flux:navlist.item icon="clipboard-document-list" :href="route('activity-logs.index')"
+                               :current="request()->routeIs('activity-logs.*')" wire:navigate>
+                Aktivity
+            </flux:navlist.item>
+        @endcan
         @can('viewAny', SparePart::class)
             <flux:navlist.item icon="clipboard-document-list" :href="route('spare-parts.index')"
                                :current="request()->routeIs('spare-parts.*')" wire:navigate>

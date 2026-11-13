@@ -18,6 +18,8 @@ Route::get('dashboard', DashboardController::class)
     ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('activity-logs', [App\Http\Controllers\ActivityLogs\ActivityLogController::class, 'index'])->name('activity-logs.index');
+
     Route::get('tests', TestsController::class)->name('tests.index');
 
     Route::redirect('settings', 'settings/profile');

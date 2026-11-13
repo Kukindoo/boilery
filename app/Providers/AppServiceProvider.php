@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Constants\RateLimiterNames;
+use App\Policies\ActivityLogPolicy;
 use App\Policies\PermissionPolicy;
 use App\Policies\RolePolicy;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -58,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
 
     private function registerPolicies(): void
     {
+        Gate::policy(Activity::class, ActivityLogPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(Permission::class, PermissionPolicy::class);
     }

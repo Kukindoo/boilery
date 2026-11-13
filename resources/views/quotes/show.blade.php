@@ -26,6 +26,10 @@
         <x-quotes.quote-person-info :quote="$quote" />
         <x-quotes.quote-boiler-info :quote="$quote" />
         <x-files.attachment-card :model="$quote" />
+        <livewire:activity-logs.activity-logs-table
+                :subject-type="\App\Models\Quote::class"
+                :subject-id="$quote->id"
+        />
     </x-stellaris.panel.container.base>
 
     <x-pdfs.pdf-modal-preview
