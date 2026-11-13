@@ -4,36 +4,16 @@
 
 <x-layouts::app :title="__('Přehled')">
     <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
-        @if(auth()->user()->can(App\Enums\Permissions::QUOTE_VIEW_OWN->label()) || auth()->user()->can('viewAny', App\Models\Quote::class))
-            <livewire:quotes.customer-quotes-table />
+        @if(auth()->user()->hasExactRoles(Roles::CUSTOMER->label()))
+            <livewire:quotes.customer-quotes-table/>
         @endif
+
         @if(auth()->user()->hasAnyRole(Roles::ADMIN->value, Roles::STAKEHOLDER->value))
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-primary-border dark:border-primary-dark-border-strong">
-                @if(auth()->user()->hasAnyRole(Roles::ADMIN->value, Roles::STAKEHOLDER->value))
-                    <form action="{{ route('cold-tests.email') }}" method="POST" class="absolute inset-0 z-10">
-                        @csrf
-                        <flux:button type="submit" class="absolute inset-0 z-10 w-full h-full">
-                            Send Cold Email Test
-                        </flux:button>
-                    </form>
-                @else
-                    <x-placeholder-pattern
-                            class="absolute inset-0 size-full stroke-heading-text/20 dark:stroke-secondary-dark-text/20"/>
-                @endif
+            <div class="grid gap-4 md:grid-cols-3">
+                <x-stellaris.statistics.base :statistic="$statistics['issues']" />
+                <x-stellaris.statistics.base :statistic="$statistics['quotes']" />
+                <x-stellaris.statistics.base :statistic="$statistics['works']" />
             </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-primary-border dark:border-primary-dark-border-strong">
-                <x-placeholder-pattern
-                        class="absolute inset-0 size-full stroke-heading-text/20 dark:stroke-secondary-dark-text/20"/>
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-primary-border dark:border-primary-dark-border-strong">
-                <x-placeholder-pattern
-                        class="absolute inset-0 size-full stroke-heading-text/20 dark:stroke-secondary-dark-text/20"/>
-            </div>
-        </div>
-        <div class="relative h-full flex-1 overflow-hidden rounded-xl border border-primary-border dark:border-primary-dark-border-strong">
-            <x-placeholder-pattern class="absolute inset-0 size-full stroke-heading-text/20 dark:stroke-secondary-dark-text/20"/>
-        </div>
         @endif
     </div>
 </x-layouts::app>
