@@ -64,6 +64,23 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         //
     })
-    ->withExceptions(function (Exceptions $exceptions) {
-        //
+    ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->report(function (Throwable $exception): void {
+            try {
+                activity('exceptions')
+                    ->event('exception_reported')
+                    ->withProperties([
+                        'exception' => $exception::class,
+                        'code' => $exception->getCode(),
+                        'file' => $exception->getFile(),
+                        'line' => $exception->getLine(),
+                    ])
+                    ->log($exception->getMessage());
+            } catch (Throwable $loggingException) {
+                // Do not recursively report a failed activity write or replace the original exception.
+                logger()->error('Could not write exception to activity log.', [
+                    'exception' => $loggingException,
+                ]);
+            }
+        });
     })->create();
