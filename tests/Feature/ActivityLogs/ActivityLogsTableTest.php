@@ -204,6 +204,16 @@ class ActivityLogsTableTest extends FeatureTestCase
             ->assertDontSee('href="' . route('works.show', $work) . '"', false);
     }
 
+    public function test_non_admin_can_access_activity_with_permission(): void
+    {
+        $user = User::factory()->create();
+        $user->givePermissionTo(Permissions::ACTIVITY_LOG_VIEW_ALL->label());
+
+        Livewire::actingAs($user)->test(ActivityLogsTable::class)->assertOk();
+        $this->actingAs($user)->get(route('activity-logs.index'))
+            ->assertOk()->assertSeeLivewire(ActivityLogsTable::class);
+    }
+
     private function viewer(): User
     {
         return User::factory()->create()->assignRole(Roles::ADMIN->value);
