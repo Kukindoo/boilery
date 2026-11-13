@@ -127,6 +127,55 @@ class ActivityLogsTableTest extends FeatureTestCase
         $component->set('subjectId', 2);
     }
 
+    public function test_filters_by_causer_and_excludes_logs_where_user_is_only_subject(): void
+    {
+        $causer = User::factory()->create();
+        $other = User::factory()->create();
+        Activity::query()->create(['description' => 'Performed by selected user', 'causer_type' => $causer->getMorphClass(), 'causer_id' => $causer->id]);
+        Activity::query()->create(['description' => 'About selected user', 'subject_type' => $causer->getMorphClass(), 'subject_id' => $causer->id, 'causer_type' => $other->getMorphClass(), 'causer_id' => $other->id]);
+        Activity::query()->create(['description' => 'Different causer type', 'causer_type' => Work::class, 'causer_id' => $causer->id]);
+        Activity::query()->create(['description' => 'System activity']);
+
+        Livewire::actingAs($this->viewer())->test(ActivityLogsTable::class, ['causer' => $causer])
+            ->assertSee('Performed by selected user')->assertDontSee('About selected user')
+            ->assertDontSee('Different causer type')->assertDontSee('System activity');
+    }
+
+    public function test_links_users_only_when_viewer_can_view_them(): void
+    {
+        $causer = User::factory()->create();
+        Activity::query()->create(['description' => 'User action', 'causer_type' => $causer->getMorphClass(), 'causer_id' => $causer->id]);
+        $viewer = User::factory()->create();
+        $viewer->givePermissionTo(Permissions::ACTIVITY_LOG_VIEW_ALL->label());
+
+        Livewire::actingAs($viewer)->test(ActivityLogsTable::class)
+            ->assertSee($causer->name)->assertDontSee('href="' . route('customers.show', $causer) . '"', false);
+        $viewer->givePermissionTo(Permissions::USER_VIEW_ALL->label());
+        Livewire::actingAs($viewer)->test(ActivityLogsTable::class)
+            ->assertSee('href="' . route('customers.show', $causer) . '"', false);
+    }
+
+    public function test_customer_page_displays_only_activities_caused_by_that_customer(): void
+    {
+        $viewer = $this->viewer();
+        $viewer->givePermissionTo([Permissions::USER_VIEW_ALL->label(), Permissions::ISSUE_VIEW_ALL->label()]);
+        $customer = User::factory()->create();
+        Activity::query()->create(['description' => 'Customer performed action', 'causer_type' => $customer->getMorphClass(), 'causer_id' => $customer->id]);
+        Activity::query()->create(['description' => 'Unrelated activity']);
+
+        $this->actingAs($viewer)->get(route('customers.show', $customer))
+            ->assertOk()->assertSee('Customer performed action')->assertDontSee('Unrelated activity');
+    }
+
+    public function test_causer_cannot_be_changed_by_the_client(): void
+    {
+        $causer = User::factory()->create();
+        $component = Livewire::actingAs($this->viewer())->test(ActivityLogsTable::class, ['causer' => $causer]);
+
+        $this->expectException(CannotUpdateLockedPropertyException::class);
+        $component->set('causer', null);
+    }
+
     private function viewer(): User
     {
         return User::factory()->create()->assignRole(Roles::ADMIN->value);

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\ActivityLogs;
 
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -23,7 +24,10 @@ class ActivityLogsTable extends Component
     #[Locked]
     public int|string|null $subjectId = null;
 
-    public function mount(?string $subjectType = null, int|string|null $subjectId = null): void
+    #[Locked]
+    public ?User $causer = null;
+
+    public function mount(?string $subjectType = null, int|string|null $subjectId = null, ?User $causer = null): void
     {
         Gate::authorize('viewAny', Activity::class);
 
@@ -37,6 +41,7 @@ class ActivityLogsTable extends Component
 
         $this->subjectType = $subjectType;
         $this->subjectId = $subjectId;
+        $this->causer = $causer;
     }
 
     /** @return LengthAwarePaginator<int, Activity> */
@@ -47,6 +52,7 @@ class ActivityLogsTable extends Component
 
         return Activity::query()
             ->with('causer')
+            ->when($this->causer !== null, fn ($query) => $query->causedBy($this->causer))
             ->when($this->subjectType !== null, fn ($query) => $query->where('subject_type', $this->subjectType))
             ->when($this->subjectId !== null, fn ($query) => $query->where('subject_id', $this->subjectId))
             ->latest('created_at')

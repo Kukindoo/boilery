@@ -11,5 +11,9 @@
         <livewire:customers.user-roles :user="$customer" />
 
         <livewire:issues.issues-table :customer="$customer" />
+
+        @can('viewAny', \Spatie\Activitylog\Models\Activity::class)
+            <livewire:activity-logs.activity-logs-table :causer="$customer" />
+        @endcan
     </div>
 </x-layouts::app>

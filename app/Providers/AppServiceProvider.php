@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Activitylog\Contracts\Activity as ActivityContract;
 use Spatie\Activitylog\Facades\Activity;
+use Spatie\Activitylog\Models\Activity as ActivityModel;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -59,7 +60,7 @@ class AppServiceProvider extends ServiceProvider
 
     private function registerPolicies(): void
     {
-        Gate::policy(Activity::class, ActivityLogPolicy::class);
+        Gate::policy(ActivityModel::class, ActivityLogPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(Permission::class, PermissionPolicy::class);
     }
