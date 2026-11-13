@@ -7,6 +7,7 @@ use App\Enums\FileTypes;
 use App\Enums\Permissions;
 use App\Models\File;
 use App\Models\FileAttachment;
+use App\Models\Issue;
 use App\Models\Quote;
 use App\Models\User;
 use App\Models\Work;
@@ -15,6 +16,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
+use Spatie\Activitylog\Models\Activity;
 use Tests\Feature\FeatureTestCase;
 
 class UploadFileTest extends FeatureTestCase
@@ -22,6 +24,56 @@ class UploadFileTest extends FeatureTestCase
     public static function origins(): array
     {
         return ['quote' => ['quote'], 'work' => ['work']];
+    }
+
+    public static function uploadOrigins(): array
+    {
+        return ['quote' => ['quote'], 'work' => ['work'], 'issue' => ['issue']];
+    }
+
+    #[DataProvider('uploadOrigins')]
+    public function test_upload_is_logged_against_its_origin_and_file(string $origin): void
+    {
+        Storage::fake();
+        $actor = User::factory()->admin()->create();
+        $this->actingAs($actor);
+        $parent = match ($origin) {
+            'quote' => Quote::factory()->forCustomer(User::factory())->create(),
+            'work' => Work::factory()->forCustomer(User::factory())->create(),
+            'issue' => Issue::factory()->for(User::factory())->create(),
+        };
+
+        $file = app(UploadFile::class)->handle(UploadedFile::fake()->image('receipt.jpg'), $parent, FileTypes::RECEIPT);
+
+        $activity = Activity::forSubject($parent)->where('description', 'File uploaded to ' . $origin)->sole();
+        $this->assertTrue($activity->causer->is($actor));
+        $this->assertSame('action_completed', $activity->event);
+        $this->assertSame($file->id, $activity->getProperty('file_id'));
+        $this->assertSame('receipt.jpg', $activity->getProperty('original_name'));
+        $this->assertSame(FileTypes::RECEIPT->value, $activity->getProperty('file_type'));
+        $this->assertSame(1, Activity::forSubject($file)->where('description', 'File uploaded')->count());
+    }
+
+    public function test_quote_activity_failure_rolls_back_upload_and_file_activity(): void
+    {
+        Storage::fake();
+        $this->actingAs(User::factory()->admin()->create());
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
+        Activity::creating(function (Activity $activity): void {
+            if ($activity->description === 'File uploaded to quote') {
+                throw new RuntimeException('Cannot log quote upload');
+            }
+        });
+
+        try {
+            app(UploadFile::class)->handle(UploadedFile::fake()->image('receipt.jpg'), $quote, FileTypes::RECEIPT);
+            $this->fail('Logging failure must propagate.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('Cannot log quote upload', $exception->getMessage());
+            $this->assertDatabaseCount('files', 0);
+            $this->assertSame(0, Activity::query()->where('event', 'action_completed')->where('properties->action', UploadFile::class)->count());
+            Storage::disk()->assertEmpty();
+        }
     }
 
     public function test_label_is_generated_before_the_file_is_persisted(): void

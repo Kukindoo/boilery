@@ -11,10 +11,24 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Spatie\Activitylog\Models\Activity;
 use Tests\Feature\FeatureTestCase;
 
 class UploadQuoteFileTest extends FeatureTestCase
 {
+    public function test_public_upload_logs_the_quote_and_file_without_a_causer(): void
+    {
+        Storage::fake();
+        $quote = Quote::factory()->forCustomer(User::factory())->create();
+
+        $file = app(UploadQuoteFile::class)->handle(UploadedFile::fake()->create('receipt.pdf', 10, 'application/pdf'), $quote, FileTypes::RECEIPT);
+
+        $entry = Activity::forSubject($quote)->where('description', 'File uploaded to quote')->sole();
+        $this->assertNull($entry->causer_id);
+        $this->assertSame($file->id, $entry->getProperty('file_id'));
+        $this->assertSame(1, Activity::forSubject($file)->where('description', 'File uploaded')->count());
+    }
+
     public function test_pivot_creation_failure_removes_file_record_and_stored_bytes(): void
     {
         Storage::fake();

@@ -52,6 +52,7 @@ class CustomerQuoteRequestPage extends Component
 
             activity('quotes')
                 ->performedOn($quote)
+                ->event('quote_requested')
                 ->log('Quote requested');
 
             Notification::route('mail', $quote->email)
