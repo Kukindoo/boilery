@@ -283,6 +283,23 @@ class ActivityLogsTableTest extends FeatureTestCase
         $this->assertSame([$entry->id], $component->get('activities')->modelKeys());
     }
 
+    public function test_work_page_activity_is_scoped_and_requires_activity_permission(): void
+    {
+        $work = Work::factory()->create();
+        $other = Work::factory()->create();
+        Activity::query()->create(['description' => 'This work activity', 'subject_type' => $work->getMorphClass(), 'subject_id' => $work->id]);
+        Activity::query()->create(['description' => 'Other work activity', 'subject_type' => $other->getMorphClass(), 'subject_id' => $other->id]);
+        $viewer = User::factory()->create();
+        $viewer->givePermissionTo(Permissions::WORK_VIEW_ALL->label());
+
+        $this->actingAs($viewer)->get(route('works.show', $work))->assertOk()
+            ->assertDontSeeLivewire(ActivityLogsTable::class)->assertDontSee('This work activity');
+        $viewer->givePermissionTo(Permissions::ACTIVITY_LOG_VIEW_ALL->label());
+        $this->get(route('works.show', $work))->assertOk()
+            ->assertSeeLivewire(ActivityLogsTable::class)
+            ->assertSee('This work activity')->assertDontSee('Other work activity');
+    }
+
     private function viewer(): User
     {
         return User::factory()->create()->assignRole(Roles::ADMIN->value);

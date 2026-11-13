@@ -31,6 +31,13 @@
             <x-works.work-transport-info :work="$work"/>
             <x-files.attachment-card :model="$work"/>
 
+            @can('viewAny', \Spatie\Activitylog\Models\Activity::class)
+                <livewire:activity-logs.activity-logs-table
+                    :subject-type="\App\Models\Work::class"
+                    :subject-id="$work->id"
+                />
+            @endcan
+
             <x-pdfs.pdf-modal-preview
                 :model="$work"
                 :file-type="FileTypes::SERVICE_PROTOCOL->value"
