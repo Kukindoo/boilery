@@ -25,7 +25,7 @@ class DashboardTest extends FeatureTestCase
     }
 
     #[DataProvider('staffRoles')]
-    public function test_staff_dashboards_show_statistics_and_controls_without_record_tables(Roles $role, bool $alsoCustomer): void
+    public function test_staff_dashboards_show_statistics_without_record_tables_or_email_test(Roles $role, bool $alsoCustomer): void
     {
         $user = User::factory()->create();
         $user->assignRole($role);
@@ -72,8 +72,15 @@ class DashboardTest extends FeatureTestCase
         $this->assertSame(3, $statistics['issues']['total']);
         $this->assertSame(['open' => 1, 'closed' => 2],
             array_map(fn (array $status): int => $status['count'], $statistics['issues']['statuses']));
+        $this->assertSame(['label' => 'Nový', 'colour' => 'orange', 'count' => 2],
+            $statistics['quotes']['statuses']['new']);
+        $this->assertSame(['label' => 'Probíhá', 'colour' => 'lime', 'count' => 2],
+            $statistics['works']['statuses']['processing']);
+        $this->assertSame(['label' => 'Uzavřený', 'colour' => 'zinc', 'count' => 2],
+            $statistics['issues']['statuses']['closed']);
+
         foreach (['quotes' => 'Poptávky', 'works' => 'Zakázky', 'issues' => 'Případy'] as $key => $heading) {
-            $response->assertSee('Zobrazit vše – ' . $heading)->assertSee(route($key . '.index'));
+            $response->assertSee('Zobrazit ' . $heading)->assertSee(route($key . '.index'));
         }
     }
 
@@ -97,7 +104,7 @@ class DashboardTest extends FeatureTestCase
 
         $response = $this->actingAs($user)->get(route('dashboard'))->assertOk()
             ->assertSee('Nemáte oprávnění k zobrazení statistik.')
-            ->assertDontSee('Zobrazit vše – Zakázky');
+            ->assertDontSee('Zobrazit Zakázky');
 
         $statistics = $response->viewData('statistics');
         $this->assertFalse($statistics['works']['canView']);
@@ -126,10 +133,16 @@ class DashboardTest extends FeatureTestCase
         $this->get('/dashboard')->assertRedirect('/login');
     }
 
-    public function test_authenticated_users_can_visit_the_dashboard(): void
+    public function test_users_without_roles_can_visit_dashboard_without_statistics(): void
     {
-        $this->actingAs($user = User::factory()->create());
+        $this->actingAs(User::factory()->create());
 
-        $this->get('/dashboard')->assertStatus(200);
+        $this->get(route('dashboard'))
+            ->assertOk()
+            ->assertViewHas('statistics', [])
+            ->assertDontSee('Zobrazit Poptávky')
+            ->assertDontSee('Zobrazit Zakázky')
+            ->assertDontSee('Zobrazit Případy')
+            ->assertDontSee('Send Cold Email Test');
     }
 }
