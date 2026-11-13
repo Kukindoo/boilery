@@ -1,5 +1,6 @@
 @php
     use App\Enums\FileTypes;
+    use Spatie\Activitylog\Models\Activity;
 @endphp
 
 <x-layouts::app :title="__('Poptávky')">
@@ -7,7 +8,7 @@
         <x-slot:header>
             <x-stellaris.panel.header.base :heading="__('Poptávka :quote_id', ['quote_id' => $quote->id])">
                 <x-slot:subheading>
-                    <x-customers.customer-name :customer="$quote->user" />
+                    <x-customers.customer-name :customer="$quote->user"/>
                 </x-slot>
             </x-stellaris.panel.header.base>
         </x-slot:header>
@@ -23,13 +24,15 @@
             </x-stellaris.panel.actions-strip.base>
         </x-slot:actionsStrip>
 
-        <x-quotes.quote-person-info :quote="$quote" />
-        <x-quotes.quote-boiler-info :quote="$quote" />
-        <x-files.attachment-card :model="$quote" />
-        <livewire:activity-logs.activity-logs-table
-                :subject-type="\App\Models\Quote::class"
-                :subject-id="$quote->id"
-        />
+        <x-quotes.quote-person-info :quote="$quote"/>
+        <x-quotes.quote-boiler-info :quote="$quote"/>
+        <x-files.attachment-card :model="$quote"/>
+        @can('viewAny', Activity::class)
+            <livewire:activity-logs.activity-logs-table
+                    :subject-type="\App\Models\Quote::class"
+                    :subject-id="$quote->id"
+            />
+        @endcan
     </x-stellaris.panel.container.base>
 
     <x-pdfs.pdf-modal-preview
