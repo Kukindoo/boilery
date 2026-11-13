@@ -1,8 +1,11 @@
 <?php
 
+use App\Actions\LogRepeatedHttpError;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -65,6 +68,27 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->respond(function (Response $response, Throwable $exception, Request $request): Response {
+            app(LogRepeatedHttpError::class)->handle($request, $response->getStatusCode());
+
+            if ($response->getStatusCode() === 403
+                && ! $request->expectsJson()
+                && ! $request->hasHeader('X-Livewire')
+                && $request->hasSession()) {
+                $previous = url()->previous();
+                $origin = $request->getSchemeAndHttpHost();
+
+                if (! str_starts_with($previous, $origin . '/')
+                    || strtok($previous, '?') === $request->url()) {
+                    $previous = route('home');
+                }
+
+                return redirect()->to($previous, 303)->with('access_denied', true);
+            }
+
+            return $response;
+        });
+
         $exceptions->report(function (Throwable $exception): void {
             try {
                 activity('exceptions')
