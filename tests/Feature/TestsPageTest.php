@@ -45,8 +45,14 @@ class TestsPageTest extends FeatureTestCase
         $this->actingAs($user);
 
         $this->get(route('dashboard'))->assertDontSee(route('tests.index'));
-        $this->get(route('tests.index'))->assertForbidden();
-        $this->post(route('cold-tests.email'))->assertForbidden();
+        $this->from(route('home'))->get(route('tests.index'))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
+        $this->from(route('home'))->post(route('cold-tests.email'))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
 
         Notification::assertNothingSent();
     }

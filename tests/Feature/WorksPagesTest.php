@@ -101,7 +101,10 @@ class WorksPagesTest extends FeatureTestCase
 
         $user = User::factory()->create();
         foreach (['works.show', 'works.edit'] as $route) {
-            $this->actingAs($user)->get(route($route, $work))->assertForbidden();
+            $this->actingAs($user)->from(route('home'))->get(route($route, $work))
+                ->assertStatus(303)
+                ->assertRedirect(route('home'))
+                ->assertSessionHas('access_denied', true);
         }
     }
 
@@ -144,8 +147,14 @@ class WorksPagesTest extends FeatureTestCase
 
         $this->actingAs($user)->get(route('works.show', $own))->assertOk()->assertSee($own->order_id);
         $this->get(route('works.edit', $own))->assertSeeLivewire(WorkEdit::class);
-        $this->get(route('works.show', $other))->assertForbidden();
-        $this->get(route('works.edit', $other))->assertForbidden();
+        $this->from(route('home'))->get(route('works.show', $other))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
+        $this->from(route('home'))->get(route('works.edit', $other))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
     }
 
     public function test_work_index_has_no_add_button_and_standalone_creation_page_is_unavailable(): void

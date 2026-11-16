@@ -101,6 +101,9 @@ class CustomerQuotesTableTest extends FeatureTestCase
         $this->actingAs($customer)->get(route('quotes.show', $quote))
             ->assertOk()
             ->assertSee('My boiler needs repair');
-        $this->get(route('quotes.show', $otherQuote))->assertForbidden();
+        $this->from(route('home'))->get(route('quotes.show', $otherQuote))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
     }
 }

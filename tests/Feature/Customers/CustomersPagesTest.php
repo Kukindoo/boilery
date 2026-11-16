@@ -53,8 +53,10 @@ class CustomersPagesTest extends FeatureTestCase
             $this->actingAs($user);
 
             foreach (['customers.index', 'customers.show', 'customers.edit'] as $route) {
-                $this->get(route($route, $route === 'customers.index' ? [] : $otherCustomer))
-                    ->assertForbidden();
+                $this->from(route('home'))->get(route($route, $route === 'customers.index' ? [] : $otherCustomer))
+                    ->assertStatus(303)
+                    ->assertRedirect(route('home'))
+                    ->assertSessionHas('access_denied', true);
             }
 
             $this->get(route('settings.profile'))->assertDontSee(route('customers.index'));

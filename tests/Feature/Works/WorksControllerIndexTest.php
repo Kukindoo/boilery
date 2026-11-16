@@ -19,7 +19,10 @@ class WorksControllerIndexTest extends FeatureTestCase
         $user = User::factory()->create();
         $user->givePermissionTo(Permissions::WORK_VIEW_OWN);
 
-        $this->actingAs($user)->get(route('works.index'))->assertForbidden();
+        $this->actingAs($user)->from(route('home'))->get(route('works.index'))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
     }
 
     public function test_authorized_users_see_the_works_table(): void

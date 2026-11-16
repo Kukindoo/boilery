@@ -57,8 +57,14 @@ class RolesAndPermissionsPagesTest extends FeatureTestCase
         $this->get(route($resource . '.index'))->assertRedirect(route('login'));
         $this->actingAs(User::factory()->customer()->create());
 
-        $this->get(route($resource . '.index'))->assertForbidden();
-        $this->get(route($resource . '.show', $record))->assertForbidden();
+        $this->from(route('home'))->get(route($resource . '.index'))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
+        $this->from(route('home'))->get(route($resource . '.show', $record))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
     }
 
     #[TestWith([RolesTable::class])]
@@ -77,7 +83,10 @@ class RolesAndPermissionsPagesTest extends FeatureTestCase
         $permission = Permission::create(['name' => 'API permission', 'guard_name' => 'api']);
         $this->actingAs(User::factory()->admin()->create());
 
-        $this->get(route('roles.show', $role))->assertForbidden();
+        $this->from(route('home'))->get(route('roles.show', $role))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
         $this->get(route('permissions.show', $permission))->assertOk();
         Livewire::test(RolePermissions::class, ['role' => $role])->assertForbidden();
     }

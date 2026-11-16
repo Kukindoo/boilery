@@ -65,7 +65,10 @@ class WorkLifecycleTest extends FeatureTestCase
         $activityCount = Activity::forSubject($work)->count();
         $this->travel(1)->days();
 
-        $this->post(route('works.' . $action, $work))->assertForbidden();
+        $this->from(route('home'))->post(route('works.' . $action, $work))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
 
         $this->assertSame($attributes, $work->refresh()->getRawOriginal());
         $this->assertSame($activityCount + 1, Activity::forSubject($work)->count());
@@ -79,7 +82,10 @@ class WorkLifecycleTest extends FeatureTestCase
         $activityCount = Activity::forSubject($work)->count();
 
         $this->post(route('works.' . $action, $work))->assertRedirect(route('login'));
-        $this->actingAs(User::factory()->create())->post(route('works.' . $action, $work))->assertForbidden();
+        $this->actingAs(User::factory()->create())->from(route('home'))->post(route('works.' . $action, $work))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
 
         $this->assertSame($attributes, $work->refresh()->getRawOriginal());
         $this->assertSame($activityCount + 1, Activity::forSubject($work)->count());

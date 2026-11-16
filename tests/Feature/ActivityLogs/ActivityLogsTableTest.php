@@ -20,7 +20,10 @@ class ActivityLogsTableTest extends FeatureTestCase
     public function test_activity_page_requires_authentication_and_permission(): void
     {
         $this->get(route('activity-logs.index'))->assertRedirect(route('login'));
-        $this->actingAs(User::factory()->create())->get(route('activity-logs.index'))->assertForbidden();
+        $this->actingAs(User::factory()->create())->from(route('home'))
+            ->get(route('activity-logs.index'))
+            ->assertStatus(303)->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
         $this->actingAs($this->viewer())->get(route('activity-logs.index'))
             ->assertOk()->assertSeeLivewire(ActivityLogsTable::class);
     }

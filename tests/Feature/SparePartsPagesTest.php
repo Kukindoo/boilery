@@ -52,7 +52,10 @@ class SparePartsPagesTest extends FeatureTestCase
         $customer = User::factory()->customer()->create();
         $this->actingAs($customer);
         foreach (['index', 'create', 'show', 'edit'] as $page) {
-            $this->get(route('spare-parts.' . $page, in_array($page, ['show', 'edit']) ? $part : []))->assertForbidden();
+            $this->from(route('home'))->get(route('spare-parts.' . $page, in_array($page, ['show', 'edit']) ? $part : []))
+                ->assertStatus(303)
+                ->assertRedirect(route('home'))
+                ->assertSessionHas('access_denied', true);
         }
         Livewire::test(SparePartsTable::class)->assertForbidden();
         Livewire::test(SparePartCreate::class)->assertForbidden();
@@ -142,7 +145,10 @@ class SparePartsPagesTest extends FeatureTestCase
         $this->assertDatabaseHas('spare_part_work', ['work_id' => $work->id, 'spare_part_id' => $part->id]);
 
         $otherWork = Work::factory()->create();
-        $this->get(route('works.show', $otherWork))->assertForbidden();
+        $this->from(route('home'))->get(route('works.show', $otherWork))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
         Livewire::test(WorkSpareParts::class, ['work' => $otherWork])->assertForbidden();
     }
 }

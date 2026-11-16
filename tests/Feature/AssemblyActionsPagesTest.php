@@ -50,7 +50,9 @@ class AssemblyActionsPagesTest extends FeatureTestCase
         $work = Work::factory()->forCustomer($customer)->create();
         $this->actingAs($customer);
         foreach (['index', 'create', 'show', 'edit'] as $page) {
-            $this->get(route('assembly-actions.' . $page, $action))->assertForbidden();
+            $this->from(route('home'))->get(route('assembly-actions.' . $page, $action))
+                ->assertStatus(303)->assertRedirect(route('home'))
+                ->assertSessionHas('access_denied', true);
         }
         $this->get(route('works.show', $work))->assertOk()->assertSeeLivewire(WorkAssemblyActions::class);
     }
@@ -68,8 +70,12 @@ class AssemblyActionsPagesTest extends FeatureTestCase
         $this->get(route('assembly-actions.show', $action))
             ->assertOk()->assertSee($action->code)->assertSee($action->name)
             ->assertDontSee('href="' . route('assembly-actions.edit', $action) . '"', false);
-        $this->get(route('assembly-actions.create'))->assertForbidden();
-        $this->get(route('assembly-actions.edit', $action))->assertForbidden();
+        $this->from(route('home'))->get(route('assembly-actions.create'))
+            ->assertStatus(303)->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
+        $this->from(route('home'))->get(route('assembly-actions.edit', $action))
+            ->assertStatus(303)->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
     }
 
     public function test_permissions_are_provisioned_only_to_staff_roles(): void

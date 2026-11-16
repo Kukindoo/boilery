@@ -97,7 +97,10 @@ class UserPolicyTest extends FeatureTestCase
         $user->givePermissionTo($permission);
 
         $this->assertFalse(Gate::forUser($user)->allows('viewAny', User::class));
-        $this->actingAs($user)->get(route('customers.index'))->assertForbidden();
+        $this->actingAs($user)->from(route('home'))->get(route('customers.index'))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
     }
 
     #[TestWith([null, false])]
