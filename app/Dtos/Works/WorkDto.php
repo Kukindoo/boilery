@@ -30,14 +30,12 @@ class WorkDto
         public ?string $mechanicName,
         public WorkStatus $status = WorkStatus::NEW,
         public ?BoilerManufacturers $boilerManufacturer = null,
-        public ?string $scheduleAt = null,
     ) {}
 
-    /** @return array{schedule_at: ?string, issue_id: int, order_id: ?string, status: WorkStatus, type_of_product: ?string, boiler_manufacturer: ?string, type_number: ?string, serial_number: ?string, warranty_accepted: ?bool, repair_in_warranty: ?string, day_of_purchase: ?string, building_type: ?string, reported_problem: ?string, work_accepted_at: ?string, work_started_at: ?string, work_completed_at: ?string, work_performed_description: ?string, transport_from: ?string, transport_to: ?string, transport_rate_in_czk: ?int, transport_distance_in_km: ?float, notes: ?string, mechanic_name: ?string} */
+    /** @return array{issue_id: int, order_id: ?string, status: WorkStatus, type_of_product: ?string, boiler_manufacturer: ?string, type_number: ?string, serial_number: ?string, warranty_accepted: ?bool, repair_in_warranty: ?string, day_of_purchase: ?string, building_type: ?string, reported_problem: ?string, work_accepted_at: ?string, work_started_at: ?string, work_completed_at: ?string, work_performed_description: ?string, transport_from: ?string, transport_to: ?string, transport_rate_in_czk: ?int, transport_distance_in_km: ?float, notes: ?string, mechanic_name: ?string} */
     public function toArray(): array
     {
         return [
-            'schedule_at' => $this->scheduleAt,
             'issue_id' => $this->issueId,
             'order_id' => $this->orderId,
             'status' => $this->status,

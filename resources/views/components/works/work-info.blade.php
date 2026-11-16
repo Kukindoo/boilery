@@ -2,7 +2,6 @@
 
 @php
     $fields = [
-        'Plánovaný termín' => $work->schedule_at?->copy()->timezone('Europe/Prague')->format('d-m-Y H:i') ?? '—',
         'Datum přijetí' => $work->work_accepted_at?->format('d-m-Y') ?? '—',
         'Datum zahájení' => $work->work_started_at?->format('d-m-Y') ?? '—',
         'Datum dokončení' => $work->work_completed_at?->format('d-m-Y') ?? '—',

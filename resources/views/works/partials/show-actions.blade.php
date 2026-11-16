@@ -16,11 +16,6 @@
                 Upravit
             </flux:menu.item>
         @endcan
-        @if ($work->schedule_at)
-            <flux:menu.item size="sm" :href="$work->googleCalendarUrl()" target="_blank" rel="noopener noreferrer">
-                Přidat do Google Kalendáře
-            </flux:menu.item>
-        @endif
 
         @if( auth()->user()->can('start', $work) )
             <form method="POST" action="{{ route('works.start', $work) }}">

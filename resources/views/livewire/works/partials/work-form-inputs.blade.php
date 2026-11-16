@@ -26,16 +26,6 @@
             </x-stellaris.livewire.forms.side-to-side.field>
         @endif
 
-        <x-stellaris.livewire.forms.side-to-side.field label="Plánované datum">
-            <flux:date-picker wire:model="form.scheduleDate" clearable />
-            <flux:error name="form.scheduleDate" />
-        </x-stellaris.livewire.forms.side-to-side.field>
-
-        <x-stellaris.livewire.forms.side-to-side.field label="Plánovaný čas">
-            <flux:time-picker wire:model="form.scheduleTime" time-format="24-hour" clearable />
-            <flux:error name="form.scheduleTime" />
-        </x-stellaris.livewire.forms.side-to-side.field>
-
         <x-stellaris.livewire.forms.side-to-side.field label="Datum přijetí">
             @if (filled($form->workAcceptedAt))
                 <flux:date-picker wire:model.live="form.workAcceptedAt" :disabled="false" />

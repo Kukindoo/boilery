@@ -11,7 +11,6 @@ use App\Enums\WorkStatus;
 use App\Models\Issue;
 use App\Models\Work;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -60,10 +59,6 @@ class WorkForm extends Form
 
     public ?string $reportedProblem = null;
 
-    public ?string $scheduleDate = null;
-
-    public ?string $scheduleTime = null;
-
     public ?string $workAcceptedAt = null;
 
     public ?string $workStartedAt = null;
@@ -104,9 +99,6 @@ class WorkForm extends Form
         $this->dayOfPurchase = $work->day_of_purchase?->format('Y-m-d');
         $this->buildingType = $work->building_type;
         $this->reportedProblem = $work->reported_problem;
-        $scheduled = $work->schedule_at?->copy()->timezone('Europe/Prague');
-        $this->scheduleDate = $scheduled?->format('Y-m-d');
-        $this->scheduleTime = $scheduled?->format('H:i');
         $this->workAcceptedAt = $work->work_accepted_at?->format('Y-m-d');
         $this->workStartedAt = $work->work_started_at?->format('Y-m-d');
         $this->workCompletedAt = $work->work_completed_at?->format('Y-m-d');
@@ -122,8 +114,6 @@ class WorkForm extends Form
     public function rules(): array
     {
         return [
-            'scheduleDate' => ['nullable', 'required_with:scheduleTime', 'date_format:Y-m-d'],
-            'scheduleTime' => ['nullable', 'required_with:scheduleDate', 'date_format:H:i'],
             'status' => ['required', Rule::enum(WorkStatus::class)],
             'issueId' => ['required', 'integer', Rule::exists('issues', 'id')->whereNull('deleted_at')],
             'orderId' => ['required', 'string', 'max:255', Rule::unique('works', 'order_id')->ignore($this->work)],
@@ -223,9 +213,6 @@ class WorkForm extends Form
             mechanicName: ($this->mechanicName === '' ? null : $this->mechanicName),
             status: WorkStatus::from($this->status),
             boilerManufacturer: ($this->boilerManufacturer === null || $this->boilerManufacturer === '' ? null : BoilerManufacturers::from($this->boilerManufacturer)),
-            scheduleAt: filled($this->scheduleDate) && filled($this->scheduleTime)
-                ? Carbon::createFromFormat('!Y-m-d H:i', $this->scheduleDate . ' ' . $this->scheduleTime, 'Europe/Prague')->utc()->toDateTimeString()
-                : null,
         );
     }
 }

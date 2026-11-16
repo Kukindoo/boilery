@@ -24,6 +24,7 @@
 
 
             <x-works.work-info :work="$work"/>
+            <x-works.work-schedule-info :work="$work"/>
             <x-works.work-boiler-info :work="$work"/>
             <x-works.work-repair-info :work="$work"/>
             <livewire:spare-parts.work-spare-parts :work="$work"/>
