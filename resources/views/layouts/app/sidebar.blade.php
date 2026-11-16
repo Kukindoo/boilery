@@ -5,11 +5,11 @@
     use App\Models\AssemblyAction;
     use App\Models\SparePart;
     use App\Models\User;
-    use Spatie\Permission\Models\Role;
+    use Spatie\Activitylog\Models\Activity;use Spatie\Permission\Models\Role;
     use Spatie\Permission\Models\Permission;
 @endphp
 
-<!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 <head>
     @include('partials.head')
@@ -64,7 +64,13 @@
 
     <flux:spacer/>
     <flux:navlist.group :heading="__('Modely')" class="grid">
-        @can('viewAny', \Spatie\Activitylog\Models\Activity::class)
+        @can('viewAny', User::class)
+        <flux:navlist.item icon="users" :href="route('users.index')"
+                           :current="request()->routeIs('users.*')" wire:navigate>
+            Uživatelé
+        </flux:navlist.item>
+        @endcan
+        @can('viewAny', Activity::class)
             <flux:navlist.item icon="clipboard-document-list" :href="route('activity-logs.index')"
                                :current="request()->routeIs('activity-logs.*')" wire:navigate>
                 Aktivity

@@ -21,7 +21,10 @@ class IssuesPagesTest extends FeatureTestCase
         }
         $this->actingAs(User::factory()->create());
         foreach (['issues.index', 'issues.create', 'issues.show', 'issues.edit'] as $route) {
-            $this->get(route($route, $issue))->assertForbidden();
+            $this->from(route('home'))->get(route($route, $issue))
+                ->assertStatus(303)
+                ->assertRedirect(route('home'))
+                ->assertSessionHas('access_denied', true);
         }
     }
 
@@ -65,10 +68,22 @@ class IssuesPagesTest extends FeatureTestCase
         $other = Issue::factory()->create();
         $this->actingAs($user);
 
-        $this->get(route('issues.index'))->assertForbidden();
+        $this->from(route('home'))->get(route('issues.index'))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
         $this->get(route('issues.show', $own))->assertSee('Případ #' . $own->id);
-        $this->get(route('issues.edit', $own))->assertForbidden();
-        $this->get(route('issues.show', $other))->assertForbidden();
-        $this->get(route('issues.edit', $other))->assertForbidden();
+        $this->from(route('home'))->get(route('issues.edit', $own))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
+        $this->from(route('home'))->get(route('issues.show', $other))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
+        $this->from(route('home'))->get(route('issues.edit', $other))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
     }
 }

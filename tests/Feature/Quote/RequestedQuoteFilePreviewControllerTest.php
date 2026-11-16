@@ -89,7 +89,7 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
             $user->givePermissionTo($filePermission);
         }
 
-        $response = $this->actingAs($user)->get(route('files.preview', ['quote', $quote, $file]));
+        $response = $this->actingAs($user)->from(route('home'))->get(route('files.preview', ['quote', $quote, $file]));
 
         if ($allowed) {
             $response->assertOk()
@@ -98,7 +98,10 @@ class RequestedQuoteFilePreviewControllerTest extends FeatureTestCase
                 ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
                 ->assertStreamedContent('Quote attachment');
         } else {
-            $response->assertForbidden();
+            $response
+                ->assertStatus(303)
+                ->assertRedirect(route('home'))
+                ->assertSessionHas('access_denied', true);
         }
     }
 

@@ -73,8 +73,10 @@ class QuoteAcceptControllerTest extends FeatureTestCase
         $quote = Quote::factory()->forCustomer(User::factory()->customer())->create();
 
         $this->actingAs(User::factory()->customer()->create())
-            ->post(route('quotes.accept', $quote))
-            ->assertForbidden();
+            ->from(route('home'))->post(route('quotes.accept', $quote))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
 
         $this->assertSame(QuoteStatus::NEW, $quote->fresh()->status);
         $this->assertDatabaseCount('works', 0);

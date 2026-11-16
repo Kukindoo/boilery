@@ -57,8 +57,10 @@ class CustomerRecordsTest extends FeatureTestCase
         $customer = User::factory()->customer()->create();
         $issue = Issue::factory()->for($customer)->create();
         foreach ([User::factory()->customer()->create(), User::factory()->create()] as $viewer) {
-            $this->actingAs($viewer)->get(route('customers.show', $customer))
-                ->assertForbidden()->assertDontSee('Případ #' . $issue->id);
+            $this->actingAs($viewer)->from(route('home'))->get(route('customers.show', $customer))
+                ->assertStatus(303)
+                ->assertRedirect(route('home'))
+                ->assertSessionHas('access_denied', true)->assertDontSee('Případ #' . $issue->id);
         }
     }
 

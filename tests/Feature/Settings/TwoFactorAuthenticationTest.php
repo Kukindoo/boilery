@@ -56,9 +56,12 @@ class TwoFactorAuthenticationTest extends FeatureTestCase
 
         $response = $this->actingAs($user)
             ->withSession(['auth.password_confirmed_at' => time()])
-            ->get(route('two-factor.show'));
+            ->from(route('home'))->get(route('two-factor.show'));
 
-        $response->assertForbidden();
+        $response
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
     }
 
     public function test_two_factor_authentication_disabled_when_confirmation_abandoned_between_requests(): void

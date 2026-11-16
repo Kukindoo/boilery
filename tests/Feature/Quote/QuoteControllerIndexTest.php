@@ -38,12 +38,15 @@ class QuoteControllerIndexTest extends FeatureTestCase
             $user->givePermissionTo($permission);
         }
 
-        $response = $this->actingAs($user)->get(route('quotes.index'));
+        $response = $this->actingAs($user)->from(route('home'))->get(route('quotes.index'));
 
         if ($allowed) {
             $response->assertOk();
         } else {
-            $response->assertForbidden();
+            $response
+                ->assertStatus(303)
+                ->assertRedirect(route('home'))
+                ->assertSessionHas('access_denied', true);
         }
     }
 }

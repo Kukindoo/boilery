@@ -111,7 +111,10 @@ class QuotePdfGenerationTest extends FeatureTestCase
         Livewire::actingAs($user)->test(PdfGeneration::class, ['model' => $quote])
             ->assertDontSee('Generovat PDF')
             ->call('generate')->assertForbidden();
-        $this->post(route('quotes.generate-pdf', $quote))->assertForbidden();
+        $this->from(route('home'))->post(route('quotes.generate-pdf', $quote))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
 
         Queue::assertNothingPushed();
         $this->assertNull($quote->fresh()->pdf_generation_status);

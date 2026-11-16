@@ -61,12 +61,17 @@ class FilePreviewControllerTest extends FeatureTestCase
         Storage::put($file->path, 'attachment');
 
         $user->givePermissionTo(Permissions::FILE_VIEW_ALL);
-        $this->actingAs($user)->get(route('files.preview', ['work', $work, $file]))
-            ->assertForbidden();
+        $this->actingAs($user)->from(route('home'))->get(route('files.preview', ['work', $work, $file]))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
 
         $user->revokePermissionTo(Permissions::FILE_VIEW_ALL);
         $user->givePermissionTo(Permissions::WORK_VIEW_ALL);
-        $this->get(route('files.preview', ['work', $work, $file]))->assertForbidden();
+        $this->from(route('home'))->get(route('files.preview', ['work', $work, $file]))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
     }
 
     public function test_file_attached_to_another_work_returns_404(): void

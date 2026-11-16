@@ -140,7 +140,10 @@ class WorkAssemblyActionPriceTest extends FeatureTestCase
             ->assertSeeLivewire(WorkAssemblyActions::class)->assertSee('Kontrola kotle')->assertSee('CZK 17,45')
             ->assertDontSee(route('assembly-actions.show', $action), false)
             ->assertDontSeeLivewire(WorkAssemblyActionAdd::class)->assertDontSee('Upravit cenu');
-        $this->get(route('works.show', $otherWork))->assertForbidden();
+        $this->from(route('home'))->get(route('works.show', $otherWork))
+            ->assertStatus(303)
+            ->assertRedirect(route('home'))
+            ->assertSessionHas('access_denied', true);
         Livewire::test(WorkAssemblyActions::class, ['work' => $otherWork])->assertForbidden();
         Livewire::test(WorkAssemblyActionRow::class, ['work' => $work, 'action' => $action, 'priceInCents' => 1745])
             ->call('edit')->assertForbidden();
