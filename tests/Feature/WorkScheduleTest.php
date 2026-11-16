@@ -16,7 +16,7 @@ class WorkScheduleTest extends FeatureTestCase
         $work = Work::factory()->forCustomer($user)->create(['work_accepted_at' => null]);
 
         Livewire::actingAs($user)->test(WorkSchedule::class, ['work' => $work])
-            ->assertSee('Schedule')
+            ->assertSee('Nastavit termín')
             ->call('open')
             ->set('form.scheduleDate', '2026-07-15')
             ->set('form.scheduleTime', '10:30')
