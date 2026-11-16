@@ -34,6 +34,7 @@ use Spatie\Activitylog\Support\LogOptions;
  * @property ?Carbon $day_of_purchase
  * @property ?string $building_type
  * @property ?string $reported_problem
+ * @property ?Carbon $schedule_at
  * @property ?Carbon $work_accepted_at
  * @property ?Carbon $work_started_at
  * @property ?Carbon $work_completed_at
@@ -66,6 +67,7 @@ class Work extends Model implements OwnsFiles
         'day_of_purchase',
         'building_type',
         'reported_problem',
+        'schedule_at',
         'work_accepted_at',
         'work_started_at',
         'work_completed_at',
@@ -116,6 +118,25 @@ class Work extends Model implements OwnsFiles
         return in_array($this->pdf_generation_status, [PdfGenerationStatus::QUEUED, PdfGenerationStatus::PROCESSING], true);
     }
 
+    public function googleCalendarUrl(): ?string
+    {
+        if ($this->schedule_at === null) {
+            return null;
+        }
+
+        $start = $this->schedule_at->copy()->utc();
+
+        return 'https://calendar.google.com/calendar/r/eventedit?' . http_build_query([
+            'action' => 'TEMPLATE',
+            'text' => 'Zakázka ' . $this->order_id,
+            'dates' => $start->format('Ymd\THis\Z') . '/' . $start->copy()->addHours(3)->format('Ymd\THis\Z'),
+            'stz' => 'Europe/Prague',
+            'etz' => 'Europe/Prague',
+            'details' => implode("\n", array_filter([$this->reported_problem, route('works.show', $this)])),
+            'location' => $this->transport_to ?? '',
+        ], '', '&', PHP_QUERY_RFC3986);
+    }
+
     public function start(): void
     {
         $this->status = WorkStatus::PROCESSING;
@@ -155,6 +176,7 @@ class Work extends Model implements OwnsFiles
             'pdf_generation_status' => PdfGenerationStatus::class,
             'boiler_manufacturer' => BoilerManufacturers::class,
             'warranty_accepted' => 'boolean',
+            'schedule_at' => 'datetime',
             'day_of_purchase' => 'date',
             'work_accepted_at' => 'date',
             'work_started_at' => 'date',
